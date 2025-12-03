@@ -18,16 +18,13 @@
 
         <p class="text-sm text-gray-600 mb-4">
           <slot name="body">
-            DocLast does not store documents on its servers to ensure your
-            security. Connect your workspace to Google Drive to store files.
+            DocLast does not store documents on its servers. Connect your
+            workspace to Google Drive to store files.
           </slot>
         </p>
 
         <slot name="actions">
-          <app-button variant="secondary">
-            <span class="text-blue-600">G</span>
-            Connect to google drive
-          </app-button>
+          <AppButton variant="secondary">Connect to Google Drive</AppButton>
         </slot>
       </div>
     </div>

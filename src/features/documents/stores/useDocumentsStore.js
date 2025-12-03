@@ -19,16 +19,16 @@ export const useDocumentsStore = defineStore("documents", () => {
     { icon: "Home", label: "Overview" },
     { icon: "Bell", label: "Notifications", badge: 10 },
     { icon: "Package", label: "Products" },
-    { icon: "Layout", label: "Forms" },
+    { icon: "LayoutGrid", label: "Forms" },
     { icon: "FileText", label: "Templates" },
-    { icon: "File", label: "Documents" },
-    { icon: "RotateCw", label: "Automations" },
+    { icon: "FileText", label: "Documents" },
+    { icon: "Zap", label: "Automations" },
     { icon: "BarChart3", label: "Reports" },
     { icon: "Users", label: "Members and teams" },
     { icon: "Building2", label: "Companies" },
-    { icon: "User", label: "People" },
+    { icon: "Users", label: "People" },
     { icon: "List", label: "Lists" },
-    { icon: "Folder", label: "2024 Contracts" },
+    { icon: "FolderClosed", label: "2024 Contracts" },
   ]);
 
   const documents = ref([
@@ -102,36 +102,6 @@ export const useDocumentsStore = defineStore("documents", () => {
       date: "16 Jan 2025",
       tags: 0,
     },
-    {
-      name: "Sisyphus",
-      domain: "sisyphus.com",
-      status: "Inactive",
-      categories: ["Customer data", "Financials"],
-      rating: "2%",
-      direction: "up",
-      date: "16 Jan 2025",
-      tags: 0,
-    },
-    {
-      name: "Sisyphus",
-      domain: "sisyphus.com",
-      status: "Inactive",
-      categories: ["Customer data", "Financials"],
-      rating: "2%",
-      direction: "up",
-      date: "16 Jan 2025",
-      tags: 0,
-    },
-    {
-      name: "Sisyphus",
-      domain: "sisyphus.com",
-      status: "Inactive",
-      categories: ["Customer data", "Financials"],
-      rating: "2%",
-      direction: "up",
-      date: "16 Jan 2025",
-      tags: 0,
-    },
   ]);
 
   const filtered = computed(() => {
@@ -177,7 +147,6 @@ export const useDocumentsStore = defineStore("documents", () => {
   }
 
   return {
-    // state
     activeNav,
     sidebarOpen,
     currentPage,
@@ -186,11 +155,9 @@ export const useDocumentsStore = defineStore("documents", () => {
     stats,
     navItems,
     documents,
-    // computed
     filtered,
     paginated,
     totalPages,
-    // actions
     setActiveNav,
     toggleSidebar,
     goToPage,

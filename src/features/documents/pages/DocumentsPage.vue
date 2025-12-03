@@ -66,7 +66,6 @@ function onCreate() {
 }
 
 function onImport() {
-  // placeholder - integrate real import/export
   window.alert("Import / Export clicked");
 }
 </script>

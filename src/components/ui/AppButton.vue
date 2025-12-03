@@ -8,7 +8,7 @@
     :disabled="disabled"
     @click="$emit('click', $event)"
   >
-    <slot></slot>
+    <slot />
   </button>
 </template>
 
@@ -18,6 +18,7 @@ defineProps({
   disabled: { type: Boolean, default: false },
 });
 </script>
+
 <style lang="scss">
-/* NO scoped - let global styles apply */
+/* Global .btn classes in components.scss */
 </style>
