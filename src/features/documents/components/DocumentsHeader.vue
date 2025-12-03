@@ -1,7 +1,9 @@
 <template>
   <div class="mb-8">
-    <!-- Single row: Breadcrumb + Search -->
-    <div class="flex items-center justify-between gap-6">
+    <!-- Flex container: becomes column on small screens -->
+    <div
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6"
+    >
       <!-- Breadcrumb -->
       <nav class="flex items-center gap-2 text-sm flex-shrink-0">
         <HomeIcon class="w-4 h-4 text-gray-400" />
@@ -11,7 +13,7 @@
       </nav>
 
       <!-- Search Box -->
-      <div class="w-full max-w-md">
+      <div class="w-full sm:max-w-md">
         <div class="relative">
           <SearchIcon
             class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
