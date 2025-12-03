@@ -1,0 +1,220 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+
+  &:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  &-primary {
+    background-color: rgb(79 70 229); /* indigo-600 */
+    color: rgb(255 255 255);
+
+    &:hover {
+      background-color: rgb(67 56 202); /* indigo-700 */
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgb(79 70 229 / 0.5);
+    }
+  }
+
+  &-secondary {
+    background-color: rgb(255 255 255);
+    color: rgb(55 65 81); /* gray-700 */
+    border: 1px solid rgb(209 213 219); /* gray-300 */
+
+    &:hover {
+      background-color: rgb(249 250 251); /* gray-50 */
+      border-color: rgb(156 163 175); /* gray-400 */
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgb(209 213 219 / 0.5);
+    }
+  }
+
+  &-ghost {
+    background-color: transparent;
+    color: rgb(55 65 81); /* gray-700 */
+    box-shadow: none;
+
+    &:hover {
+      background-color: rgb(243 244 246); /* gray-100 */
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgb(209 213 219 / 0.5);
+    }
+  }
+}
+
+.app-input {
+  width: 100%;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: all 200ms;
+
+  &:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    border-color: rgb(79 70 229);
+    box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
+  }
+
+  &::placeholder {
+    color: rgb(156 163 175);
+  }
+}
+
+.app-card {
+  background-color: rgb(255 255 255);
+  border-radius: 0.5rem;
+  border: 1px solid rgb(229 231 235);
+  padding: 1rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+
+  @media (min-width: 640px) {
+    padding: 1.5rem;
+  }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 800px;
+
+  th {
+    background-color: rgb(249 250 251);
+    border-bottom: 1px solid rgb(229 231 235);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 500;
+    color: rgb(107 114 128);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    @media (min-width: 640px) {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  td {
+    padding: 1rem;
+    border-bottom: 1px solid rgb(243 244 246);
+
+    @media (min-width: 640px) {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  tr {
+    transition: background-color 200ms;
+
+    &:hover {
+      background-color: rgb(249 250 251);
+    }
+  }
+}
+
+.search-box {
+  position: relative;
+  width: 100%;
+
+  .icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    color: rgb(156 163 175);
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .input {
+    width: 100%;
+    padding-left: 2.5rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border: 1px solid rgb(209 213 219);
+    border-radius: 0.5rem;
+    background-color: rgb(255 255 255);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: rgb(17 24 39);
+    transition: all 200ms;
+
+    &:focus {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+      border-color: rgb(199 210 254);
+      box-shadow: 0 0 0 3px rgb(199 210 254 / 0.5);
+    }
+
+    &:hover {
+      border-color: rgb(156 163 175);
+    }
+
+    &::placeholder {
+      color: rgb(156 163 175);
+    }
+  }
+}
+/* Sidebar - add this to your components.scss if not already there */
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  width: 14rem;
+  background-color: rgb(255 255 255);
+  display: flex;
+  flex-direction: column;
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  @media (min-width: 1024px) {
+    position: static;
+    width: 16rem;
+  }
+}
+
+.sidebar-header {
+  padding: 1rem;
+}
+
+.sidebar-user {
+  padding: 1rem;
+  border-top: 1px solid rgb(229 231 235);
+}
