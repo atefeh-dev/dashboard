@@ -1,42 +1,31 @@
 <template>
-  <div class="flex h-screen bg-gray-50 overflow-hidden">
-    <!-- Mobile overlay -->
+  <div class="flex h-screen bg-gray-50">
+    <Sidebar
+      :sidebar-open="sidebarOpen"
+      :active-nav="activeNav"
+      @close="$emit('closeSidebar')"
+      @navigate="$emit('navigate', $event)"
+    />
+    <div class="flex-1 overflow-y-auto">
+      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <slot />
+      </main>
+    </div>
     <div
       v-if="sidebarOpen"
       class="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
       @click="$emit('closeSidebar')"
     ></div>
-
-    <!-- Sidebar -->
-    <Sidebar
-      :sidebarOpen="sidebarOpen"
-      :activeNav="activeNav"
-      @close="$emit('closeSidebar')"
-      @navigate="onNavigate"
-    />
-
-    <!-- Main Content -->
-    <div class="flex-1 overflow-auto">
-      <div class="p-4 sm:p-6 lg:p-8">
-        <slot />
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import Sidebar from "@/components/layout/Sidebar.vue";
+import Sidebar from "./Sidebar.vue";
 
-const props = defineProps({
+defineProps({
   sidebarOpen: { type: Boolean, default: false },
   activeNav: { type: String, default: "" },
 });
 
-const emit = defineEmits(["closeSidebar", "navigate"]);
-
-function onNavigate(label) {
-  emit("navigate", label);
-}
+defineEmits(["closeSidebar", "navigate"]);
 </script>
-
-<style scoped lang="scss"></style>

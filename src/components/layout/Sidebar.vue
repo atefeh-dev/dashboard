@@ -33,14 +33,14 @@
     <nav class="flex-1 overflow-y-auto px-3 py-2">
       <!-- Overview -->
       <button
-        @click="$emit('navigate', 'Overview')"
+        @click="handleClick('Overview', 'Overview')"
         :class="navItemClass('Overview')"
       >
         <Home class="w-5 h-5 flex-shrink-0" />
         <span class="flex-1 text-left">Overview</span>
       </button>
 
-      <!-- Notifications -->
+      <!-- Notifications with green dot and badge -->
       <button
         @click="$emit('navigate', 'Notifications')"
         :class="navItemClass('Notifications')"
@@ -54,7 +54,7 @@
         >
       </button>
 
-      <!-- Products Section -->
+      <!-- Products Section (always open) -->
       <div
         class="w-full flex items-center gap-2 px-3 py-3 mt-3 mb-0.5 text-xs text-gray-500 font-medium"
       >
@@ -71,6 +71,7 @@
         <span class="flex-1 text-left">All Products</span>
       </button>
 
+      <!-- Forms -->
       <button
         @click="$emit('navigate', 'Forms')"
         :class="navItemClass('Forms')"
@@ -79,6 +80,7 @@
         <span class="flex-1 text-left">Forms</span>
       </button>
 
+      <!-- Templates -->
       <button
         @click="$emit('navigate', 'Templates')"
         :class="navItemClass('Templates')"
@@ -87,14 +89,16 @@
         <span class="flex-1 text-left">Templates</span>
       </button>
 
+      <!-- Documents (active) -->
       <button
-        @click="$emit('navigate', 'Documents')"
+        @click="handleClick('Documents', 'Documents')"
         :class="navItemClass('Documents')"
       >
         <FileText class="w-5 h-5 flex-shrink-0" />
         <span class="flex-1 text-left">Documents</span>
       </button>
 
+      <!-- Automations -->
       <button
         @click="$emit('navigate', 'Automations')"
         :class="navItemClass('Automations')"
@@ -103,6 +107,7 @@
         <span class="flex-1 text-left">Automations</span>
       </button>
 
+      <!-- Reports -->
       <button
         @click="$emit('navigate', 'Reports')"
         :class="navItemClass('Reports')"
@@ -111,6 +116,7 @@
         <span class="flex-1 text-left">Reports</span>
       </button>
 
+      <!-- Members and teams -->
       <button
         @click="$emit('navigate', 'Members and teams')"
         :class="navItemClass('Members and teams')"
@@ -119,7 +125,7 @@
         <span class="flex-1 text-left">Members and teams</span>
       </button>
 
-      <!-- Records Section -->
+      <!-- Records Section (always open) -->
       <div
         class="w-full flex items-center gap-2 px-3 py-3 mt-3 mb-0.5 text-xs text-gray-500 font-medium"
       >
@@ -144,7 +150,7 @@
         <span class="flex-1 text-left">People</span>
       </button>
 
-      <!-- Lists Section -->
+      <!-- Lists Section (always open) -->
       <div
         class="w-full flex items-center gap-2 px-3 py-3 mt-3 mb-0.5 text-xs text-gray-500 font-medium"
       >
@@ -191,6 +197,7 @@
 </template>
 
 <script setup>
+import { ref, computed } from "vue";
 import {
   ChevronsLeft,
   ChevronDown,
@@ -208,23 +215,42 @@ import {
   MoreVertical,
 } from "lucide-vue-next";
 
+import { useRouter } from "vue-router";
+
 const props = defineProps({
-  sidebarOpen: { type: Boolean, default: false },
-  activeNav: { type: String, default: "Documents" },
+  sidebarOpen: Boolean,
+  activeNav: String,
 });
 
-defineEmits(["close", "navigate"]);
+const emit = defineEmits(["close", "navigate"]);
 
-const navItemClass = (label) => {
-  return [
-    "w-full flex items-center gap-3 px-3 py-2 mb-0.5 rounded-lg text-sm transition-colors",
-    props.activeNav === label
-      ? "bg-gray-100 text-gray-900 font-medium"
-      : "text-gray-600 hover:bg-gray-50",
-  ];
-};
+const router = useRouter();
+
+/* CLICK HANDLER FIXED */
+function handleClick(label, routeName = null) {
+  // If routeName provided, navigate via Vue Router
+  if (routeName) {
+    router.push({ name: routeName }).catch(() => {
+      // catch redundant navigation error
+    });
+  }
+
+  emit("navigate", label);
+
+  if (window.innerWidth < 1024) {
+    emit("close");
+  }
+}
+
+/* ACTIVE LINK CLASS */
+const navItemClass = (label) => [
+  "w-full flex items-center gap-3 px-3 py-2 mb-0.5 rounded-lg text-sm transition-colors",
+  props.activeNav === label
+    ? "bg-gray-100 text-gray-900 font-medium"
+    : "text-gray-600 hover:bg-gray-50",
+];
 </script>
 
 <style scoped lang="scss">
-/* minimal scoped styles */
+/* Minimal scoped styles - most styling via Tailwind */
 </style>

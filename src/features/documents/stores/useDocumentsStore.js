@@ -2,18 +2,32 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 
 export const useDocumentsStore = defineStore("documents", () => {
-  const activeNav = ref("Documents");
+  const activeNav = ref("Overview");
   const sidebarOpen = ref(false);
   const currentPage = ref(1);
-  const perPage = ref(5);
+  const perPage = ref(10);
   const search = ref("");
+  const activeTab = ref("companies"); // For Overview tabs
 
-  const stats = ref([
-    { label: "# of total documents", value: 24 },
-    { label: "# of drafts", value: 14 },
-    { label: "# of pending documents", value: 238 },
-    { label: "# of available templates", value: 66 },
-  ]);
+  // Stats - changes based on active page
+  const stats = computed(() => {
+    if (activeNav.value === "Overview") {
+      return [
+        { label: "# of companies", value: 24 },
+        { label: "# of people", value: 14 },
+        { label: "# of documents", value: 238 },
+        { label: "# of available templates", value: 66 },
+      ];
+    } else if (activeNav.value === "Documents") {
+      return [
+        { label: "# of total documents", value: 24 },
+        { label: "# of drafts", value: 14 },
+        { label: "# of pending documents", value: 238 },
+        { label: "# of available templates", value: 66 },
+      ];
+    }
+    return [];
+  });
 
   const navItems = ref([
     { icon: "Home", label: "Overview" },
@@ -31,78 +45,125 @@ export const useDocumentsStore = defineStore("documents", () => {
     { icon: "FolderClosed", label: "2024 Contracts" },
   ]);
 
-  const documents = ref([
-    {
-      name: "Ephemeral",
-      domain: "ephemeral.io",
-      status: "Active",
-      categories: ["Customer data", "Admin"],
-      rating: "5%",
-      direction: "up",
-      date: "22 Jan 2025",
-      tags: 4,
-    },
-    {
-      name: "Stack3d Lab",
-      domain: "stack3dlab.com",
-      status: "Active",
-      categories: ["Business data", "Admin"],
-      rating: "4%",
-      direction: "down",
-      date: "20 Jan 2025",
-      tags: 4,
-    },
-    {
-      name: "Warpspeed",
-      domain: "getwarpspeed.com",
-      status: "Active",
-      categories: ["Customer data", "Financials"],
-      rating: "6%",
-      direction: "up",
-      date: "24 Jan 2025",
-      tags: 0,
-    },
-    {
-      name: "CloudWatch",
-      domain: "cloudwatch.app",
-      status: "Active",
-      categories: ["Database access", "Admin"],
-      rating: "8%",
-      direction: "up",
-      date: "26 Jan 2025",
-      tags: 0,
-    },
-    {
-      name: "ContrastAI",
-      domain: "contrastai.com",
-      status: "Active",
-      categories: ["Salesforce", "Admin"],
-      rating: "1%",
-      direction: "down",
-      date: "18 Jan 2025",
-      tags: 4,
-    },
-    {
-      name: "Convergence",
-      domain: "convergence.io",
-      status: "Active",
-      categories: ["Business data", "Admin"],
-      rating: "6%",
-      direction: "down",
-      date: "28 Jan 2025",
-      tags: 4,
-    },
-    {
-      name: "Sisyphus",
-      domain: "sisyphus.com",
-      status: "Inactive",
-      categories: ["Customer data", "Financials"],
-      rating: "2%",
-      direction: "up",
-      date: "16 Jan 2025",
-      tags: 0,
-    },
-  ]);
+  // All data in one place
+  const allData = ref({
+    companies: [
+      {
+        name: "Ephemeral",
+        domain: "ephemeral.io",
+        status: "Active",
+        categories: ["Customer data", "Admin"],
+        rating: "5%",
+        direction: "up",
+        date: "22 Jan 2025",
+        tags: 4,
+      },
+      {
+        name: "Stack3d Lab",
+        domain: "stack3dlab.com",
+        status: "Active",
+        categories: ["Business data", "Admin"],
+        rating: "4%",
+        direction: "down",
+        date: "20 Jan 2025",
+        tags: 4,
+      },
+      {
+        name: "Warpspeed",
+        domain: "getwarpspeed.com",
+        status: "Active",
+        categories: ["Customer data", "Financials"],
+        rating: "6%",
+        direction: "up",
+        date: "24 Jan 2025",
+        tags: 0,
+      },
+      {
+        name: "CloudWatch",
+        domain: "cloudwatch.app",
+        status: "Active",
+        categories: ["Database access", "Admin"],
+        rating: "8%",
+        direction: "up",
+        date: "26 Jan 2025",
+        tags: 0,
+      },
+      {
+        name: "ContrastAI",
+        domain: "contrastai.com",
+        status: "Active",
+        categories: ["Salesforce", "Admin"],
+        rating: "1%",
+        direction: "down",
+        date: "18 Jan 2025",
+        tags: 4,
+      },
+      {
+        name: "Convergence",
+        domain: "convergence.io",
+        status: "Active",
+        categories: ["Business data", "Admin"],
+        rating: "6%",
+        direction: "down",
+        date: "28 Jan 2025",
+        tags: 4,
+      },
+      {
+        name: "Sisyphus",
+        domain: "sisyphus.com",
+        status: "Inactive",
+        categories: ["Customer data", "Financials"],
+        rating: "2%",
+        direction: "up",
+        date: "16 Jan 2025",
+        tags: 0,
+      },
+    ],
+    people: [
+      {
+        name: "John Doe",
+        domain: "john@example.com",
+        status: "Active",
+        categories: ["Developer", "Admin"],
+        rating: "8%",
+        direction: "up",
+        date: "20 Jan 2025",
+        tags: 2,
+      },
+    ],
+    documents: [
+      {
+        name: "Q4 Report",
+        domain: "report-2024.pdf",
+        status: "Active",
+        categories: ["Financial", "Reports"],
+        rating: "7%",
+        direction: "up",
+        date: "25 Jan 2025",
+        tags: 3,
+      },
+    ],
+    templates: [
+      {
+        name: "Invoice Template",
+        domain: "invoice.docx",
+        status: "Active",
+        categories: ["Financial", "Templates"],
+        rating: "9%",
+        direction: "up",
+        date: "15 Jan 2025",
+        tags: 0,
+      },
+    ],
+  });
+
+  // Get current documents based on active tab
+  const documents = computed(() => {
+    if (activeNav.value === "Overview") {
+      return allData.value[activeTab.value] || [];
+    }
+    return allData.value.companies || [];
+  });
 
   const filtered = computed(() => {
     if (!search.value) return documents.value;
@@ -126,22 +187,35 @@ export const useDocumentsStore = defineStore("documents", () => {
 
   function setActiveNav(label) {
     activeNav.value = label;
+    currentPage.value = 1;
+    search.value = "";
   }
+
+  function setActiveTab(tab) {
+    activeTab.value = tab;
+    currentPage.value = 1;
+  }
+
   function toggleSidebar() {
     sidebarOpen.value = !sidebarOpen.value;
   }
+
   function goToPage(page) {
     if (page < 1) page = 1;
     if (page > totalPages.value) page = totalPages.value;
     currentPage.value = page;
   }
+
   function setSearch(q) {
     search.value = q;
     currentPage.value = 1;
   }
+
   function removeDocument(index) {
-    documents.value.splice(index, 1);
+    const actualIndex = (currentPage.value - 1) * perPage.value + index;
+    documents.value.splice(actualIndex, 1);
   }
+
   function addDocument(doc) {
     documents.value.unshift(doc);
   }
@@ -152,6 +226,7 @@ export const useDocumentsStore = defineStore("documents", () => {
     currentPage,
     perPage,
     search,
+    activeTab,
     stats,
     navItems,
     documents,
@@ -159,6 +234,7 @@ export const useDocumentsStore = defineStore("documents", () => {
     paginated,
     totalPages,
     setActiveNav,
+    setActiveTab,
     toggleSidebar,
     goToPage,
     setSearch,

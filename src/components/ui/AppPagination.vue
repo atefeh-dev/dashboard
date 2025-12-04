@@ -6,6 +6,7 @@
       variant="secondary"
       class="w-full sm:w-auto"
       @click="$emit('prev')"
+      :disabled="store.currentPage === store.totalPages"
     >
       <ArrowLeft class="w-4 h-4 mr-1" /> Previous
     </AppButton>
@@ -32,6 +33,7 @@
       variant="secondary"
       class="w-full sm:w-auto"
       @click="$emit('next')"
+      :disabled="store.currentPage === store.totalPages"
     >
       Next <ArrowRight class="w-4 h-4 ml-1" />
     </AppButton>
@@ -41,6 +43,9 @@
 <script setup>
 import AppButton from "./AppButton.vue";
 import { ArrowRight, ArrowLeft } from "lucide-vue-next";
+import { useDocumentsStore } from "@/features/documents/stores/useDocumentsStore";
+
+const store = useDocumentsStore();
 
 const props = defineProps({
   pages: { type: Array, default: () => [] },
