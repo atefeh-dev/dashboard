@@ -191,27 +191,36 @@
     }
   }
 }
-/* Sidebar - add this to your components.scss if not already there */
+// Update .sidebar section in components.scss
+
 .sidebar {
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   z-index: 30;
-  width: 14rem;
   background-color: rgb(255 255 255);
+  border-right: 1px solid rgb(229 231 235);
   display: flex;
   flex-direction: column;
-  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
 
   @media (min-width: 1024px) {
     position: static;
-    width: 16rem;
   }
+}
+
+.sidebar-expanded {
+  width: 16rem; // 256px
+}
+
+.sidebar-collapsed {
+  width: 5rem; // 80px
 }
 
 .sidebar-header {
   padding: 1rem;
+  border-bottom: 1px solid rgb(229 231 235);
 }
 
 .sidebar-user {
