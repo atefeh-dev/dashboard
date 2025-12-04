@@ -209,7 +209,7 @@ function handleGoogleLogin() {
 }
 
 .auth-logo {
-  text-align: center;
+  text-align: left;
   margin-bottom: 2rem; /* mb-8 */
 }
 
@@ -217,7 +217,7 @@ function handleGoogleLogin() {
   font-size: 1.5rem; /* text-2xl */
   font-weight: 600; /* font-semibold */
   color: #111827; /* gray-900 */
-  text-align: center;
+  text-align: left;
   margin-bottom: 1.5rem; /* mb-6 */
 }
 
@@ -340,7 +340,7 @@ function handleGoogleLogin() {
 
 .auth-footer {
   margin-top: 1.5rem; /* mt-6 */
-  text-align: center;
+  text-align: left;
   display: flex;
   flex-direction: column;
   gap: 0.5rem; /* space-y-2 */
