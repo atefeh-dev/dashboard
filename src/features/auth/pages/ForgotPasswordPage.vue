@@ -119,7 +119,7 @@ async function handleSubmit() {
   background-color: #f9fafb; /* gray-50 */
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: celnter;
   padding: 3rem 1rem; /* py-12 px-4 */
 }
 
@@ -129,7 +129,7 @@ async function handleSubmit() {
 }
 
 .auth-logo {
-  text-align: center;
+  text-align: left;
   margin-bottom: 2rem;
 }
 
@@ -137,14 +137,14 @@ async function handleSubmit() {
   font-size: 1.5rem; /* text-2xl */
   font-weight: 600; /* font-semibold */
   color: #111827; /* gray-900 */
-  text-align: center;
+  text-align: left;
   margin-bottom: 0.5rem; /* mb-2 */
 }
 
 .auth-subtitle {
   font-size: 0.875rem; /* text-sm */
   color: #4b5563; /* gray-600 */
-  text-align: center;
+  text-align: left;
   margin-bottom: 1.5rem; /* mb-6 */
 }
 
@@ -217,6 +217,6 @@ async function handleSubmit() {
 
 .auth-footer {
   margin-top: 1.5rem; /* mt-6 */
-  text-align: center;
+  text-align: left;
 }
 </style>
