@@ -121,7 +121,7 @@
 
 <script setup>
 import AppPagination from "@/components/ui/AppPagination.vue";
-import { useDocumentsStore } from "../stores/useDocumentsStore";
+import { useDocumentsStore } from "../../../stores/useDocumentsStore";
 import { computed } from "vue";
 import { Trash2 as TrashIcon, Edit as EditIcon } from "lucide-vue-next";
 

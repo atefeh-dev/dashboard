@@ -22,7 +22,7 @@
 <script setup>
 import { Home as HomeIcon } from "lucide-vue-next";
 import AppSearch from "@/components/ui/AppSearch.vue";
-import { useDocumentsStore } from "../stores/useDocumentsStore";
+import { useDocumentsStore } from "../../../stores/useDocumentsStore";
 
 const store = useDocumentsStore();
 </script>

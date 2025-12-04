@@ -43,7 +43,7 @@
 <script setup>
 import AppButton from "./AppButton.vue";
 import { ArrowRight, ArrowLeft } from "lucide-vue-next";
-import { useDocumentsStore } from "@/features/documents/stores/useDocumentsStore";
+import { useDocumentsStore } from "../../stores/useDocumentsStore";
 
 const store = useDocumentsStore();
 

@@ -2,10 +2,17 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import router from "./router";
 import App from "./App.vue";
-import "./assets/styles/base.css"; // ← This line is critical
-import "./assets/styles/components.scss"; // ← This line is critical
+import "./assets/styles/base.css";
 
 const app = createApp(App);
-app.use(createPinia());
+const pinia = createPinia();
+
+app.use(pinia);
 app.use(router);
+
+// Initialize auth state from localStorage
+import { useAuthStore } from "./stores/useAuthStore";
+const authStore = useAuthStore();
+authStore.initAuth();
+
 app.mount("#app");

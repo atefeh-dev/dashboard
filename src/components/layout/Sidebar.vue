@@ -308,27 +308,4 @@ const navItemClass = (label) => [
 ];
 </script>
 
-<style scoped lang="scss">
-.sidebar {
-  @apply fixed lg:static inset-y-0 left-0 z-30
-         bg-white border-r border-gray-200 
-         flex flex-col 
-         transition-all duration-300 ease-in-out;
-}
-
-.sidebar-expanded {
-  @apply w-64;
-}
-
-.sidebar-collapsed {
-  @apply w-20;
-}
-
-.sidebar-header {
-  @apply p-4 border-b border-gray-200;
-}
-
-.sidebar-user {
-  @apply p-4 border-t border-gray-200;
-}
-</style>
+<style scoped lang="scss"></style>

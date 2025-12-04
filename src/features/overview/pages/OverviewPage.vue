@@ -85,7 +85,7 @@ import StatsGrid from "@/components/common/StatsGrid.vue";
 import AppButton from "@/components/ui/AppButton.vue";
 import AppSearch from "@/components/ui/AppSearch.vue";
 import { Menu, Plus, Globe, Home } from "lucide-vue-next";
-import { useDocumentsStore } from "../../../features/documents/stores/useDocumentsStore";
+import { useDocumentsStore } from "../../../stores/useDocumentsStore";
 
 const store = useDocumentsStore();
 const router = useRouter();

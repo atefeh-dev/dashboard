@@ -47,7 +47,7 @@ import DocumentsFilters from "../components/DocumentsFilters.vue";
 import DocumentsTable from "../components/DocumentsTable.vue";
 import StatsGrid from "@/components/common/StatsGrid.vue";
 import InfoCard from "@/components/common/InfoCard.vue";
-import { useDocumentsStore } from "../stores/useDocumentsStore";
+import { useDocumentsStore } from "../../../stores/useDocumentsStore";
 import { Menu as MenuIcon, Search as SearchIcon } from "lucide-vue-next";
 
 const store = useDocumentsStore();

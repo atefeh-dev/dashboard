@@ -118,7 +118,7 @@
 <script setup>
 import { Trash2, Edit } from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
-import { useDocumentsStore } from "../../../features/documents/stores/useDocumentsStore";
+import { useDocumentsStore } from "../../../stores/useDocumentsStore";
 
 const store = useDocumentsStore();
 </script>
