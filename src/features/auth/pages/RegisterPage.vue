@@ -1,4 +1,4 @@
-<!-- features/auth/pages/RegisterPage.vue -->
+<!-- features/auth/pages/RegisterPage.vue - FIXED: Allow re-entry -->
 <template>
   <div
     class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12"
@@ -79,22 +79,22 @@
 
         <!-- Error Alert -->
         <div
-          v-if="authStore.error"
+          v-if="errors.general"
           class="px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600"
         >
-          {{ authStore.error }}
+          {{ errors.general }}
         </div>
 
         <!-- Submit Button -->
         <button
           type="submit"
-          :disabled="authStore.isLoading"
+          :disabled="isLoading"
           class="w-full px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
-          <span v-if="!authStore.isLoading">Continue</span>
+          <span v-if="!isLoading">Continue</span>
           <span v-else class="flex items-center justify-center gap-2">
             <Loader2 class="w-4 h-4 animate-spin" />
-            Creating account...
+            Checking...
           </span>
         </button>
       </form>
@@ -122,11 +122,14 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { Loader2 } from "lucide-vue-next";
-import { useAuthStore } from "@/stores/useAuthStore";
 
-const authStore = useAuthStore();
+const router = useRouter();
+const route = useRoute();
+
+const isLoading = ref(false);
 
 const form = reactive({
   email: "",
@@ -134,10 +137,25 @@ const form = reactive({
 
 const errors = reactive({
   email: "",
+  general: "",
+});
+
+// On mount - clear any previous signup session data
+// This allows users to start fresh when they visit /signup
+onMounted(() => {
+  // Load existing email if user is returning to edit
+  const storedEmail = sessionStorage.getItem("signup_email");
+  if (storedEmail) {
+    form.email = storedEmail;
+  }
+
+  // Clear verification code if user comes back to change email
+  sessionStorage.removeItem("verification_code");
 });
 
 function validateForm() {
   errors.email = "";
+  errors.general = "";
 
   if (!form.email) {
     errors.email = "Email is required";
@@ -154,11 +172,26 @@ function validateForm() {
 
 async function handleSubmit() {
   if (!validateForm()) return;
-  const tempPassword = "TempPass123!";
-  await authStore.register(form.email, tempPassword);
+
+  isLoading.value = true;
+
+  try {
+    // TODO: Check if email exists
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Store email in session
+    sessionStorage.setItem("signup_email", form.email);
+
+    // Navigate to verify page
+    await router.push("/signup/verify");
+  } catch (err) {
+    errors.general = "Something went wrong. Please try again.";
+  } finally {
+    isLoading.value = false;
+  }
 }
 
 function handleGoogleLogin() {
-  authStore.loginWithGoogle();
+  console.log("Google OAuth not implemented");
 }
 </script>

@@ -14,7 +14,7 @@ export const useAuthStore = defineStore("auth", () => {
   // Computed
   const isAuthenticated = computed(() => !!token.value && !!user.value);
 
-  // Dev-only bypass login (MOVE THIS BEFORE RETURN)
+  // Dev-only bypass login
   async function devLogin() {
     if (import.meta.env.MODE !== "development") {
       console.error("Dev login only available in development mode");
@@ -89,6 +89,25 @@ export const useAuthStore = defineStore("auth", () => {
     error.value = null;
 
     try {
+      // DEV MODE: Simulate successful registration
+      if (import.meta.env.MODE === "development") {
+        console.log("🔧 DEV MODE: Simulating registration");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        user.value = {
+          id: Date.now(),
+          name: email.split("@")[0],
+          email: email,
+          role: "user",
+        };
+
+        token.value = "dev-token-" + Date.now();
+        localStorage.setItem("auth_token", token.value);
+
+        router.push("/overview");
+        return { success: true };
+      }
+
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -127,6 +146,16 @@ export const useAuthStore = defineStore("auth", () => {
     error.value = null;
 
     try {
+      // DEV MODE: Simulate successful password reset request
+      if (import.meta.env.MODE === "development") {
+        console.log(
+          "🔧 DEV MODE: Simulating password reset email sent to",
+          email
+        );
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        return { success: true };
+      }
+
       const response = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -136,6 +165,44 @@ export const useAuthStore = defineStore("auth", () => {
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.message || "Failed to send reset code");
+      }
+
+      return { success: true };
+    } catch (err) {
+      error.value = err.message;
+      return { success: false, error: err.message };
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function resetPassword(email, code, password) {
+    isLoading.value = true;
+    error.value = null;
+
+    try {
+      // DEV MODE: Simulate successful password reset
+      if (import.meta.env.MODE === "development") {
+        console.log("🔧 DEV MODE: Simulating password reset for", email);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // Validate code format in dev mode
+        if (code.length !== 4 || !/^\d+$/.test(code)) {
+          throw new Error("Invalid verification code");
+        }
+
+        return { success: true };
+      }
+
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code, password }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Password reset failed");
       }
 
       return { success: true };
@@ -157,6 +224,16 @@ export const useAuthStore = defineStore("auth", () => {
   async function initAuth() {
     if (token.value) {
       try {
+        // DEV MODE: Auto-login with stored token
+        if (import.meta.env.MODE === "development") {
+          user.value = {
+            id: 1,
+            name: "Admin User",
+            email: "admin@example.com",
+            role: "admin",
+          };
+          return;
+        }
         // TODO: Fetch user data from API using token
       } catch (err) {
         logout();
@@ -164,7 +241,6 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  // RETURN AT THE END
   return {
     user,
     token,
@@ -175,6 +251,7 @@ export const useAuthStore = defineStore("auth", () => {
     register,
     loginWithGoogle,
     sendPasswordReset,
+    resetPassword,
     logout,
     initAuth,
     devLogin,

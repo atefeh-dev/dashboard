@@ -28,7 +28,7 @@
 
         <!-- Success message -->
         <div v-if="success" class="alert-success">
-          Reset code sent! Check your email.
+          Reset code sent! Redirecting...
         </div>
 
         <!-- Error message -->
@@ -67,11 +67,13 @@
 
 <script setup>
 import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
 import { Loader2 } from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const authStore = useAuthStore();
+const router = useRouter();
 const success = ref(false);
 
 const form = reactive({
@@ -105,118 +107,19 @@ async function handleSubmit() {
 
   if (result.success) {
     success.value = true;
-    // In real app, redirect to verification code page
+
+    // Store email for next step
+    localStorage.setItem("reset_email", form.email);
+
+    // Redirect to reset password verification page
     setTimeout(() => {
-      // router.push('/reset-password-verify');
-    }, 2000);
+      router.push({
+        name: "ResetPassword",
+        query: { email: form.email },
+      });
+    }, 1500);
   }
 }
 </script>
 
-<style scoped lang="scss">
-.auth-page {
-  min-height: 100vh;
-  background-color: #f9fafb; /* gray-50 */
-  display: flex;
-  align-items: center;
-  justify-content: celnter;
-  padding: 3rem 1rem; /* py-12 px-4 */
-}
-
-.auth-container {
-  width: 100%;
-  max-width: 28rem; /* max-w-md */
-}
-
-.auth-logo {
-  text-align: left;
-  margin-bottom: 2rem;
-}
-
-.auth-title {
-  font-size: 1.5rem; /* text-2xl */
-  font-weight: 600; /* font-semibold */
-  color: #111827; /* gray-900 */
-  text-align: left;
-  margin-bottom: 0.5rem; /* mb-2 */
-}
-
-.auth-subtitle {
-  font-size: 0.875rem; /* text-sm */
-  color: #4b5563; /* gray-600 */
-  text-align: left;
-  margin-bottom: 1.5rem; /* mb-6 */
-}
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem; /* space-y-4 */
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem; /* space-y-2 */
-}
-
-.form-label {
-  display: block;
-  font-size: 0.875rem; /* text-sm */
-  font-weight: 500;
-  color: #374151; /* gray-700 */
-}
-
-.form-input {
-  width: 100%;
-  padding: 0.625rem 0.75rem; /* px-3 py-2.5 */
-  border: 1px solid #d1d5db; /* gray-300 */
-  border-radius: 0.5rem; /* rounded-lg */
-  font-size: 0.875rem;
-  color: #111827; /* gray-900 */
-  transition: all 0.2s;
-}
-
-.form-input::placeholder {
-  color: #9ca3af; /* gray-400 */
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: transparent;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 1); /* ring-2 ring-indigo-500 */
-}
-
-.input-error {
-  border-color: #ef4444; /* red-500 */
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 1); /* red ring */
-}
-
-.error-message {
-  font-size: 0.875rem;
-  color: #dc2626; /* red-600 */
-}
-
-.alert-success {
-  padding: 0.75rem 1rem; /* px-4 py-3 */
-  background-color: #ecfdf5; /* green-50 */
-  border: 1px solid #bbf7d0; /* green-200 */
-  border-radius: 0.5rem; /* rounded-lg */
-  font-size: 0.875rem; /* text-sm */
-  color: #16a34a; /* green-600 */
-}
-
-.alert-error {
-  padding: 0.75rem 1rem; /* px-4 py-3 */
-  background-color: #fef2f2; /* red-50 */
-  border: 1px solid #fecaca; /* red-200 */
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  color: #dc2626; /* red-600 */
-}
-
-.auth-footer {
-  margin-top: 1.5rem; /* mt-6 */
-  text-align: left;
-}
-</style>
+<style scoped lang="scss"></style>

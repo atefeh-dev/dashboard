@@ -3,18 +3,21 @@ import { setupAuthGuard } from "./guards";
 
 // Auth pages
 import LoginPage from "@/features/auth/pages/LoginPage.vue";
-import RegisterPage from "@/features/auth/pages/RegisterPage.vue";
+import SignupPage from "@/features/auth/pages/RegisterPage.vue";
+import SignupVerificationPage from "@/features/auth/pages/SignupVerificationPage.vue";
+import SignupOnboardingPage from "@/features/auth/pages/SignupOnboardingPage.vue";
 import ForgotPasswordPage from "@/features/auth/pages/ForgotPasswordPage.vue";
+import ResetPasswordPage from "@/features/auth/pages/ResetPasswordPage.vue";
+
 // App pages
 import OverviewPage from "@/features/overview/pages/OverviewPage.vue";
 import DocumentsPage from "@/features/documents/pages/DocumentsPage.vue";
 
 const routes = [
-  // Redirect root to overview or login
+  // Redirect root
   {
     path: "/",
-    redirect: (to) => {
-      // Check if user is logged in
+    redirect: () => {
       const token = localStorage.getItem("auth_token");
       return token ? "/overview" : "/login";
     },
@@ -28,15 +31,33 @@ const routes = [
     meta: { requiresAuth: false },
   },
   {
-    path: "/register",
-    name: "Register",
-    component: RegisterPage,
+    path: "/signup",
+    name: "Signup",
+    component: SignupPage,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: "/signup/verify",
+    name: "SignupVerify",
+    component: SignupVerificationPage,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: "/signup/onboarding",
+    name: "SignupOnboarding",
+    component: SignupOnboardingPage,
     meta: { requiresAuth: false },
   },
   {
     path: "/forgot-password",
     name: "ForgotPassword",
     component: ForgotPasswordPage,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: "/reset-password",
+    name: "ResetPassword",
+    component: ResetPasswordPage,
     meta: { requiresAuth: false },
   },
 
@@ -54,7 +75,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
 
-  // Catch all - redirect to login
+  // Catch all
   {
     path: "/:catchAll(.*)",
     redirect: "/login",
