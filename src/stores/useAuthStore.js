@@ -14,13 +14,48 @@ export const useAuthStore = defineStore("auth", () => {
   // Computed
   const isAuthenticated = computed(() => !!token.value && !!user.value);
 
-  // Actions
+  // Dev-only bypass login (MOVE THIS BEFORE RETURN)
+  async function devLogin() {
+    if (import.meta.env.MODE !== "development") {
+      console.error("Dev login only available in development mode");
+      return { success: false };
+    }
+
+    console.log("🔧 DEV MODE: Bypassing authentication");
+
+    // Mock user data
+    user.value = {
+      id: 1,
+      name: "Admin User",
+      email: "admin@example.com",
+      role: "admin",
+    };
+
+    token.value = "dev-token-12345";
+    localStorage.setItem("auth_token", "dev-token-12345");
+
+    router.push("/overview");
+
+    return { success: true };
+  }
+
+  // Login function
   async function login(email, password) {
     isLoading.value = true;
     error.value = null;
 
     try {
-      // TODO: Replace with your actual API endpoint
+      // DEV MODE: Check for admin/admin
+      if (
+        import.meta.env.MODE === "development" &&
+        email === "admin@admin.com" &&
+        password === "admin"
+      ) {
+        console.log("🔧 DEV MODE: Using dev credentials");
+        return await devLogin();
+      }
+
+      // Normal login flow
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -34,12 +69,10 @@ export const useAuthStore = defineStore("auth", () => {
 
       const data = await response.json();
 
-      // Store token and user data
       token.value = data.token;
       user.value = data.user;
       localStorage.setItem("auth_token", data.token);
 
-      // Redirect to overview
       router.push("/overview");
 
       return { success: true };
@@ -56,7 +89,6 @@ export const useAuthStore = defineStore("auth", () => {
     error.value = null;
 
     try {
-      // TODO: Replace with your actual API endpoint
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -87,7 +119,6 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function loginWithGoogle() {
-    // TODO: Implement Google OAuth
     console.log("Google login not implemented yet");
   }
 
@@ -123,22 +154,17 @@ export const useAuthStore = defineStore("auth", () => {
     router.push("/login");
   }
 
-  // Initialize user from token on app load
   async function initAuth() {
     if (token.value) {
       try {
         // TODO: Fetch user data from API using token
-        // const response = await fetch('/api/auth/me', {
-        //   headers: { 'Authorization': `Bearer ${token.value}` }
-        // });
-        // user.value = await response.json();
       } catch (err) {
-        // Token invalid, clear it
         logout();
       }
     }
   }
 
+  // RETURN AT THE END
   return {
     user,
     token,
@@ -151,5 +177,6 @@ export const useAuthStore = defineStore("auth", () => {
     sendPasswordReset,
     logout,
     initAuth,
+    devLogin,
   };
 });

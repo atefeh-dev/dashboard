@@ -1,16 +1,35 @@
 <template>
-  <div class="auth-page">
-    <div class="auth-container">
+  <div
+    class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12"
+  >
+    <div class="w-full max-w-md">
       <!-- Logo -->
-      <div class="auth-logo">
-        <span class="text-indigo-600 font-bold text-3xl">doclast |</span>
+      <div class="text-center mb-8">
+        <h1 class="text-indigo-600 font-bold text-3xl">doclast |</h1>
       </div>
 
       <!-- Title -->
-      <h1 class="auth-title">Welcome back</h1>
+      <h2 class="text-2xl font-semibold text-gray-900 text-center mb-6">
+        Welcome back
+      </h2>
 
-      <!-- Google Sign In -->
-      <button class="google-btn" @click="handleGoogleLogin">
+      <!-- Dev Mode Banner -->
+      <div
+        v-if="isDev"
+        class="mb-6 px-4 py-3 bg-yellow-50 border border-yellow-300 rounded-lg"
+      >
+        <p class="text-sm text-yellow-800">
+          🔧 Dev Mode: Use <strong>admin@admin.com</strong> /
+          <strong>admin</strong> for quick login
+        </p>
+      </div>
+
+      <!-- Google Button -->
+      <button
+        type="button"
+        @click="handleGoogleLogin"
+        class="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors mb-6"
+      >
         <svg class="w-5 h-5" viewBox="0 0 24 24">
           <path
             fill="#4285F4"
@@ -33,114 +52,127 @@
       </button>
 
       <!-- Divider -->
-      <div class="auth-divider">
-        <span>or</span>
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-300"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-4 bg-gray-50 text-gray-500 font-medium">or</span>
+        </div>
       </div>
 
       <!-- Form -->
-      <form @submit.prevent="handleSubmit" class="auth-form">
+      <form @submit.prevent="handleSubmit" class="space-y-4">
         <!-- Email -->
-        <div class="form-group">
-          <label for="email" class="form-label">Email</label>
+        <div>
+          <label
+            for="email"
+            class="block text-sm font-medium text-gray-700 mb-2"
+            >Email</label
+          >
           <input
             id="email"
             v-model="form.email"
             type="email"
-            class="form-input"
-            :class="{ 'input-error': errors.email }"
+            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            :class="{ 'border-red-500 focus:ring-red-500': errors.email }"
             placeholder="you@example.com"
             required
-            autocomplete="email"
           />
-          <p v-if="errors.email" class="error-message">{{ errors.email }}</p>
+          <p v-if="errors.email" class="mt-1 text-sm text-red-600">
+            {{ errors.email }}
+          </p>
         </div>
 
         <!-- Password -->
-        <div class="form-group">
-          <label for="password" class="form-label">Password</label>
+        <div>
+          <label
+            for="password"
+            class="block text-sm font-medium text-gray-700 mb-2"
+            >Password</label
+          >
           <div class="relative">
             <input
               id="password"
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
-              class="form-input pr-10"
-              :class="{ 'input-error': errors.password }"
+              class="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              :class="{ 'border-red-500 focus:ring-red-500': errors.password }"
               placeholder="••••••••"
               required
-              autocomplete="current-password"
             />
             <button
               type="button"
-              class="password-toggle"
               @click="showPassword = !showPassword"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <Eye v-if="!showPassword" class="w-5 h-5" />
               <EyeOff v-else class="w-5 h-5" />
             </button>
           </div>
-          <p v-if="errors.password" class="error-message">
+          <p v-if="errors.password" class="mt-1 text-sm text-red-600">
             {{ errors.password }}
           </p>
         </div>
 
-        <!-- Error message -->
-        <div v-if="authStore.error" class="alert-error">
+        <!-- Error Alert -->
+        <div
+          v-if="authStore.error"
+          class="px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600"
+        >
           {{ authStore.error }}
         </div>
 
-        <!-- Submit -->
-        <AppButton
+        <!-- Submit Button -->
+        <button
           type="submit"
-          variant="primary"
           :disabled="authStore.isLoading"
-          class="w-full"
+          class="w-full px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
           <span v-if="!authStore.isLoading">Continue</span>
-          <span v-else class="flex items-center gap-2">
+          <span v-else class="flex items-center justify-center gap-2">
             <Loader2 class="w-4 h-4 animate-spin" />
             Signing in...
           </span>
-        </AppButton>
+        </button>
       </form>
 
-      <!-- Footer -->
-      <div class="auth-footer">
+      <!-- Footer Links -->
+      <div class="mt-6 space-y-2 text-center">
         <p class="text-sm text-gray-600">
           Don't have an account yet?
           <router-link
             to="/register"
-            class="text-indigo-600 hover:text-indigo-700 font-medium"
+            class="text-indigo-600 hover:text-indigo-700 font-medium ml-1"
           >
             Sign up
           </router-link>
         </p>
-        <router-link
-          to="/forgot-password"
-          class="text-sm text-gray-600 hover:text-gray-900"
-        >
+        <p class="text-sm text-gray-600">
           Forgot password?
-          <span class="text-indigo-600 hover:text-indigo-700 font-medium"
-            >Reset</span
+          <router-link
+            to="/forgot-password"
+            class="text-indigo-600 hover:text-indigo-700 font-medium ml-1"
           >
-        </router-link>
+            Reset
+          </router-link>
+        </p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
-import { useRouter } from "vue-router";
+import { ref, reactive, computed } from "vue";
 import { Eye, EyeOff, Loader2 } from "lucide-vue-next";
-import AppButton from "@/components/ui/AppButton.vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 
-const router = useRouter();
 const authStore = useAuthStore();
+const isDev = computed(() => import.meta.env.MODE === "development");
 
 const form = reactive({
-  email: "",
-  password: "",
+  email: isDev.value ? "admin@admin.com" : "",
+  password: isDev.value ? "admin" : "",
 });
 
 const errors = reactive({
@@ -169,8 +201,8 @@ function validateForm() {
     return false;
   }
 
-  if (form.password.length < 8) {
-    errors.password = "Password must be at least 8 characters";
+  if (form.password.length < 5) {
+    errors.password = "Password must be at least 5 characters";
     return false;
   }
 
@@ -179,170 +211,10 @@ function validateForm() {
 
 async function handleSubmit() {
   if (!validateForm()) return;
-
-  const result = await authStore.login(form.email, form.password);
-
-  if (result.success) {
-    // Redirect handled by store
-  } else {
-    // Error displayed from store
-  }
+  await authStore.login(form.email, form.password);
 }
 
 function handleGoogleLogin() {
   authStore.loginWithGoogle();
 }
 </script>
-<style lang="scss">
-.auth-page {
-  min-height: 100vh;
-  background-color: #f9fafb; /* gray-50 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 1rem; /* py-12 px-4 */
-}
-
-.auth-container {
-  width: 100%;
-  max-width: 28rem; /* max-w-md */
-}
-
-.auth-logo {
-  text-align: left;
-  margin-bottom: 2rem; /* mb-8 */
-}
-
-.auth-title {
-  font-size: 1.5rem; /* text-2xl */
-  font-weight: 600; /* font-semibold */
-  color: #111827; /* gray-900 */
-  text-align: left;
-  margin-bottom: 1.5rem; /* mb-6 */
-}
-
-.google-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem; /* gap-3 */
-  padding: 0.75rem 1rem; /* px-4 py-3 */
-  background-color: #ffffff;
-  border: 1px solid #d1d5db; /* gray-300 */
-  border-radius: 0.5rem;
-  font-size: 0.875rem; /* text-sm */
-  font-weight: 500;
-  color: #374151; /* gray-700 */
-  transition: background-color 0.2s;
-}
-
-.google-btn:hover {
-  background-color: #f9fafb; /* gray-50 */
-}
-
-.auth-divider {
-  position: relative;
-  margin: 1.5rem 0; /* my-6 */
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 100%;
-  height: 1px;
-  background-color: #d1d5db; /* gray-300 */
-}
-
-.auth-divider span {
-  position: relative;
-  z-index: 10;
-  background-color: #f9fafb; /* gray-50 */
-  padding: 0 1rem; /* px-4 */
-  font-size: 0.875rem; /* text-sm */
-  color: #6b7280; /* gray-500 */
-  display: block;
-  text-align: center;
-}
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem; /* space-y-4 */
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem; /* space-y-2 */
-}
-
-.form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151; /* gray-700 */
-}
-
-.form-input {
-  width: 100%;
-  padding: 0.625rem 0.75rem; /* px-3 py-2.5 */
-  border: 1px solid #d1d5db; /* gray-300 */
-  border-radius: 0.5rem;
-  font-size: 0.875rem; /* text-sm */
-  color: #111827; /* gray-900 */
-  transition: all 0.2s;
-}
-
-.form-input::placeholder {
-  color: #9ca3af; /* gray-400 */
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: transparent;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 1); /* ring-indigo-500 */
-}
-
-.input-error {
-  border-color: #ef4444; /* red-500 */
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 1); /* ring-red-500 */
-}
-
-.error-message {
-  font-size: 0.875rem; /* text-sm */
-  color: #dc2626; /* red-600 */
-}
-
-.password-toggle {
-  position: absolute;
-  right: 0.75rem; /* right-3 */
-  top: 50%;
-  transform: translateY(-50%);
-  color: #9ca3af; /* gray-400 */
-  transition: color 0.2s;
-}
-
-.password-toggle:hover {
-  color: #4b5563; /* gray-600 */
-}
-
-.alert-error {
-  padding: 0.75rem 1rem; /* px-4 py-3 */
-  background-color: #fef2f2; /* red-50 */
-  border: 1px solid #fecaca; /* red-200 */
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  color: #dc2626; /* red-600 */
-}
-
-.auth-footer {
-  margin-top: 1.5rem; /* mt-6 */
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem; /* space-y-2 */
-}
-</style>
