@@ -9,42 +9,6 @@ export const useDocumentsStore = defineStore("documents", () => {
   const search = ref("");
   const activeTab = ref("companies"); // For Overview tabs
 
-  // Stats - changes based on active page
-  const stats = computed(() => {
-    if (activeNav.value === "Overview") {
-      return [
-        { label: "# of companies", value: 24 },
-        { label: "# of people", value: 14 },
-        { label: "# of documents", value: 238 },
-        { label: "# of available templates", value: 66 },
-      ];
-    } else if (activeNav.value === "Documents") {
-      return [
-        { label: "# of total documents", value: 24 },
-        { label: "# of drafts", value: 14 },
-        { label: "# of pending documents", value: 238 },
-        { label: "# of available templates", value: 66 },
-      ];
-    }
-    return [];
-  });
-
-  const navItems = ref([
-    { icon: "Home", label: "Overview" },
-    { icon: "Bell", label: "Notifications", badge: 10 },
-    { icon: "Package", label: "Products" },
-    { icon: "LayoutGrid", label: "Forms" },
-    { icon: "FileText", label: "Templates" },
-    { icon: "FileText", label: "Documents" },
-    { icon: "Zap", label: "Automations" },
-    { icon: "BarChart3", label: "Reports" },
-    { icon: "Users", label: "Members and teams" },
-    { icon: "Building2", label: "Companies" },
-    { icon: "Users", label: "People" },
-    { icon: "List", label: "Lists" },
-    { icon: "FolderClosed", label: "2024 Contracts" },
-  ]);
-
   // All data in one place
   const allData = ref({
     companies: [
@@ -157,10 +121,55 @@ export const useDocumentsStore = defineStore("documents", () => {
     ],
   });
 
-  // Get current documents based on active tab
+  // Stats - changes based on active page
+  const stats = computed(() => {
+    if (activeNav.value === "Overview") {
+      return [
+        { label: "# of companies", value: allData.value.companies.length },
+        { label: "# of people", value: allData.value.people.length },
+        { label: "# of documents", value: allData.value.documents.length },
+        {
+          label: "# of available templates",
+          value: allData.value.templates.length,
+        },
+      ];
+    } else if (activeNav.value === "Documents") {
+      const totalDocs = allData.value.documents?.length || 0;
+      return [
+        { label: "# of total documents", value: totalDocs },
+        { label: "# of drafts", value: 0 },
+        { label: "# of pending documents", value: 0 },
+        {
+          label: "# of available templates",
+          value: allData.value.templates.length,
+        },
+      ];
+    }
+    return [];
+  });
+
+  const navItems = ref([
+    { icon: "Home", label: "Overview" },
+    { icon: "Bell", label: "Notifications", badge: 10 },
+    { icon: "Package", label: "Products" },
+    { icon: "LayoutGrid", label: "Forms" },
+    { icon: "FileText", label: "Templates" },
+    { icon: "FileText", label: "Documents" },
+    { icon: "Zap", label: "Automations" },
+    { icon: "BarChart3", label: "Reports" },
+    { icon: "Users", label: "Members and teams" },
+    { icon: "Building2", label: "Companies" },
+    { icon: "Users", label: "People" },
+    { icon: "List", label: "Lists" },
+    { icon: "FolderClosed", label: "2024 Contracts" },
+  ]);
+
+  // Get current documents based on active tab or page
   const documents = computed(() => {
     if (activeNav.value === "Overview") {
       return allData.value[activeTab.value] || [];
+    } else if (activeNav.value === "Documents") {
+      return allData.value.documents || [];
     }
     return allData.value.companies || [];
   });
@@ -212,12 +221,21 @@ export const useDocumentsStore = defineStore("documents", () => {
   }
 
   function removeDocument(index) {
+    // Calculate the actual index in the array
     const actualIndex = (currentPage.value - 1) * perPage.value + index;
-    documents.value.splice(actualIndex, 1);
+
+    // Remove from the correct data source based on context
+    if (activeNav.value === "Documents") {
+      allData.value.documents.splice(actualIndex, 1);
+    } else if (activeNav.value === "Overview") {
+      const dataKey = activeTab.value; // companies, people, documents, templates
+      allData.value[dataKey].splice(actualIndex, 1);
+    }
   }
 
   function addDocument(doc) {
-    documents.value.unshift(doc);
+    // Add to documents array
+    allData.value.documents.unshift(doc);
   }
 
   return {
@@ -229,6 +247,7 @@ export const useDocumentsStore = defineStore("documents", () => {
     activeTab,
     stats,
     navItems,
+    allData,
     documents,
     filtered,
     paginated,
