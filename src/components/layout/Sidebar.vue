@@ -1,30 +1,36 @@
 <template>
   <aside
     :class="[
-      'sidebar',
-      isCollapsed ? 'sidebar-collapsed' : 'sidebar-expanded',
+      'fixed top-0 left-0 h-screen bg-white border-r border-gray-200 flex flex-col z-30 transition-all duration-300',
+      isCollapsed ? 'w-16' : 'w-60',
       sidebarOpen ? 'translate-x-0' : '-translate-x-full',
       'lg:translate-x-0',
     ]"
   >
     <!-- Header with Logo and Collapse Button -->
-    <div class="sidebar-header">
+    <div class="px-4 py-4 border-b border-gray-200">
       <div class="flex items-center justify-between mb-4">
-        <span v-if="!isCollapsed" class="text-indigo-600 font-bold text-xl"
+        <span
+          v-if="!isCollapsed"
+          class="text-indigo-600 font-bold text-xl transition-opacity"
           >doclast |</span
         >
-        <span v-else class="text-indigo-600 font-bold text-xl mx-auto">d</span>
+        <span
+          v-else
+          class="text-indigo-600 font-bold text-xl w-full text-center transition-opacity"
+          >d</span
+        >
         <button
-          class="p-1.5 hover:bg-gray-100 rounded transition-colors"
+          v-if="!isCollapsed"
+          class="p-1.5 hover:bg-gray-100 rounded transition-colors hidden lg:block"
           @click="toggleCollapse"
           :aria-label="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
         >
-          <ChevronsLeft v-if="!isCollapsed" class="w-5 h-5 text-gray-400" />
-          <ChevronsRight v-else class="w-5 h-5 text-gray-400" />
+          <ChevronsLeft class="w-5 h-5 text-gray-400" />
         </button>
       </div>
 
-      <!-- Workspace Dropdown - hide when collapsed -->
+      <!-- Workspace Dropdown -->
       <button
         v-if="!isCollapsed"
         class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
@@ -41,6 +47,16 @@
         :title="'Workspace Name'"
       >
         <Building2 class="w-5 h-5 text-gray-500" />
+      </button>
+
+      <!-- Expand button when collapsed -->
+      <button
+        v-if="isCollapsed"
+        class="w-full flex items-center justify-center p-1.5 hover:bg-gray-100 rounded transition-colors mt-2 hidden lg:block"
+        @click="toggleCollapse"
+        :aria-label="'Expand sidebar'"
+      >
+        <ChevronsRight class="w-5 h-5 text-gray-400" />
       </button>
     </div>
 
@@ -212,7 +228,7 @@
     </nav>
 
     <!-- User Footer -->
-    <div class="sidebar-user">
+    <div class="p-4 border-t border-gray-200">
       <div v-if="!isCollapsed" class="flex items-center gap-3">
         <div
           class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0"
@@ -230,6 +246,7 @@
           <div class="text-xs text-gray-500">Active plan: Basic</div>
         </div>
         <button
+          @click="handleUserMenu"
           class="p-1 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
         >
           <MoreVertical class="w-4 h-4 text-gray-400" />
@@ -238,13 +255,17 @@
 
       <!-- Collapsed user footer - just avatar -->
       <div v-else class="flex justify-center">
-        <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+        <button
+          @click="handleUserMenu"
+          class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 hover:ring-2 hover:ring-indigo-500 transition-all"
+          title="Olivia Rhye"
+        >
           <img
             src="https://i.pravatar.cc/40?img=1"
             alt="Olivia Rhye"
             class="w-full h-full object-cover"
           />
-        </div>
+        </button>
       </div>
     </div>
   </aside>
@@ -276,7 +297,7 @@ const props = defineProps({
   activeNav: String,
 });
 
-const emit = defineEmits(["close", "navigate", "toggleCollapse"]);
+const emit = defineEmits(["close", "navigate", "toggleCollapse", "userMenu"]);
 const router = useRouter();
 
 // Collapsed state
@@ -299,6 +320,10 @@ function handleClick(label, routeName = null) {
   }
 }
 
+function handleUserMenu() {
+  emit("userMenu");
+}
+
 const navItemClass = (label) => [
   "w-full flex items-center gap-3 px-3 py-2 mb-0.5 rounded-lg text-sm transition-colors",
   isCollapsed.value ? "justify-center" : "",
@@ -307,5 +332,3 @@ const navItemClass = (label) => [
     : "text-gray-600 hover:bg-gray-50",
 ];
 </script>
-
-<style scoped lang="scss"></style>
