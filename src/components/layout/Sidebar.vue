@@ -1,237 +1,226 @@
 <template>
   <aside
     :class="[
-      'fixed top-0 left-0 h-screen bg-white border-r border-gray-200 flex flex-col z-30 transition-all duration-300',
-      isCollapsed ? 'w-16' : 'w-60',
+      'fixed top-0 left-0 h-screen bg-white border-r border-[#E9EAEB] flex flex-col z-30 transition-all duration-300',
+      isCollapsed ? 'w-16' : 'w-[280px]',
       sidebarOpen ? 'translate-x-0' : '-translate-x-full',
       'lg:translate-x-0',
     ]"
   >
     <!-- Header with Logo and Collapse Button -->
-    <div class="px-4 py-4 border-b border-gray-200">
-      <div class="flex items-center justify-between mb-4">
-        <span
-          v-if="!isCollapsed"
-          class="text-indigo-600 font-bold text-xl transition-opacity"
-          >doclast |</span
-        >
-        <span
-          v-else
-          class="text-indigo-600 font-bold text-xl w-full text-center transition-opacity"
-          >d</span
-        >
-        <button
-          v-if="!isCollapsed"
-          class="p-1.5 hover:bg-gray-100 rounded transition-colors hidden lg:block"
-          @click="toggleCollapse"
-          :aria-label="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-        >
-          <ChevronsLeft class="w-5 h-5 text-gray-400" />
-        </button>
+    <div
+      class="flex items-center justify-between px-5 py-4 border-b border-[#E9EAEB]"
+      v-if="!isCollapsed"
+    >
+      <!-- Logo -->
+      <div class="flex items-center">
+        <span class="text-[#4539CC] font-bold text-xl">doc</span>
+        <span class="text-[#181D27] font-bold text-xl">last</span>
+        <span class="text-[#181D27] font-bold text-xl ml-0.5">|</span>
       </div>
 
-      <!-- Workspace Dropdown -->
+      <!-- Collapse Button -->
       <button
-        v-if="!isCollapsed"
-        class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-      >
-        <Building2 class="w-4 h-4 text-gray-500 flex-shrink-0" />
-        <span class="flex-1 text-left">Workspace Name</span>
-        <ChevronDown class="w-4 h-4 text-gray-400 flex-shrink-0" />
-      </button>
-
-      <!-- Icon only for collapsed state -->
-      <button
-        v-else
-        class="w-full flex items-center justify-center p-2 text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-        :title="'Workspace Name'"
-      >
-        <Building2 class="w-5 h-5 text-gray-500" />
-      </button>
-
-      <!-- Expand button when collapsed -->
-      <button
-        v-if="isCollapsed"
-        class="w-full flex items-center justify-center p-1.5 hover:bg-gray-100 rounded transition-colors mt-2 hidden lg:block"
+        class="p-1 hover:bg-gray-50 rounded transition-colors"
         @click="toggleCollapse"
-        :aria-label="'Expand sidebar'"
+        aria-label="Collapse sidebar"
       >
-        <ChevronsRight class="w-5 h-5 text-gray-400" />
+        <ChevronsLeft class="w-5 h-5 text-[#A4A7AE]" />
+      </button>
+    </div>
+
+    <!-- Collapsed Header -->
+    <div
+      v-else
+      class="flex items-center justify-center py-4 border-b border-[#E9EAEB]"
+    >
+      <span class="text-[#4539CC] font-bold text-xl">d</span>
+    </div>
+
+    <!-- Workspace Dropdown -->
+    <div class="p-5 border-b border-[#E9EAEB]" v-if="!isCollapsed">
+      <button
+        class="flex items-center gap-2 w-full px-3 py-2 bg-white border border-[#D5D7DA] rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
+      >
+        <Building2 class="w-5 h-5 text-[#A4A7AE] flex-shrink-0" />
+        <span class="flex-1 text-left text-[#414651] text-sm font-normal"
+          >Workspace Name</span
+        >
+        <ChevronDown class="w-4 h-4 text-[#A4A7AE] flex-shrink-0" />
       </button>
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 overflow-y-auto px-3 py-2">
+    <nav class="flex-1 overflow-y-auto p-5 space-y-0.5">
       <!-- Overview -->
       <button
         @click="handleClick('Overview', 'Overview')"
         :class="navItemClass('Overview')"
-        :title="isCollapsed ? 'Overview' : ''"
       >
         <Home class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left">Overview</span>
+        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-semibold"
+          >Overview</span
+        >
       </button>
 
-      <!-- Notifications with green dot and badge -->
+      <!-- Notifications -->
       <button
         @click="handleClick('Notifications')"
         :class="navItemClass('Notifications')"
-        :title="isCollapsed ? 'Notifications' : ''"
       >
-        <div class="relative">
-          <Bell class="w-5 h-5 flex-shrink-0" />
-          <span
-            v-if="isCollapsed"
-            class="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"
-          ></span>
-        </div>
-        <template v-if="!isCollapsed">
-          <span class="flex-1 text-left">Notifications</span>
-          <span class="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>
-          <span
-            class="px-2 py-0.5 text-xs bg-gray-200 text-gray-700 rounded font-medium flex-shrink-0"
-            >10</span
-          >
-        </template>
+        <Bell class="w-5 h-5 flex-shrink-0 relative" />
+        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
+          >Notifications</span
+        >
+        <span
+          v-if="!isCollapsed"
+          class="w-2 h-2 rounded-full bg-[#17B26A] flex-shrink-0"
+        ></span>
+        <span
+          v-if="!isCollapsed"
+          class="px-2 py-0.5 bg-[#F2F4F7] text-[#344054] text-xs font-medium rounded-full flex-shrink-0"
+          >10</span
+        >
       </button>
 
-      <!-- Products Section -->
-      <div
-        v-if="!isCollapsed"
-        class="w-full flex items-center gap-2 px-3 py-3 mt-3 mb-0.5 text-xs text-gray-500 font-medium"
-      >
-        <ChevronRight class="w-4 h-4 flex-shrink-0" />
-        <span class="whitespace-nowrap">Products</span>
-        <span class="flex-1 h-px bg-gray-200 ml-2"></span>
+      <!-- Products Divider -->
+      <div v-if="!isCollapsed" class="flex items-center gap-1 py-2">
+        <ChevronRight class="w-4 h-4 text-[#A4A7AE] flex-shrink-0" />
+        <span class="text-xs font-medium text-[#535862] whitespace-nowrap"
+          >Products</span
+        >
+        <div class="flex-1 h-px bg-[#E9EAEB] ml-2"></div>
       </div>
-      <div v-else class="w-full h-px bg-gray-200 my-3"></div>
+      <div v-else class="w-full h-px bg-[#E9EAEB] my-2"></div>
 
+      <!-- All Products -->
       <button
         @click="handleClick('All Products')"
         :class="navItemClass('All Products')"
-        :title="isCollapsed ? 'All Products' : ''"
       >
         <Package class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left">All Products</span>
+        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
+          >All Products</span
+        >
       </button>
 
       <!-- Forms -->
-      <button
-        @click="handleClick('Forms')"
-        :class="navItemClass('Forms')"
-        :title="isCollapsed ? 'Forms' : ''"
-      >
+      <button @click="handleClick('Forms')" :class="navItemClass('Forms')">
         <LayoutGrid class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left">Forms</span>
+        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
+          >Forms</span
+        >
       </button>
 
       <!-- Templates -->
       <button
         @click="handleClick('Templates')"
         :class="navItemClass('Templates')"
-        :title="isCollapsed ? 'Templates' : ''"
       >
         <FileText class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left">Templates</span>
+        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
+          >Templates</span
+        >
       </button>
 
       <!-- Documents -->
       <button
         @click="handleClick('Documents', 'Documents')"
         :class="navItemClass('Documents')"
-        :title="isCollapsed ? 'Documents' : ''"
       >
         <FileText class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left">Documents</span>
+        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
+          >Documents</span
+        >
       </button>
 
       <!-- Automations -->
       <button
         @click="handleClick('Automations')"
         :class="navItemClass('Automations')"
-        :title="isCollapsed ? 'Automations' : ''"
       >
         <Zap class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left">Automations</span>
+        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
+          >Automations</span
+        >
       </button>
 
       <!-- Reports -->
-      <button
-        @click="handleClick('Reports')"
-        :class="navItemClass('Reports')"
-        :title="isCollapsed ? 'Reports' : ''"
-      >
+      <button @click="handleClick('Reports')" :class="navItemClass('Reports')">
         <BarChart3 class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left">Reports</span>
+        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
+          >Reports</span
+        >
       </button>
 
       <!-- Members and teams -->
       <button
         @click="handleClick('Members and teams')"
         :class="navItemClass('Members and teams')"
-        :title="isCollapsed ? 'Members and teams' : ''"
       >
         <Users class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left"
+        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
           >Members and teams</span
         >
       </button>
 
-      <!-- Records Section -->
-      <div
-        v-if="!isCollapsed"
-        class="w-full flex items-center gap-2 px-3 py-3 mt-3 mb-0.5 text-xs text-gray-500 font-medium"
-      >
-        <ChevronRight class="w-4 h-4 flex-shrink-0" />
-        <span class="whitespace-nowrap">Records</span>
-        <span class="flex-1 h-px bg-gray-200 ml-2"></span>
+      <!-- Records Divider -->
+      <div v-if="!isCollapsed" class="flex items-center gap-1 py-2">
+        <ChevronRight class="w-4 h-4 text-[#A4A7AE] flex-shrink-0" />
+        <span class="text-xs font-medium text-[#535862] whitespace-nowrap"
+          >Records</span
+        >
+        <div class="flex-1 h-px bg-[#E9EAEB] ml-2"></div>
       </div>
-      <div v-else class="w-full h-px bg-gray-200 my-3"></div>
+      <div v-else class="w-full h-px bg-[#E9EAEB] my-2"></div>
 
+      <!-- Companies -->
       <button
         @click="handleClick('Companies')"
         :class="navItemClass('Companies')"
-        :title="isCollapsed ? 'Companies' : ''"
       >
         <Building2 class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left">Companies</span>
+        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
+          >Companies</span
+        >
       </button>
 
-      <button
-        @click="handleClick('People')"
-        :class="navItemClass('People')"
-        :title="isCollapsed ? 'People' : ''"
-      >
+      <!-- People -->
+      <button @click="handleClick('People')" :class="navItemClass('People')">
         <Users class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left">People</span>
+        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
+          >People</span
+        >
       </button>
 
-      <!-- Lists Section -->
-      <div
-        v-if="!isCollapsed"
-        class="w-full flex items-center gap-2 px-3 py-3 mt-3 mb-0.5 text-xs text-gray-500 font-medium"
-      >
-        <ChevronRight class="w-4 h-4 flex-shrink-0" />
-        <span class="whitespace-nowrap">Lists</span>
-        <span class="flex-1 h-px bg-gray-200 ml-2"></span>
+      <!-- Lists Divider -->
+      <div v-if="!isCollapsed" class="flex items-center gap-1 py-2">
+        <ChevronRight class="w-4 h-4 text-[#A4A7AE] flex-shrink-0" />
+        <span class="text-xs font-medium text-[#535862] whitespace-nowrap"
+          >Lists</span
+        >
+        <div class="flex-1 h-px bg-[#E9EAEB] ml-2"></div>
       </div>
-      <div v-else class="w-full h-px bg-gray-200 my-3"></div>
+      <div v-else class="w-full h-px bg-[#E9EAEB] my-2"></div>
 
+      <!-- 2024 Contracts -->
       <button
         @click="handleClick('2024 Contracts')"
         :class="navItemClass('2024 Contracts')"
-        :title="isCollapsed ? '2024 Contracts' : ''"
       >
         <FolderClosed class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left">2024 Contracts</span>
+        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
+          >2024 Contracts</span
+        >
       </button>
     </nav>
 
-    <!-- User Footer -->
-    <div class="p-4 border-t border-gray-200">
-      <div v-if="!isCollapsed" class="flex items-center gap-3">
+    <!--User Footer -->
+    <div class="p-5 border-t border-[#E9EAEB]" v-if="!isCollapsed">
+      <div class="flex items-center gap-3">
+        <!-- Avatar -->
         <div
-          class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0"
+          class="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden bg-gray-200"
         >
           <img
             src="https://i.pravatar.cc/40?img=1"
@@ -239,34 +228,37 @@
             class="w-full h-full object-cover"
           />
         </div>
-        <div class="flex-1 min-w-0">
-          <div class="text-sm font-medium text-gray-900 truncate">
-            Olivia Rhye
-          </div>
-          <div class="text-xs text-gray-500">Active plan: Basic</div>
-        </div>
-        <button
-          @click="handleUserMenu"
-          class="p-1 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
-        >
-          <MoreVertical class="w-4 h-4 text-gray-400" />
-        </button>
-      </div>
 
-      <!-- Collapsed user footer - just avatar -->
-      <div v-else class="flex justify-center">
+        <!-- Name and Plan -->
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-semibold text-[#181D27]">Olivia Rhye</div>
+          <div class="text-xs text-[#535862]">
+            Active plan: <span class="text-[#4539CC]">Basic</span>
+          </div>
+        </div>
+
+        <!-- Menu Button -->
         <button
           @click="handleUserMenu"
-          class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 hover:ring-2 hover:ring-indigo-500 transition-all"
-          title="Olivia Rhye"
+          class="p-1 hover:bg-gray-50 rounded transition-colors flex-shrink-0"
         >
-          <img
-            src="https://i.pravatar.cc/40?img=1"
-            alt="Olivia Rhye"
-            class="w-full h-full object-cover"
-          />
+          <MoreVertical class="w-5 h-5 text-[#A4A7AE]" />
         </button>
       </div>
+    </div>
+
+    <!-- Collapsed User Footer -->
+    <div v-else class="flex justify-center pb-5">
+      <button
+        @click="handleUserMenu"
+        class="w-10 h-10 rounded overflow-hidden hover:ring-2 hover:ring-indigo-500 transition-all"
+      >
+        <img
+          src="https://i.pravatar.cc/40?img=1"
+          alt="Olivia Rhye"
+          class="w-full h-full object-cover"
+        />
+      </button>
     </div>
   </aside>
 </template>
@@ -275,7 +267,6 @@
 import { ref } from "vue";
 import {
   ChevronsLeft,
-  ChevronsRight,
   ChevronDown,
   ChevronRight,
   Building2,
@@ -300,7 +291,6 @@ const props = defineProps({
 const emit = defineEmits(["close", "navigate", "toggleCollapse", "userMenu"]);
 const router = useRouter();
 
-// Collapsed state
 const isCollapsed = ref(false);
 
 function toggleCollapse() {
@@ -314,7 +304,6 @@ function handleClick(label, routeName = null) {
   }
   emit("navigate", label);
 
-  // Close on mobile after navigation
   if (window.innerWidth < 1024) {
     emit("close");
   }
@@ -324,11 +313,20 @@ function handleUserMenu() {
   emit("userMenu");
 }
 
-const navItemClass = (label) => [
-  "w-full flex items-center gap-3 px-3 py-2 mb-0.5 rounded-lg text-sm transition-colors",
-  isCollapsed.value ? "justify-center" : "",
-  props.activeNav === label
-    ? "bg-gray-100 text-gray-900 font-medium"
-    : "text-gray-600 hover:bg-gray-50",
-];
+const navItemClass = (label) => {
+  const isActive = props.activeNav === label;
+  return [
+    "flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors w-full",
+    isCollapsed.value ? "justify-center" : "",
+    isActive
+      ? "text-[#4539CC] bg-[#F5F3FF] font-semibold"
+      : "text-[#414651] hover:bg-gray-50 font-normal",
+  ];
+};
 </script>
+
+<style scoped>
+.shadow-xs {
+  box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+}
+</style>

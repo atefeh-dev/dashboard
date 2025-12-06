@@ -14,7 +14,7 @@
     <div
       :class="[
         'flex-1 flex flex-col min-h-screen transition-all duration-300',
-        isCollapsed ? 'lg:pl-16' : 'lg:pl-60',
+        isCollapsed ? 'lg:ml-16' : 'lg:ml-[280px]',
       ]"
     >
       <!-- Navbar (if provided) -->
