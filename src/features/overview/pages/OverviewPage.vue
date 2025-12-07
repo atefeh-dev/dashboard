@@ -10,10 +10,9 @@
         class="p-2 hover:bg-gray-100 rounded-lg"
         @click="store.toggleSidebar"
       >
-        <Menu class="w-6 h-6" />
+        <Menu class="w-6 h-4" />
       </button>
     </div>
-
     <!-- Header -->
     <div class="mb-8">
       <div
@@ -33,10 +32,8 @@
         />
       </div>
     </div>
-
     <!-- Stats -->
     <StatsGrid :stats="store.stats" />
-
     <!-- Quick view -->
     <div class="app-card">
       <div class="px-6 py-4 border-b border-gray-200">
@@ -47,19 +44,24 @@
           Keep track of everything you're working on
         </p>
       </div>
-
       <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex items-center justify-between gap-4">
-          <div class="flex gap-2">
+          <!-- Tabs - segmented control style -->
+          <div
+            class="inline-flex bg-gray-50 border border-gray-200 rounded-lg p-1"
+          >
             <button
-              v-for="tab in tabs"
+              v-for="(tab, index) in tabs"
               :key="tab"
               @click="store.setActiveTab(tab)"
               :class="[
-                'px-4 py-2 text-sm font-medium rounded-lg transition',
+                'relative px-4 py-2 text-sm font-medium rounded-md transition-all whitespace-nowrap',
                 store.activeTab === tab
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-600 hover:bg-gray-50',
+                  ? ' text-gray-900'
+                  : 'text-gray-600 hover:text-gray-900',
+                index !== tabs.length - 1
+                  ? 'after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:bg-gray-200'
+                  : '',
               ]"
             >
               {{ tab.charAt(0).toUpperCase() + tab.slice(1) }}
@@ -71,12 +73,10 @@
           </AppButton>
         </div>
       </div>
-
       <OverviewTable />
     </div>
   </MainLayout>
 </template>
-
 <script setup>
 import { useRouter } from "vue-router";
 import MainLayout from "@/components/layout/MainLayout.vue";
@@ -86,17 +86,18 @@ import AppButton from "@/components/ui/AppButton.vue";
 import AppSearch from "@/components/ui/AppSearch.vue";
 import { Menu, Plus, Globe, Home } from "lucide-vue-next";
 import { useDocumentsStore } from "../../../stores/useDocumentsStore";
-
 const store = useDocumentsStore();
 const router = useRouter();
-
 store.setActiveNav("Overview");
-
 const tabs = ["companies", "people", "documents", "templates"];
-
 const handleNavigate = (label) => {
   store.setActiveNav(label);
   if (label === "Documents") router.push("/documents");
   if (label === "Overview") router.push("/overview");
 };
 </script>
+<style scoped>
+.shadow-xs {
+  box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+}
+</style>
