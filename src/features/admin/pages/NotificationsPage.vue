@@ -12,136 +12,146 @@
       </button>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- CORRECT TWO-SIDEBAR LAYOUT (COPY–PASTE SOLUTION)          -->
-    <!-- ========================================================= -->
-
-    <!-- Break out of MainLayout padding so sub-sidebar aligns with global -->
-    <div class="flex -mx-4 sm:-mx-6 lg:-mx-8 w-full">
-      <!-- Sub Sidebar -->
-      <aside
-        class="hidden lg:block w-[280px] flex-shrink-0 px-4 sm:px-6 lg:px-8"
-      >
-        <div class="sticky top-6">
-          <div class="bg-white rounded-lg border border-gray-200 p-4">
-            <nav class="space-y-1">
-              <button
-                v-for="item in navItems"
-                :key="item.name"
-                @click="activeSection = item.name"
-                :class="[
-                  'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group',
-                  activeSection === item.name
-                    ? 'bg-gray-50 text-gray-900'
-                    : 'text-gray-700 hover:bg-gray-50',
-                ]"
+    <!-- Break out of MainLayout's max-w and padding constraints -->
+    <div class="-mx-4 sm:-mx-6 lg:-mx-8 -my-8">
+      <div class="flex min-h-screen">
+        <!-- Second Sidebar (Admin Navigation) -->
+        <aside
+          class="hidden lg:block w-[280px] flex-shrink-0 border-r border-gray-200 bg-white px-6 py-8"
+        >
+          <div class="mb-6">
+            <div
+              class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full"
+            >
+              <div
+                class="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center"
               >
-                <component :is="item.icon" class="w-5 h-5 text-gray-400" />
-                <span class="flex-1 text-sm font-normal">{{ item.name }}</span>
-                <span
-                  v-if="item.count"
-                  class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-md"
-                >
-                  {{ item.count }}
-                </span>
-                <ChevronRight
-                  v-else
-                  class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                />
-              </button>
-            </nav>
+                <div class="w-2 h-2 rounded-full bg-white"></div>
+              </div>
+              <span class="text-sm font-medium text-indigo-700"
+                >Administrator</span
+              >
+            </div>
           </div>
-        </div>
-      </aside>
 
-      <!-- Main content (restore padding here) -->
-      <main class="flex-1 min-w-0 px-4 sm:px-6 lg:px-8">
-        <div class="mb-8">
-          <h1 class="text-3xl font-semibold text-gray-900 mb-2">
-            Notifications
-          </h1>
-          <p class="text-sm text-gray-600">
-            Select when and how you'll be notified.
-          </p>
-        </div>
+          <nav class="space-y-1">
+            <button
+              v-for="item in navItems"
+              :key="item.name"
+              @click="activeSection = item.name"
+              :class="[
+                'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group',
+                activeSection === item.name
+                  ? 'bg-gray-50 text-gray-900'
+                  : 'text-gray-700 hover:bg-gray-50',
+              ]"
+            >
+              <component :is="item.icon" class="w-5 h-5 text-gray-400" />
+              <span class="flex-1 text-sm font-normal">{{ item.name }}</span>
+              <span
+                v-if="item.count"
+                class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-md"
+              >
+                {{ item.count }}
+              </span>
+              <ChevronRight
+                v-else
+                class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+              />
+            </button>
+          </nav>
+        </aside>
 
-        <div class="space-y-10">
-          <!-- General Notifications -->
-          <section>
-            <h2 class="text-sm font-semibold text-gray-900 mb-1">
-              General notifications
-            </h2>
-            <p class="text-sm text-gray-600 mb-6">
-              Select when you'll be notified when the following changes occur.
-            </p>
-
-            <div class="space-y-4">
-              <NotificationRow
-                label="I'm mentioned in a message"
-                :selected="generalNotifications.mentioned"
-                @update="generalNotifications.mentioned = $event"
-              />
-              <NotificationRow
-                label="Someone replies to any message"
-                :selected="generalNotifications.replies"
-                @update="generalNotifications.replies = $event"
-              />
-              <NotificationRow
-                label="I'm assigned a task"
-                :selected="generalNotifications.assigned"
-                @update="generalNotifications.assigned = $event"
-              />
-              <NotificationRow
-                label="A task is overdue"
-                :selected="generalNotifications.overdue"
-                @update="generalNotifications.overdue = $event"
-              />
-              <NotificationRow
-                label="A task status is updated"
-                :selected="generalNotifications.taskStatus"
-                @update="generalNotifications.taskStatus = $event"
-              />
+        <!-- Main Content Area -->
+        <main class="flex-1 min-w-0 px-8 py-8 bg-gray-50">
+          <div class="max-w-5xl">
+            <div class="mb-8">
+              <h1 class="text-3xl font-semibold text-gray-900 mb-2">
+                Notifications
+              </h1>
+              <p class="text-sm text-gray-600">
+                Select when and how you'll be notified.
+              </p>
             </div>
-          </section>
 
-          <!-- Summary Notifications -->
-          <section>
-            <h2 class="text-sm font-semibold text-gray-900 mb-1">
-              Summary notifications
-            </h2>
-            <p class="text-sm text-gray-600 mb-6">
-              Select when you'll be notified when the following summaries or
-              report are ready.
-            </p>
+            <div class="space-y-10">
+              <!-- General Notifications -->
+              <section>
+                <h2 class="text-sm font-semibold text-gray-900 mb-1">
+                  General notifications
+                </h2>
+                <p class="text-sm text-gray-600 mb-6">
+                  Select when you'll be notified when the following changes
+                  occur.
+                </p>
 
-            <div class="space-y-4">
-              <NotificationRow
-                label="Daily summary"
-                :selected="summaryNotifications.daily"
-                @update="summaryNotifications.daily = $event"
-              />
-              <NotificationRow
-                label="Weekly summary"
-                :selected="summaryNotifications.weekly"
-                @update="summaryNotifications.weekly = $event"
-              />
-              <NotificationRow
-                label="Monthly summary"
-                :selected="summaryNotifications.monthly"
-                @update="summaryNotifications.monthly = $event"
-              />
-              <NotificationRow
-                label="Quarterly summary"
-                :selected="summaryNotifications.quarterly"
-                @update="summaryNotifications.quarterly = $event"
-              />
+                <div class="space-y-4">
+                  <NotificationRow
+                    label="I'm mentioned in a message"
+                    :selected="generalNotifications.mentioned"
+                    @update="generalNotifications.mentioned = $event"
+                  />
+                  <NotificationRow
+                    label="Someone replies to any message"
+                    :selected="generalNotifications.replies"
+                    @update="generalNotifications.replies = $event"
+                  />
+                  <NotificationRow
+                    label="I'm assigned a task"
+                    :selected="generalNotifications.assigned"
+                    @update="generalNotifications.assigned = $event"
+                  />
+                  <NotificationRow
+                    label="A task is overdue"
+                    :selected="generalNotifications.overdue"
+                    @update="generalNotifications.overdue = $event"
+                  />
+                  <NotificationRow
+                    label="A task status is updated"
+                    :selected="generalNotifications.taskStatus"
+                    @update="generalNotifications.taskStatus = $event"
+                  />
+                </div>
+              </section>
+
+              <!-- Summary Notifications -->
+              <section>
+                <h2 class="text-sm font-semibold text-gray-900 mb-1">
+                  Summary notifications
+                </h2>
+                <p class="text-sm text-gray-600 mb-6">
+                  Select when you'll be notified when the following summaries or
+                  report are ready.
+                </p>
+
+                <div class="space-y-4">
+                  <NotificationRow
+                    label="Daily summary"
+                    :selected="summaryNotifications.daily"
+                    @update="summaryNotifications.daily = $event"
+                  />
+                  <NotificationRow
+                    label="Weekly summary"
+                    :selected="summaryNotifications.weekly"
+                    @update="summaryNotifications.weekly = $event"
+                  />
+                  <NotificationRow
+                    label="Monthly summary"
+                    :selected="summaryNotifications.monthly"
+                    @update="summaryNotifications.monthly = $event"
+                  />
+                  <NotificationRow
+                    label="Quarterly summary"
+                    :selected="summaryNotifications.quarterly"
+                    @update="summaryNotifications.quarterly = $event"
+                  />
+                </div>
+              </section>
             </div>
-          </section>
-        </div>
-      </main>
+          </div>
+        </main>
+      </div>
     </div>
-
-    <!-- END LAYOUT -->
   </MainLayout>
 </template>
 
