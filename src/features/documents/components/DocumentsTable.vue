@@ -1,30 +1,51 @@
 <template>
   <div>
-    <div class="table-wrapper">
-      <table class="table">
+    <div class="overflow-x-auto">
+      <table class="w-full">
         <thead>
-          <tr>
-            <th>Name</th>
-            <th>Categories</th>
-            <th>Rating</th>
-            <th>Last assessed</th>
-            <th>Date</th>
-            <th>Actions</th>
+          <tr class="border-b border-gray-200">
+            <th
+              class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Name
+            </th>
+            <th
+              class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Categories
+            </th>
+            <th
+              class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Rating
+            </th>
+            <th
+              class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Last assessed
+            </th>
+            <th
+              class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Actions
+            </th>
           </tr>
         </thead>
 
-        <tbody>
+        <tbody class="divide-y divide-gray-200">
           <tr
             v-for="(doc, i) in store.paginated"
             :key="i"
-            class="hover:bg-gray-50"
+            class="hover:bg-gray-50 transition-colors"
           >
-            <td>
+            <!-- Name -->
+            <td class="py-4 px-6">
               <div class="font-medium text-gray-900">{{ doc.name }}</div>
               <div class="text-sm text-gray-500">{{ doc.domain }}</div>
             </td>
 
-            <td>
+            <!-- Categories -->
+            <td class="py-4 px-6">
               <div class="flex flex-wrap gap-2">
                 <span
                   :class="[
@@ -58,50 +79,59 @@
               </div>
             </td>
 
-            <td>
+            <!-- Rating -->
+            <td class="py-4 px-6">
               <span
-                class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-green-50 text-green-700 rounded"
+                :class="[
+                  'inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium',
+                  doc.status === 'Active'
+                    ? 'bg-green-50 text-green-700'
+                    : 'bg-gray-100 text-gray-700',
+                ]"
               >
-                <span
-                  :class="
-                    doc.direction === 'up' ? 'text-green-500' : 'text-red-500'
-                  "
-                  >{{ doc.direction === "up" ? "↑" : "↓" }}</span
-                >
-                Active
+                {{ doc.status }}
               </span>
             </td>
 
-            <td>
-              <span
+            <!-- Last Assessed -->
+            <td class="py-4 px-6">
+              <div
                 :class="[
-                  'inline-flex items-center gap-1 text-sm',
+                  'flex items-center gap-1 text-sm font-medium',
                   doc.direction === 'up' ? 'text-green-600' : 'text-red-600',
                 ]"
               >
-                {{ doc.direction === "up" ? "↑" : "↓" }} {{ doc.rating }}
-              </span>
+                <component
+                  :is="doc.direction === 'up' ? TrendingUp : TrendingDown"
+                  class="w-4 h-4"
+                />
+                {{ doc.rating }}
+              </div>
+              <div class="text-sm text-gray-500 mt-1">{{ doc.date }}</div>
             </td>
 
-            <td class="text-sm text-gray-500">{{ doc.date }}</td>
-
-            <td>
-              <div class="flex gap-2">
+            <!-- Actions -->
+            <td class="py-4 px-6">
+              <div class="flex items-center gap-2">
                 <button
-                  class="p-1 text-gray-400 hover:text-gray-600"
                   @click="remove(i)"
+                  class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                  title="Delete"
                 >
-                  <TrashIcon class="w-4 h-4" />
+                  <Trash2 class="w-4 h-4" />
                 </button>
-                <button class="p-1 text-gray-400 hover:text-gray-600">
-                  <EditIcon class="w-4 h-4" />
+                <button
+                  class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                  title="Edit"
+                >
+                  <Pencil class="w-4 h-4" />
                 </button>
               </div>
             </td>
           </tr>
 
           <tr v-if="store.paginated.length === 0">
-            <td class="px-4 py-6 text-center text-gray-500" colspan="6">
+            <td class="px-6 py-8 text-center text-gray-500" colspan="5">
               No documents found
             </td>
           </tr>
@@ -109,48 +139,55 @@
       </table>
     </div>
 
-    <AppPagination
-      :pages="pagesArray"
-      :current="store.currentPage"
-      @change="store.goToPage"
-      @prev="prev"
-      @next="next"
-    />
+    <!-- Pagination -->
+    <div
+      class="flex items-center justify-between px-6 py-4 border-t border-gray-200"
+    >
+      <div class="text-sm text-gray-500">
+        Showing {{ (store.currentPage - 1) * store.perPage + 1 }} to
+        {{ Math.min(store.currentPage * store.perPage, store.filtered.length) }}
+        of {{ store.filtered.length }} results
+      </div>
+      <div class="flex gap-2">
+        <button
+          @click="prev"
+          :disabled="store.currentPage === 1"
+          class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Previous
+        </button>
+        <button
+          @click="next"
+          :disabled="store.currentPage === store.totalPages"
+          class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Next
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import AppPagination from "@/components/ui/AppPagination.vue";
-import { useDocumentsStore } from "../../../stores/useDocumentsStore";
-import { computed } from "vue";
-import { Trash2 as TrashIcon, Edit as EditIcon } from "lucide-vue-next";
+import { useDocumentsStore } from "@/stores/useDocumentsStore";
+import { Trash2, Pencil, TrendingUp, TrendingDown } from "lucide-vue-next";
 
 const store = useDocumentsStore();
 
-const pagesArray = computed(() => {
-  // create a simple pages array like [1,2,3,'...',8,9,10]
-  const total = store.totalPages;
-  const cur = store.currentPage;
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  const res = [1, 2, 3];
-  if (cur > 4) res.push("...");
-  const start = Math.max(4, cur - 1);
-  const end = Math.min(total - 3, cur + 1);
-  for (let i = start; i <= end; i++) res.push(i);
-  if (cur < total - 3) res.push("...");
-  res.push(total - 2, total - 1, total);
-  return [...new Set(res)].slice(0, 9);
-});
-
 function prev() {
-  store.goToPage(store.currentPage - 1);
+  if (store.currentPage > 1) {
+    store.goToPage(store.currentPage - 1);
+  }
 }
+
 function next() {
-  store.goToPage(store.currentPage + 1);
+  if (store.currentPage < store.totalPages) {
+    store.goToPage(store.currentPage + 1);
+  }
 }
-function remove(i) {
-  store.removeDocument((store.currentPage - 1) * store.perPage + i);
+
+function remove(index) {
+  // Pass the index directly - store will calculate the actual index
+  store.removeDocument(index);
 }
 </script>
-
-<style scoped lang="scss"></style>
