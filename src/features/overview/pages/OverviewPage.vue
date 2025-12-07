@@ -47,18 +47,16 @@
       <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex items-center justify-between gap-4">
           <!-- Tabs - segmented control style -->
-          <div
-            class="inline-flex bg-gray-50 border border-gray-200 rounded-lg p-1"
-          >
+          <div class="inline-flex bg-gray-50 border border-gray-200 rounded-lg">
             <button
               v-for="(tab, index) in tabs"
               :key="tab"
               @click="store.setActiveTab(tab)"
               :class="[
-                'relative px-4 py-2 text-sm font-medium rounded-md transition-all whitespace-nowrap',
+                'relative px-6 py-2 text-sm font-medium rounded-md transition-all whitespace-nowrap border-color[#d5d7da]',
                 store.activeTab === tab
-                  ? ' text-gray-900'
-                  : 'text-gray-600 hover:text-gray-900',
+                  ? 'bg-gray-50 text-gray-900'
+                  : 'text-gray-600 hover:text-gray-900 bg-white',
                 index !== tabs.length - 1
                   ? 'after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:bg-gray-200'
                   : '',

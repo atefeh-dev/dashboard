@@ -12,63 +12,50 @@
       </button>
     </div>
 
-    <!-- Main Content -->
-    <div class="flex gap-8">
-      <!-- Left Sidebar Navigation -->
-      <aside class="hidden lg:block w-64 flex-shrink-0">
-        <!-- Administrator Badge -->
-        <div class="mb-6">
-          <div
-            class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full"
-          >
-            <div
-              class="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center"
-            >
-              <div class="w-2 h-2 rounded-full bg-white"></div>
-            </div>
-            <span class="text-sm font-medium text-indigo-700"
-              >Administrator</span
-            >
-          </div>
-        </div>
+    <!-- ========================================================= -->
+    <!-- CORRECT TWO-SIDEBAR LAYOUT (COPY–PASTE SOLUTION)          -->
+    <!-- ========================================================= -->
 
-        <div class="bg-white rounded-lg">
-          <!-- Navigation Items -->
-          <nav class="space-y-1">
-            <button
-              v-for="item in navItems"
-              :key="item.name"
-              @click="activeSection = item.name"
-              :class="[
-                'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left group',
-                activeSection === item.name
-                  ? 'bg-gray-50 text-gray-900'
-                  : 'text-gray-700 hover:bg-gray-50',
-              ]"
-            >
-              <component
-                :is="item.icon"
-                class="w-5 h-5 flex-shrink-0 text-gray-400"
-              />
-              <span class="flex-1 text-sm font-normal">{{ item.name }}</span>
-              <span
-                v-if="item.count"
-                class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-md"
+    <!-- Break out of MainLayout padding so sub-sidebar aligns with global -->
+    <div class="flex -mx-4 sm:-mx-6 lg:-mx-8 w-full">
+      <!-- Sub Sidebar -->
+      <aside
+        class="hidden lg:block w-[280px] flex-shrink-0 px-4 sm:px-6 lg:px-8"
+      >
+        <div class="sticky top-6">
+          <div class="bg-white rounded-lg border border-gray-200 p-4">
+            <nav class="space-y-1">
+              <button
+                v-for="item in navItems"
+                :key="item.name"
+                @click="activeSection = item.name"
+                :class="[
+                  'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group',
+                  activeSection === item.name
+                    ? 'bg-gray-50 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-50',
+                ]"
               >
-                {{ item.count }}
-              </span>
-              <ChevronRight
-                v-else
-                class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
-              />
-            </button>
-          </nav>
+                <component :is="item.icon" class="w-5 h-5 text-gray-400" />
+                <span class="flex-1 text-sm font-normal">{{ item.name }}</span>
+                <span
+                  v-if="item.count"
+                  class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-md"
+                >
+                  {{ item.count }}
+                </span>
+                <ChevronRight
+                  v-else
+                  class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                />
+              </button>
+            </nav>
+          </div>
         </div>
       </aside>
 
-      <!-- Main Content Area -->
-      <main class="flex-1 min-w-0">
-        <!-- Header -->
+      <!-- Main content (restore padding here) -->
+      <main class="flex-1 min-w-0 px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
           <h1 class="text-3xl font-semibold text-gray-900 mb-2">
             Notifications
@@ -78,7 +65,6 @@
           </p>
         </div>
 
-        <!-- Notifications Settings -->
         <div class="space-y-10">
           <!-- General Notifications -->
           <section>
@@ -154,6 +140,8 @@
         </div>
       </main>
     </div>
+
+    <!-- END LAYOUT -->
   </MainLayout>
 </template>
 
@@ -181,7 +169,6 @@ const navItems = [
   { name: "Notifications", icon: Bell, count: 10 },
   { name: "Analytics", icon: BarChart3 },
   { name: "Saved reports", icon: FileText },
-  { name: "My details", icon: User },
   { name: "User reports", icon: FileText, count: 10 },
   { name: "Settings", icon: Settings },
 ];
