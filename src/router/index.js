@@ -12,6 +12,7 @@ import ResetPasswordPage from "@/features/auth/pages/ResetPasswordPage.vue";
 // App pages
 import OverviewPage from "@/features/overview/pages/OverviewPage.vue";
 import DocumentsPage from "@/features/documents/pages/DocumentsPage.vue";
+import NotificationsPage from "@/features/admin/pages/NotificationsPage.vue";
 
 const routes = [
   // Redirect root
@@ -22,7 +23,6 @@ const routes = [
       return token ? "/overview" : "/login";
     },
   },
-
   // Auth routes (public)
   {
     path: "/login",
@@ -60,7 +60,6 @@ const routes = [
     component: ResetPasswordPage,
     meta: { requiresAuth: false },
   },
-
   // App routes (protected)
   {
     path: "/overview",
@@ -74,7 +73,12 @@ const routes = [
     component: DocumentsPage,
     meta: { requiresAuth: true },
   },
-
+  {
+    path: "/admin/notifications",
+    name: "AdminNotifications",
+    component: NotificationsPage,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
   // Catch all
   {
     path: "/:catchAll(.*)",

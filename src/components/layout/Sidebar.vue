@@ -54,7 +54,7 @@
     <nav class="flex-1 overflow-y-auto p-5 space-y-0.5">
       <!-- Overview -->
       <button
-        @click="handleClick('Overview', 'Overview')"
+        @click="handleClick('Overview', '/overview')"
         :class="navItemClass('Overview')"
       >
         <Home class="w-5 h-5 flex-shrink-0" />
@@ -65,7 +65,7 @@
 
       <!-- Notifications -->
       <button
-        @click="handleClick('Notifications')"
+        @click="handleClick('Notifications', '/admin/notifications')"
         :class="navItemClass('Notifications')"
       >
         <Bell class="w-5 h-5 flex-shrink-0 relative" />
@@ -125,7 +125,7 @@
 
       <!-- Documents -->
       <button
-        @click="handleClick('Documents', 'Documents')"
+        @click="handleClick('Documents', '/documents')"
         :class="navItemClass('Documents')"
       >
         <FileText class="w-5 h-5 flex-shrink-0" />
@@ -298,9 +298,9 @@ function toggleCollapse() {
   emit("toggleCollapse", isCollapsed.value);
 }
 
-function handleClick(label, routeName = null) {
-  if (routeName) {
-    router.push({ name: routeName }).catch(() => {});
+function handleClick(label, routePath = null) {
+  if (routePath) {
+    router.push(routePath).catch(() => {});
   }
   emit("navigate", label);
 
