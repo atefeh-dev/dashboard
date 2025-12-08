@@ -13,7 +13,7 @@
         email address is spelled correctly.
       </p>
 
-      <form @submit.prevent="handleSubmit" class="auth-form">
+      <form @submit="onSubmit" class="auth-form">
         <!-- Verification Code Input -->
         <div class="form-group">
           <label class="form-label">Verification code</label>
@@ -40,9 +40,9 @@
         <div class="form-group">
           <label for="password" class="form-label">New password</label>
           <div class="relative">
-            <input
+            <Field
               id="password"
-              v-model="form.password"
+              name="password"
               :type="showPassword ? 'text' : 'password'"
               class="form-input"
               :class="{ 'input-error': errors.password }"
@@ -58,9 +58,7 @@
               <EyeOff v-else :size="20" />
             </button>
           </div>
-          <p v-if="errors.password" class="error-message">
-            {{ errors.password }}
-          </p>
+          <ErrorMessage name="password" class="error-message" />
         </div>
 
         <!-- Confirm Password -->
@@ -69,9 +67,9 @@
             >Confirm password</label
           >
           <div class="relative">
-            <input
+            <Field
               id="confirmPassword"
-              v-model="form.confirmPassword"
+              name="confirmPassword"
               :type="showConfirmPassword ? 'text' : 'password'"
               class="form-input"
               :class="{ 'input-error': errors.confirmPassword }"
@@ -87,9 +85,7 @@
               <EyeOff v-else :size="20" />
             </button>
           </div>
-          <p v-if="errors.confirmPassword" class="error-message">
-            {{ errors.confirmPassword }}
-          </p>
+          <ErrorMessage name="confirmPassword" class="error-message" />
         </div>
 
         <!-- Error Alert -->
@@ -134,6 +130,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { useForm, Field, ErrorMessage } from "vee-validate";
+import * as yup from "yup";
 import { Eye, EyeOff, Loader2 } from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -164,19 +162,25 @@ const generalError = ref("");
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
-// Code inputs
+// Code inputs (not part of VeeValidate form)
 const code = reactive(["", "", "", ""]);
 const codeInputs = ref([]);
 
-const form = reactive({
-  password: "",
-  confirmPassword: "",
+// Validation schema
+const schema = yup.object({
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(8, "Password should be minimum 8 characters"),
+  confirmPassword: yup
+    .string()
+    .required("Please confirm your password")
+    .oneOf([yup.ref("password")], "Passwords don't match"),
 });
 
-const errors = reactive({
-  code: "",
-  password: "",
-  confirmPassword: "",
+// Setup form with VeeValidate
+const { handleSubmit, errors } = useForm({
+  validationSchema: schema,
 });
 
 // Auto-focus first input on mount and check for email
@@ -203,7 +207,7 @@ function handleCodeInput(index, event) {
   }
 
   // Clear error when user starts typing
-  errors.code = "";
+  errors.value.code = "";
 
   // Move to next input if value entered
   if (value && index < 3) {
@@ -242,57 +246,25 @@ function handlePaste(event) {
   codeInputs.value[focusIndex]?.focus();
 }
 
-function validateForm() {
-  // Reset errors
-  errors.code = "";
-  errors.password = "";
-  errors.confirmPassword = "";
-  generalError.value = "";
-
-  let isValid = true;
-
-  // Validate code
+// Submit handler
+const onSubmit = handleSubmit(async (values) => {
+  // Validate code separately (not part of VeeValidate schema)
   const fullCode = code.join("");
   if (fullCode.length !== 4) {
-    errors.code = "The verification code you entered is incorrect";
-    isValid = false;
+    errors.value.code = "The verification code you entered is incorrect";
+    return;
   }
 
-  // Validate password
-  if (!form.password) {
-    errors.password = "Password is required";
-    isValid = false;
-  } else if (form.password.length < 8) {
-    errors.password = "Password should be minimum 8 characters";
-    isValid = false;
-  }
-
-  // Validate confirm password
-  if (!form.confirmPassword) {
-    errors.confirmPassword = "Please confirm your password";
-    isValid = false;
-  } else if (form.password !== form.confirmPassword) {
-    errors.confirmPassword = "Passwords don't match";
-    isValid = false;
-  }
-
-  return isValid;
-}
-
-async function handleSubmit() {
-  if (!validateForm()) return;
-
+  errors.value.code = "";
   isLoading.value = true;
   generalError.value = "";
 
   try {
-    const fullCode = code.join("");
-
     // Use auth store method
     const result = await authStore.resetPassword(
       email.value,
       fullCode,
-      form.password
+      values.password
     );
 
     if (result.success) {
@@ -311,7 +283,7 @@ async function handleSubmit() {
   } finally {
     isLoading.value = false;
   }
-}
+});
 </script>
 
 <style scoped lang="scss">
@@ -354,11 +326,58 @@ async function handleSubmit() {
   }
 
   &[type="number"] {
+    appearance: textfield;
     -moz-appearance: textfield;
   }
 }
 
 .relative {
   position: relative;
+}
+
+.error-message {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: #ef4444;
+}
+
+.input-error {
+  border-color: #ef4444;
+
+  &:focus {
+    box-shadow: 0 0 0 2px #ef4444;
+  }
+}
+
+.alert-error {
+  padding: 0.75rem 1rem;
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #991b1b;
+}
+
+.alert-success {
+  padding: 0.75rem 1rem;
+  background-color: #d1fae5;
+  border: 1px solid #6ee7b7;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #065f46;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #4b5563;
+  }
 }
 </style>

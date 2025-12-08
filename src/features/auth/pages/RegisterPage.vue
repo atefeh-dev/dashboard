@@ -1,4 +1,4 @@
-<!-- features/auth/pages/RegisterPage.vue - FIXED: Allow re-entry -->
+<!-- features/auth/pages/RegisterPage.vue - VeeValidate version -->
 <template>
   <div
     class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12"
@@ -55,7 +55,7 @@
       </div>
 
       <!-- Form -->
-      <form @submit.prevent="handleSubmit" class="space-y-4">
+      <form @submit="onSubmit" class="space-y-4">
         <!-- Email -->
         <div>
           <label
@@ -63,26 +63,23 @@
             class="block text-sm font-medium text-gray-700 mb-2"
             >Email</label
           >
-          <input
+          <Field
             id="email"
-            v-model="form.email"
+            name="email"
             type="email"
             class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
             :class="{ 'border-red-500 focus:ring-red-500': errors.email }"
             placeholder="you@example.com"
-            required
           />
-          <p v-if="errors.email" class="mt-1 text-sm text-red-600">
-            {{ errors.email }}
-          </p>
+          <ErrorMessage name="email" class="mt-1 text-sm text-red-600" />
         </div>
 
         <!-- Error Alert -->
         <div
-          v-if="errors.general"
+          v-if="generalError"
           class="px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600"
         >
-          {{ errors.general }}
+          {{ generalError }}
         </div>
 
         <!-- Submit Button -->
@@ -122,74 +119,60 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useForm, Field, ErrorMessage } from "vee-validate";
+import * as yup from "yup";
 import { Loader2 } from "lucide-vue-next";
 
 const router = useRouter();
-const route = useRoute();
-
 const isLoading = ref(false);
+const generalError = ref("");
 
-const form = reactive({
-  email: "",
+// Validation schema
+const schema = yup.object({
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Please enter a valid email"),
 });
 
-const errors = reactive({
-  email: "",
-  general: "",
+// Setup form with VeeValidate
+const { handleSubmit, errors, setFieldValue } = useForm({
+  validationSchema: schema,
 });
 
-// On mount - clear any previous signup session data
-// This allows users to start fresh when they visit /signup
+// On mount - load existing email if user is returning to edit
 onMounted(() => {
-  // Load existing email if user is returning to edit
   const storedEmail = sessionStorage.getItem("signup_email");
   if (storedEmail) {
-    form.email = storedEmail;
+    setFieldValue("email", storedEmail);
   }
 
   // Clear verification code if user comes back to change email
   sessionStorage.removeItem("verification_code");
 });
 
-function validateForm() {
-  errors.email = "";
-  errors.general = "";
-
-  if (!form.email) {
-    errors.email = "Email is required";
-    return false;
-  }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = "Please enter a valid email";
-    return false;
-  }
-
-  return true;
-}
-
-async function handleSubmit() {
-  if (!validateForm()) return;
-
+// Submit handler
+const onSubmit = handleSubmit(async (values) => {
   isLoading.value = true;
+  generalError.value = "";
 
   try {
     // TODO: Check if email exists
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Store email in session
-    sessionStorage.setItem("signup_email", form.email);
+    sessionStorage.setItem("signup_email", values.email);
 
     // Navigate to verify page
     await router.push("/signup/verify");
   } catch (err) {
-    errors.general = "Something went wrong. Please try again.";
+    generalError.value = "Something went wrong. Please try again.";
   } finally {
     isLoading.value = false;
   }
-}
+});
 
 function handleGoogleLogin() {
   console.log("Google OAuth not implemented");

@@ -4,26 +4,25 @@
       <div class="auth-logo">
         <span class="text-indigo-600 font-bold text-3xl">doclast |</span>
       </div>
-
       <h1 class="auth-title">Send password Reset code</h1>
       <p class="auth-subtitle">
         We'll send a 4-digit reset code to your email.
       </p>
 
-      <form @submit.prevent="handleSubmit" class="auth-form">
+      <form @submit="onSubmit" class="auth-form">
         <div class="form-group">
           <label for="email" class="form-label">Email</label>
-          <input
+          <Field
             id="email"
-            v-model="form.email"
+            name="email"
             type="email"
+            v-model="email"
             class="form-input"
             :class="{ 'input-error': errors.email }"
             placeholder="you@example.com"
-            required
             autocomplete="email"
           />
-          <p v-if="errors.email" class="error-message">{{ errors.email }}</p>
+          <ErrorMessage name="email" class="error-message" />
         </div>
 
         <!-- Success message -->
@@ -66,8 +65,10 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useForm, Field, ErrorMessage } from "vee-validate";
+import * as yup from "yup";
 import { Loader2 } from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -76,50 +77,73 @@ const authStore = useAuthStore();
 const router = useRouter();
 const success = ref(false);
 
-const form = reactive({
-  email: "",
+// Validation schema
+const schema = yup.object({
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Please enter a valid email"),
 });
 
-const errors = reactive({
-  email: "",
+// Setup form with VeeValidate
+const { handleSubmit, errors, defineField } = useForm({
+  validationSchema: schema,
 });
 
-function validateForm() {
-  errors.email = "";
+// Define field with two-way binding
+const [email] = defineField("email");
 
-  if (!form.email) {
-    errors.email = "Email is required";
-    return false;
-  }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = "Please enter a valid email";
-    return false;
-  }
-
-  return true;
-}
-
-async function handleSubmit() {
-  if (!validateForm()) return;
-
-  const result = await authStore.sendPasswordReset(form.email);
+// Submit handler
+const onSubmit = handleSubmit(async (values) => {
+  const result = await authStore.sendPasswordReset(values.email);
 
   if (result.success) {
     success.value = true;
-
     // Store email for next step
-    localStorage.setItem("reset_email", form.email);
+    localStorage.setItem("reset_email", values.email);
 
     // Redirect to reset password verification page
     setTimeout(() => {
       router.push({
         name: "ResetPassword",
-        query: { email: form.email },
+        query: { email: values.email },
       });
     }, 1500);
   }
-}
+});
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.error-message {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: #ef4444;
+}
+
+.input-error {
+  border-color: #ef4444;
+
+  &:focus {
+    box-shadow: 0 0 0 2px #ef4444;
+  }
+}
+
+.alert-success {
+  padding: 0.75rem 1rem;
+  background-color: #d1fae5;
+  border: 1px solid #6ee7b7;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #065f46;
+}
+
+.alert-error {
+  padding: 0.75rem 1rem;
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #991b1b;
+}
+</style>

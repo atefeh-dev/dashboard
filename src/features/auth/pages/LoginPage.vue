@@ -62,7 +62,7 @@
       </div>
 
       <!-- Form -->
-      <form @submit.prevent="handleSubmit" class="space-y-4">
+      <form @submit="onSubmit" class="space-y-4">
         <!-- Email -->
         <div>
           <label
@@ -70,18 +70,15 @@
             class="block text-sm font-medium text-gray-700 mb-2"
             >Email</label
           >
-          <input
+          <Field
             id="email"
-            v-model="form.email"
+            name="email"
             type="email"
             class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
             :class="{ 'border-red-500 focus:ring-red-500': errors.email }"
             placeholder="you@example.com"
-            required
           />
-          <p v-if="errors.email" class="mt-1 text-sm text-red-600">
-            {{ errors.email }}
-          </p>
+          <ErrorMessage name="email" class="mt-1 text-sm text-red-600" />
         </div>
 
         <!-- Password -->
@@ -92,14 +89,13 @@
             >Password</label
           >
           <div class="relative">
-            <input
+            <Field
               id="password"
-              v-model="form.password"
+              name="password"
               :type="showPassword ? 'text' : 'password'"
               class="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               :class="{ 'border-red-500 focus:ring-red-500': errors.password }"
               placeholder="••••••••"
-              required
             />
             <button
               type="button"
@@ -110,9 +106,7 @@
               <EyeOff v-else class="w-5 h-5" />
             </button>
           </div>
-          <p v-if="errors.password" class="mt-1 text-sm text-red-600">
-            {{ errors.password }}
-          </p>
+          <ErrorMessage name="password" class="mt-1 text-sm text-red-600" />
         </div>
 
         <!-- Error Alert -->
@@ -163,56 +157,41 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from "vue";
+import { ref, computed } from "vue";
+import { useForm, Field, ErrorMessage } from "vee-validate";
+import * as yup from "yup";
 import { Eye, EyeOff, Loader2 } from "lucide-vue-next";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const authStore = useAuthStore();
 const isDev = computed(() => import.meta.env.MODE === "development");
-
-const form = reactive({
-  email: isDev.value ? "admin@admin.com" : "",
-  password: isDev.value ? "admin" : "",
-});
-
-const errors = reactive({
-  email: "",
-  password: "",
-});
-
 const showPassword = ref(false);
 
-function validateForm() {
-  errors.email = "";
-  errors.password = "";
+// Validation schema
+const schema = yup.object({
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Please enter a valid email"),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(5, "Password must be at least 5 characters"),
+});
 
-  if (!form.email) {
-    errors.email = "Email is required";
-    return false;
-  }
+// Setup form with VeeValidate
+const { handleSubmit, errors, setValues } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    email: isDev.value ? "admin@admin.com" : "",
+    password: isDev.value ? "admin" : "",
+  },
+});
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = "Please enter a valid email";
-    return false;
-  }
-
-  if (!form.password) {
-    errors.password = "Password is required";
-    return false;
-  }
-
-  if (form.password.length < 5) {
-    errors.password = "Password must be at least 5 characters";
-    return false;
-  }
-
-  return true;
-}
-
-async function handleSubmit() {
-  if (!validateForm()) return;
-  await authStore.login(form.email, form.password);
-}
+// Submit handler
+const onSubmit = handleSubmit(async (values) => {
+  await authStore.login(values.email, values.password);
+});
 
 function handleGoogleLogin() {
   authStore.loginWithGoogle();

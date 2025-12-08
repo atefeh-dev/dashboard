@@ -1,4 +1,4 @@
-<!-- features/auth/pages/SignupOnboardingPage.vue -->
+<!-- features/auth/pages/SignupOnboardingPage.vue - VeeValidate version -->
 <template>
   <div
     class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12"
@@ -19,7 +19,7 @@
       </p>
 
       <!-- Onboarding Form -->
-      <form @submit.prevent="handleSubmit" class="space-y-4">
+      <form @submit="onSubmit" class="space-y-4">
         <!-- First Name -->
         <div>
           <label
@@ -27,17 +27,14 @@
             class="block text-sm font-medium text-gray-700 mb-2"
             >First name</label
           >
-          <input
+          <Field
             id="firstName"
-            v-model="form.firstName"
+            name="firstName"
             type="text"
             class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
             :class="{ 'border-red-500 focus:ring-red-500': errors.firstName }"
-            required
           />
-          <p v-if="errors.firstName" class="mt-1 text-sm text-red-600">
-            {{ errors.firstName }}
-          </p>
+          <ErrorMessage name="firstName" class="mt-1 text-sm text-red-600" />
         </div>
 
         <!-- Last Name -->
@@ -47,17 +44,14 @@
             class="block text-sm font-medium text-gray-700 mb-2"
             >Last name</label
           >
-          <input
+          <Field
             id="lastName"
-            v-model="form.lastName"
+            name="lastName"
             type="text"
             class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
             :class="{ 'border-red-500 focus:ring-red-500': errors.lastName }"
-            required
           />
-          <p v-if="errors.lastName" class="mt-1 text-sm text-red-600">
-            {{ errors.lastName }}
-          </p>
+          <ErrorMessage name="lastName" class="mt-1 text-sm text-red-600" />
         </div>
 
         <!-- Password -->
@@ -68,13 +62,12 @@
             >Choose a password</label
           >
           <div class="relative">
-            <input
+            <Field
               id="password"
-              v-model="form.password"
+              name="password"
               :type="showPassword ? 'text' : 'password'"
               class="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               :class="{ 'border-red-500 focus:ring-red-500': errors.password }"
-              required
             />
             <button
               type="button"
@@ -85,9 +78,7 @@
               <EyeOff v-else class="w-5 h-5" />
             </button>
           </div>
-          <p v-if="errors.password" class="mt-1 text-sm text-red-600">
-            {{ errors.password }}
-          </p>
+          <ErrorMessage name="password" class="mt-1 text-sm text-red-600" />
         </div>
 
         <!-- Workspace Name -->
@@ -97,20 +88,20 @@
             class="block text-sm font-medium text-gray-700 mb-2"
             >Name your workspace</label
           >
-          <input
+          <Field
             id="workspace"
-            v-model="form.workspaceName"
+            name="workspaceName"
             type="text"
             class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
             :class="{
               'border-red-500 focus:ring-red-500': errors.workspaceName,
             }"
             placeholder='for example "Personal"'
-            required
           />
-          <p v-if="errors.workspaceName" class="mt-1 text-sm text-red-600">
-            {{ errors.workspaceName }}
-          </p>
+          <ErrorMessage
+            name="workspaceName"
+            class="mt-1 text-sm text-red-600"
+          />
         </div>
 
         <!-- Error Alert -->
@@ -149,8 +140,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useForm, Field, ErrorMessage } from "vee-validate";
+import * as yup from "yup";
 import { Eye, EyeOff, Loader2 } from "lucide-vue-next";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -162,18 +155,26 @@ const showPassword = ref(false);
 const isLoading = ref(false);
 const generalError = ref("");
 
-const form = reactive({
-  firstName: "",
-  lastName: "",
-  password: "",
-  workspaceName: "",
+// Validation schema
+const schema = yup.object({
+  firstName: yup
+    .string()
+    .required("We need this for how we can call your name")
+    .trim(),
+  lastName: yup.string().required("We need this too").trim(),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(8, "Password should be minimum 8 characters"),
+  workspaceName: yup
+    .string()
+    .required("We need this for your new document's home name")
+    .trim(),
 });
 
-const errors = reactive({
-  firstName: "",
-  lastName: "",
-  password: "",
-  workspaceName: "",
+// Setup form with VeeValidate
+const { handleSubmit, errors } = useForm({
+  validationSchema: schema,
 });
 
 // Check if user came from verification
@@ -187,48 +188,10 @@ onMounted(() => {
   }
 });
 
-// Validation
-function validateForm() {
-  // Clear errors
-  errors.firstName = "";
-  errors.lastName = "";
-  errors.password = "";
-  errors.workspaceName = "";
-  generalError.value = "";
-
-  let isValid = true;
-
-  if (!form.firstName.trim()) {
-    errors.firstName = "We need this for how we can call your name";
-    isValid = false;
-  }
-
-  if (!form.lastName.trim()) {
-    errors.lastName = "We need this too";
-    isValid = false;
-  }
-
-  if (!form.password) {
-    errors.password = "Password is required";
-    isValid = false;
-  } else if (form.password.length < 8) {
-    errors.password = "Password should be minimum 8 characters";
-    isValid = false;
-  }
-
-  if (!form.workspaceName.trim()) {
-    errors.workspaceName = "We need this for your new document's home name";
-    isValid = false;
-  }
-
-  return isValid;
-}
-
-// Submit
-async function handleSubmit() {
-  if (!validateForm()) return;
-
+// Submit handler
+const onSubmit = handleSubmit(async (values) => {
   isLoading.value = true;
+  generalError.value = "";
 
   try {
     const email = sessionStorage.getItem("signup_email");
@@ -241,10 +204,10 @@ async function handleSubmit() {
       body: JSON.stringify({
         email,
         verificationCode,
-        firstName: form.firstName,
-        lastName: form.lastName,
-        password: form.password,
-        workspaceName: form.workspaceName,
+        firstName: values.firstName.trim(),
+        lastName: values.lastName.trim(),
+        password: values.password,
+        workspaceName: values.workspaceName.trim(),
       }),
     });
 
@@ -272,5 +235,5 @@ async function handleSubmit() {
   } finally {
     isLoading.value = false;
   }
-}
+});
 </script>
