@@ -1,4 +1,4 @@
-<!-- features/auth/pages/SignupOnboardingPage.vue - VeeValidate version -->
+<!-- features/auth/pages/SignupOnboardingPage.vue - Final Version -->
 <template>
   <div
     class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12"
@@ -113,17 +113,19 @@
         </div>
 
         <!-- Submit Button -->
-        <button
+        <AppButton
           type="submit"
+          variant="primary"
           :disabled="isLoading"
-          class="w-full px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          :loading="isLoading"
+          class="w-full"
         >
           <span v-if="!isLoading">Continue</span>
           <span v-else class="flex items-center justify-center gap-2">
             <Loader2 class="w-4 h-4 animate-spin" />
             Creating your account...
           </span>
-        </button>
+        </AppButton>
       </form>
 
       <!-- Footer -->
@@ -145,6 +147,7 @@ import { useRouter } from "vue-router";
 import { useForm, Field, ErrorMessage } from "vee-validate";
 import * as yup from "yup";
 import { Eye, EyeOff, Loader2 } from "lucide-vue-next";
+import AppButton from "@/components/ui/AppButton.vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const router = useRouter();

@@ -1,4 +1,4 @@
-<!-- features/auth/pages/SignupVerificationPage.vue - FIXED -->
+<!-- features/auth/pages/SignupVerificationPage.vue - VeeValidate version -->
 <template>
   <div
     class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12"
@@ -72,7 +72,7 @@
       </p>
 
       <!-- Verification Form -->
-      <form @submit.prevent="handleVerifyCode" class="space-y-4">
+      <form @submit="onSubmit" class="space-y-4">
         <!-- Verification Code Inputs -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2"
@@ -92,26 +92,28 @@
               @keydown="handleKeyDown(index, $event)"
               @paste="handlePaste"
               class="w-16 h-16 text-center text-2xl font-semibold border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              :class="{ 'border-red-500 focus:ring-red-500': errors.code }"
+              :class="{ 'border-red-500 focus:ring-red-500': codeError }"
             />
           </div>
-          <p v-if="errors.code" class="text-sm text-red-600">
-            {{ errors.code }}
+          <p v-if="codeError" class="text-sm text-red-600">
+            {{ codeError }}
           </p>
         </div>
 
         <!-- Submit Button -->
-        <button
+        <AppButton
           type="submit"
+          variant="primary"
           :disabled="isLoading || !isCodeComplete"
-          class="w-full px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          :loading="isLoading"
+          class="w-full"
         >
           <span v-if="!isLoading">Continue</span>
           <span v-else class="flex items-center justify-center gap-2">
             <Loader2 class="w-4 h-4 animate-spin" />
             Verifying...
           </span>
-        </button>
+        </AppButton>
       </form>
 
       <!-- Footer Links -->
@@ -139,7 +141,10 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useForm } from "vee-validate";
+import * as yup from "yup";
 import { Loader2 } from "lucide-vue-next";
+import AppButton from "@/components/ui/AppButton.vue";
 
 const router = useRouter();
 
@@ -148,9 +153,14 @@ const email = ref("");
 const code = reactive(["", "", "", ""]);
 const codeInputs = ref([]);
 const isLoading = ref(false);
+const codeError = ref("");
 
-const errors = reactive({
-  code: "",
+// Validation schema (empty for now, code validation is custom)
+const schema = yup.object({});
+
+// Setup form with VeeValidate
+const { handleSubmit } = useForm({
+  validationSchema: schema,
 });
 
 // Computed
@@ -174,12 +184,12 @@ onMounted(() => {
   }, 100);
 });
 
-// Methods
-async function handleVerifyCode() {
-  errors.code = "";
+// Submit handler
+const onSubmit = handleSubmit(async () => {
+  codeError.value = "";
 
   if (!isCodeComplete.value) {
-    errors.code = "Please enter the complete verification code";
+    codeError.value = "Please enter the complete verification code";
     return;
   }
 
@@ -196,14 +206,14 @@ async function handleVerifyCode() {
     // Navigate to onboarding using replace
     await router.replace("/signup/onboarding");
   } catch (err) {
-    errors.code = "The verification code you entered is incorrect";
+    codeError.value = "The verification code you entered is incorrect";
     // Clear code
     code.forEach((_, i) => (code[i] = ""));
     codeInputs.value[0]?.focus();
   } finally {
     isLoading.value = false;
   }
-}
+});
 
 function handleCodeInput(index, event) {
   const value = event.target.value;
@@ -222,8 +232,8 @@ function handleCodeInput(index, event) {
   }
 
   // Clear error when user starts typing
-  if (errors.code) {
-    errors.code = "";
+  if (codeError.value) {
+    codeError.value = "";
   }
 }
 

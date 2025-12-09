@@ -118,17 +118,19 @@
         </div>
 
         <!-- Submit Button -->
-        <button
+        <AppButton
           type="submit"
+          variant="primary"
           :disabled="authStore.isLoading"
-          class="w-full px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          :loading="authStore.isLoading"
+          class="w-full"
         >
           <span v-if="!authStore.isLoading">Continue</span>
           <span v-else class="flex items-center justify-center gap-2">
             <Loader2 class="w-4 h-4 animate-spin" />
             Signing in...
           </span>
-        </button>
+        </AppButton>
       </form>
 
       <!-- Footer Links -->
@@ -161,6 +163,7 @@ import { ref, computed } from "vue";
 import { useForm, Field, ErrorMessage } from "vee-validate";
 import * as yup from "yup";
 import { Eye, EyeOff, Loader2 } from "lucide-vue-next";
+import AppButton from "@/components/ui/AppButton.vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const authStore = useAuthStore();
@@ -180,7 +183,7 @@ const schema = yup.object({
 });
 
 // Setup form with VeeValidate
-const { handleSubmit, errors, setValues } = useForm({
+const { handleSubmit, errors } = useForm({
   validationSchema: schema,
   initialValues: {
     email: isDev.value ? "admin@admin.com" : "",

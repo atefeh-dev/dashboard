@@ -16,7 +16,6 @@
             id="email"
             name="email"
             type="email"
-            v-model="email"
             class="form-input"
             :class="{ 'input-error': errors.email }"
             placeholder="you@example.com"
@@ -39,6 +38,7 @@
           type="submit"
           variant="primary"
           :disabled="authStore.isLoading"
+          :loading="authStore.isLoading"
           class="w-full"
         >
           <span v-if="!authStore.isLoading">Send</span>

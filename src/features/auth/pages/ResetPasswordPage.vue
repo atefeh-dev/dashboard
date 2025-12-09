@@ -102,13 +102,10 @@
           type="submit"
           variant="primary"
           :disabled="isLoading"
+          :loading="isLoading"
           class="w-full"
         >
-          <span v-if="!isLoading">Send</span>
-          <span v-else class="flex items-center gap-2">
-            <Loader2 class="w-4 h-4 animate-spin" />
-            Resetting...
-          </span>
+          Reset Password
         </AppButton>
       </form>
 
@@ -132,7 +129,7 @@ import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm, Field, ErrorMessage } from "vee-validate";
 import * as yup from "yup";
-import { Eye, EyeOff, Loader2 } from "lucide-vue-next";
+import { Eye, EyeOff } from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 
