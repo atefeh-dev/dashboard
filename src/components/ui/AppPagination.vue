@@ -6,12 +6,12 @@
       variant="secondary"
       class="w-full sm:w-auto"
       @click="$emit('prev')"
-      :disabled="store.currentPage === store.totalPages"
+      :disabled="store.currentPage === 1"
     >
       <ArrowLeft class="w-4 h-4 mr-1" /> Previous
     </AppButton>
 
-    <div class="flex gap-1 sm:gap-2 overflow-x-auto">
+    <div class="flex-1 flex justify-center gap-1 sm:gap-2 overflow-x-auto">
       <button
         v-for="(p, idx) in pages"
         :key="idx"

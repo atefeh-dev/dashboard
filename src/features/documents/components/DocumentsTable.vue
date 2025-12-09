@@ -1,92 +1,65 @@
 <template>
-  <div>
-    <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead>
-          <tr class="border-b border-gray-200">
-            <th
-              class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Name
-            </th>
-            <th
-              class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Categories
-            </th>
-            <th
-              class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Rating
-            </th>
-            <th
-              class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Last assessed
-            </th>
-            <th
-              class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Actions
-            </th>
+  <div class="documents-table">
+    <div class="documents-table__wrapper">
+      <table class="documents-table__table">
+        <thead class="documents-table__head">
+          <tr class="documents-table__row documents-table__row--header">
+            <th class="documents-table__header">Name</th>
+            <th class="documents-table__header">Categories</th>
+            <th class="documents-table__header">Rating</th>
+            <th class="documents-table__header">Last assessed</th>
+            <th class="documents-table__header">Actions</th>
           </tr>
         </thead>
 
-        <tbody class="divide-y divide-gray-200">
+        <tbody class="documents-table__body">
           <tr
             v-for="(doc, i) in store.paginated"
             :key="i"
-            class="hover:bg-gray-50 transition-colors"
+            class="documents-table__row"
           >
             <!-- Name -->
-            <td class="py-4 px-6">
-              <div class="font-medium text-gray-900">{{ doc.name }}</div>
-              <div class="text-sm text-gray-500">{{ doc.domain }}</div>
+            <td class="documents-table__cell">
+              <div class="documents-table__name">{{ doc.name }}</div>
+              <div class="documents-table__domain">{{ doc.domain }}</div>
             </td>
 
             <!-- Categories -->
-            <td class="py-4 px-6">
-              <div class="flex flex-wrap gap-2">
+            <td class="documents-table__cell">
+              <div class="documents-table__categories">
                 <span
                   :class="[
-                    'inline-flex items-center gap-1 px-2 py-1 text-xs rounded',
+                    'documents-table__badge',
                     doc.status === 'Active'
-                      ? 'bg-green-50 text-green-700'
-                      : 'bg-gray-100 text-gray-600',
+                      ? 'documents-table__badge--active'
+                      : 'documents-table__badge--inactive',
                   ]"
                 >
-                  <span
-                    :class="[
-                      'w-1.5 h-1.5 rounded-full',
-                      doc.status === 'Active' ? 'bg-green-500' : 'bg-gray-400',
-                    ]"
-                  ></span>
+                  <span class="documents-table__badge-dot"></span>
                   {{ doc.status }}
                 </span>
 
                 <span
                   v-for="(c, idx) in doc.categories"
                   :key="idx"
-                  class="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
+                  class="documents-table__tag"
                   >{{ c }}</span
                 >
 
-                <span
-                  v-if="doc.tags > 0"
-                  class="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
+                <span v-if="doc.tags > 0" class="documents-table__tag"
                   >+{{ doc.tags }}</span
                 >
               </div>
             </td>
 
             <!-- Rating -->
-            <td class="py-4 px-6">
+            <td class="documents-table__cell">
               <span
                 :class="[
-                  'inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium',
+                  'documents-table__status',
                   doc.status === 'Active'
-                    ? 'bg-green-50 text-green-700'
-                    : 'bg-gray-100 text-gray-700',
+                    ? 'documents-table__status--active'
+                    : 'documents-table__status--inactive',
                 ]"
               >
                 {{ doc.status }}
@@ -94,48 +67,50 @@
             </td>
 
             <!-- Last Assessed -->
-            <td class="py-4 px-6">
+            <td class="documents-table__cell">
               <div
                 :class="[
-                  'flex items-center gap-1 text-sm font-medium',
-                  doc.direction === 'up' ? 'text-green-600' : 'text-red-600',
+                  'documents-table__rating',
+                  doc.direction === 'up'
+                    ? 'documents-table__rating--up'
+                    : 'documents-table__rating--down',
                 ]"
               >
                 <component
                   :is="doc.direction === 'up' ? TrendingUp : TrendingDown"
-                  class="w-4 h-4"
+                  class="documents-table__rating-icon"
                 />
                 {{ doc.rating }}
               </div>
-              <div class="text-sm text-gray-500 mt-1">{{ doc.date }}</div>
+              <div class="documents-table__date">{{ doc.date }}</div>
             </td>
 
             <!-- Actions -->
-            <td class="py-4 px-6">
-              <div class="flex items-center gap-2">
+            <td class="documents-table__cell">
+              <div class="documents-table__actions">
                 <AppButton
                   variant="ghost"
                   size="sm"
                   @click="remove(i)"
                   title="Delete"
-                  class="action-btn"
+                  class="documents-table__action-btn"
                 >
-                  <Trash2 class="w-4 h-4" />
+                  <Trash2 class="documents-table__action-icon" />
                 </AppButton>
                 <AppButton
                   variant="ghost"
                   size="sm"
                   title="Edit"
-                  class="action-btn"
+                  class="documents-table__action-btn"
                 >
-                  <Pencil class="w-4 h-4" />
+                  <Pencil class="documents-table__action-icon" />
                 </AppButton>
               </div>
             </td>
           </tr>
 
           <tr v-if="store.paginated.length === 0">
-            <td class="px-6 py-8 text-center text-gray-500" colspan="5">
+            <td class="documents-table__empty" colspan="5">
               No documents found
             </td>
           </tr>
@@ -144,77 +119,14 @@
     </div>
 
     <!-- Pagination -->
-    <div
-      class="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-200"
-    >
-      <!-- Previous Button -->
-      <AppButton
-        variant="secondary"
-        size="sm"
-        @click="prev"
-        :disabled="store.currentPage === 1"
-        class="pagination-btn"
-      >
-        <ChevronLeft class="w-4 h-4" />
-        <span class="hidden sm:inline">Previous</span>
-      </AppButton>
 
-      <!-- Page Numbers -->
-      <div class="hidden sm:flex items-center gap-1">
-        <!-- First Page -->
-        <button
-          v-if="pageNumbers[0] > 1"
-          @click="goToPage(1)"
-          class="pagination-number"
-        >
-          1
-        </button>
-
-        <!-- Left Ellipsis -->
-        <span v-if="pageNumbers[0] > 2" class="px-2 text-gray-400">...</span>
-
-        <!-- Page Numbers -->
-        <button
-          v-for="page in pageNumbers"
-          :key="page"
-          @click="goToPage(page)"
-          :class="[
-            'pagination-number',
-            page === store.currentPage ? 'pagination-number-active' : '',
-          ]"
-        >
-          {{ page }}
-        </button>
-
-        <!-- Right Ellipsis -->
-        <span
-          v-if="pageNumbers[pageNumbers.length - 1] < store.totalPages - 1"
-          class="px-2 text-gray-400"
-          >...</span
-        >
-
-        <!-- Last Page -->
-        <button
-          v-if="pageNumbers[pageNumbers.length - 1] < store.totalPages"
-          @click="goToPage(store.totalPages)"
-          class="pagination-number"
-        >
-          {{ store.totalPages }}
-        </button>
-      </div>
-
-      <!-- Next Button -->
-      <AppButton
-        variant="secondary"
-        size="sm"
-        @click="next"
-        :disabled="store.currentPage === store.totalPages"
-        class="pagination-btn"
-      >
-        <span class="hidden sm:inline">Next</span>
-        <ChevronRight class="w-4 h-4" />
-      </AppButton>
-    </div>
+    <AppPagination
+      :pages="pages"
+      :current="store.currentPage"
+      @change="goToPage"
+      @prev="prev"
+      @next="next"
+    />
   </div>
 </template>
 
@@ -238,11 +150,9 @@ const store = useDocumentsStore();
 const pageNumbers = computed(() => {
   const current = store.currentPage;
   const total = store.totalPages;
-  const delta = 2; // Show 2 pages on each side of current page
+  const delta = 2;
 
   const range = [];
-  const rangeWithDots = [];
-  let l;
 
   for (let i = 1; i <= total; i++) {
     if (
@@ -255,6 +165,28 @@ const pageNumbers = computed(() => {
   }
 
   return range;
+});
+
+// Build pages array with a centered ellipsis between left/right groups
+// If total pages is small, return full range. Otherwise return first N, '...', last N.
+const pages = computed(() => {
+  const total = store.totalPages || 0;
+  const maxVisible = 7; // total items to show including ellipsis
+
+  if (total <= maxVisible) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const side = Math.floor((maxVisible - 1) / 2); // items on each side of ellipsis
+  const left = Array.from({ length: side }, (_, i) => i + 1);
+  const right = Array.from({ length: side }, (_, i) => total - side + i + 1);
+
+  // If there is no gap (or only one) between left and right, return full range
+  if (right[0] - left[left.length - 1] <= 1) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  return [...left, "...", ...right];
 });
 
 function goToPage(page) {
@@ -279,71 +211,318 @@ function remove(index) {
 </script>
 
 <style scoped lang="scss">
-// Custom styles for action buttons
-.action-btn {
-  min-width: auto;
-  padding: 0.375rem;
+.documents-table {
+  width: 100%;
 
-  &:hover {
-    background-color: #f3f4f6;
+  // Table wrapper with horizontal scroll
+  &__wrapper {
+    overflow-x: auto;
   }
-}
 
-// Custom styles for pagination buttons
-.pagination-btn {
-  min-width: fit-content;
-
-  @media (max-width: 640px) {
-    padding: 0.5rem;
+  // Base table
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
   }
-}
 
-// Page number buttons
-.pagination-number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2rem;
-  height: 2rem;
-  padding: 0 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  background-color: transparent;
-  border-radius: 0.375rem;
-  transition: all 0.2s;
-  cursor: pointer;
+  // Table head
+  &__head {
+    border-bottom: 1px solid #e5e7eb;
+  }
 
-  &:hover:not(.pagination-number-active) {
-    background-color: #f3f4f6;
+  // Table body
+  &__body {
+    .documents-table__row:not(:last-child) {
+      border-bottom: 1px solid #e5e7eb;
+    }
+  }
+
+  // Table row
+  &__row {
+    transition: background-color 0.2s ease;
+
+    &:hover:not(&--header) {
+      background-color: #f9fafb;
+    }
+  }
+
+  // Table header cell
+  &__header {
+    text-align: left;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  // Table cell
+  &__cell {
+    padding: 1rem 1.5rem;
+    vertical-align: top;
+  }
+
+  // Name column
+  &__name {
+    font-weight: 500;
     color: #111827;
+    margin-bottom: 0.25rem;
   }
 
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-  }
-}
-
-.pagination-number-active {
-  background-color: #6366f1;
-  color: white;
-  font-weight: 600;
-
-  &:hover {
-    background-color: #4f46e5;
-  }
-}
-
-// Ensure table is responsive
-@media (max-width: 768px) {
-  table {
+  &__domain {
     font-size: 0.875rem;
+    color: #6b7280;
+  }
 
-    th,
-    td {
+  // Categories
+  &__categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  // Badge (Active/Inactive status)
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+
+    &--active {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+    &--inactive {
+      background-color: #f3f4f6;
+      color: #4b5563;
+    }
+  }
+
+  &__badge-dot {
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background-color: currentColor;
+  }
+
+  // Tag
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    background-color: #f3f4f6;
+    color: #374151;
+    border-radius: 0.25rem;
+  }
+
+  // Status badge
+  &__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 9999px;
+
+    &--active {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+    &--inactive {
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+  }
+
+  // Rating
+  &__rating {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+
+    &--up {
+      color: #059669;
+    }
+
+    &--down {
+      color: #dc2626;
+    }
+  }
+
+  &__rating-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+
+  &__date {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  // Actions
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__action-btn {
+    min-width: auto;
+    padding: 0.375rem;
+
+    &:hover {
+      background-color: #f3f4f6;
+    }
+  }
+
+  &__action-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  // Empty state
+  &__empty {
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: #6b7280;
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    &__table {
+      font-size: 0.875rem;
+    }
+
+    &__header,
+    &__cell {
       padding: 0.75rem 1rem;
     }
+  }
+}
+
+// ============================================
+// Pagination Block (BEM)
+// ============================================
+.pagination {
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem 1.5rem;
+
+  // Container - centers and spaces pagination elements
+  &__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+
+  // Previous/Next buttons
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-width: fit-content;
+
+    @media (max-width: 640px) {
+      width: 100%;
+    }
+  }
+
+  &__icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+
+  &__text {
+    @media (max-width: 640px) {
+      display: none;
+    }
+  }
+
+  // Page numbers container
+  &__numbers {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    @media (max-width: 640px) {
+      display: none;
+    }
+  }
+
+  // Individual page number button
+  &__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    background-color: transparent;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+
+    &:hover:not(&--active) {
+      background-color: #f3f4f6;
+      color: #111827;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    &:active:not(&--active) {
+      background-color: #e5e7eb;
+    }
+
+    // Active state - matches design
+    &--active {
+      background-color: #f3f4f6;
+      color: #6b7280;
+      font-weight: 600;
+      cursor: default;
+
+      &:hover {
+        background-color: #f3f4f6;
+      }
+    }
+  }
+
+  // Ellipsis
+  &__ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0 0.5rem;
+    font-size: 0.875rem;
+    color: #9ca3af;
+    user-select: none;
   }
 }
 </style>
