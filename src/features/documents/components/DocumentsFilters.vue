@@ -1,33 +1,106 @@
 <template>
-  <div
-    class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4"
+  <component
+    :is="componentType"
+    :class="buttonClasses"
+    :disabled="isDisabled"
+    :type="buttonType"
+    :to="to"
+    :href="href"
+    @click="handleClick"
   >
-    <div>
-      <h2 class="text-base sm:text-lg font-semibold text-gray-900">
-        Your documents are important, we're keep an eye on them here
-      </h2>
-      <p class="text-sm text-gray-600">
-        Keep track of every document you're working on
-      </p>
-    </div>
-
-    <div class="flex flex-col sm:flex-row gap-3">
-      <AppButton variant="secondary" @click="$emit('import')">
-        <UploadIcon class="w-4 h-4" />
-        <span>Import / Export</span>
-      </AppButton>
-
-      <AppButton variant="primary" @click="$emit('create')">
-        <PlusIcon class="w-4 h-4" />
-        <span>New document</span>
-      </AppButton>
-    </div>
-  </div>
+    <slot />
+  </component>
 </template>
 
 <script setup>
-import AppButton from "@/components/ui/AppButton.vue";
-import { Upload as UploadIcon, Plus as PlusIcon } from "lucide-vue-next";
+import { computed } from "vue";
+import { RouterLink } from "vue-router";
+
+const props = defineProps({
+  // Variant
+  variant: {
+    type: String,
+    default: "primary",
+    validator: (value) =>
+      ["primary", "secondary", "ghost", "danger"].includes(value),
+  },
+  // State
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+  // Loading state
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+  // Size
+  size: {
+    type: String,
+    default: "md",
+    validator: (value) => ["sm", "md", "lg"].includes(value),
+  },
+  // Button type
+  type: {
+    type: String,
+    default: "button",
+  },
+  // Router link
+  to: {
+    type: [String, Object],
+    default: null,
+  },
+  // External link
+  href: {
+    type: String,
+    default: null,
+  },
+});
+
+const emit = defineEmits(["click"]);
+
+// Determine component type
+const componentType = computed(() => {
+  if (props.to) return RouterLink;
+  if (props.href) return "a";
+  return "button";
+});
+
+// Button type (only for actual buttons)
+const buttonType = computed(() => {
+  if (componentType.value === "button") return props.type;
+  return undefined;
+});
+
+// Disabled state
+const isDisabled = computed(() => {
+  if (componentType.value !== "button") return undefined;
+  return props.disabled || props.loading;
+});
+
+// Button classes
+const buttonClasses = computed(() => {
+  return [
+    "btn",
+    `btn-${props.variant}`,
+    `btn-${props.size}`,
+    {
+      "btn-disabled": props.disabled || props.loading,
+      "btn-loading": props.loading,
+    },
+  ];
+});
+
+// Click handler
+function handleClick(event) {
+  if (props.disabled || props.loading) {
+    event.preventDefault();
+    return;
+  }
+  emit("click", event);
+}
 </script>
 
-<style scoped lang="scss"></style>
+<style lang="scss">
+/* Base button styles with proper responsive handling */
+</style>

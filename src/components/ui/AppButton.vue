@@ -24,38 +24,32 @@ const props = defineProps({
     validator: (value) =>
       ["primary", "secondary", "ghost", "danger"].includes(value),
   },
-
   // State
   disabled: {
     type: Boolean,
     default: false,
   },
-
   // Loading state
   loading: {
     type: Boolean,
     default: false,
   },
-
   // Size
   size: {
     type: String,
     default: "md",
     validator: (value) => ["sm", "md", "lg"].includes(value),
   },
-
   // Button type
   type: {
     type: String,
     default: "button",
   },
-
   // Router link
   to: {
     type: [String, Object],
     default: null,
   },
-
   // External link
   href: {
     type: String,
@@ -108,5 +102,5 @@ function handleClick(event) {
 </script>
 
 <style lang="scss">
-/* Button uses global .btn classes from components.scss */
+/* Base button styles with proper responsive handling */
 </style>
