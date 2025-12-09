@@ -69,24 +69,31 @@
         @click="handleClick('Notifications', '/admin/notifications')"
         :class="navItemClass('Notifications')"
       >
+        <!-- Icon -->
         <NotificationIcon
-          class="w-5 h-5 flex-shrink-0 relative"
+          class="w-5 h-5 flex-shrink-0"
           :class="IconClass('Notifications')"
         />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Notifications</span
-        >
-        <span
-          v-if="!isCollapsed"
-          class="w-2 h-2 rounded-full bg-[#17B26A] flex-shrink-0"
-        ></span>
-        <span
-          v-if="!isCollapsed"
-          class="px-2 py-0.5 bg-[#F2F4F7] text-[#344054] text-xs font-medium rounded-full flex-shrink-0"
-          >10</span
-        >
-      </button>
 
+        <!-- Text + green dot on left, count on right -->
+        <div
+          v-if="!isCollapsed"
+          class="flex items-center justify-between flex-1"
+        >
+          <span class="flex items-center gap-2 text-sm font-normal">
+            Notifications
+            <!-- Green dot -->
+            <span class="w-2 h-2 rounded-full bg-[#17B26A]"></span>
+          </span>
+
+          <!-- Count badge aligned right -->
+          <span
+            class="flex items-center justify-center w-[30px] h-[22px] px-2 py-0.5 text-xs font-medium rounded-full bg-[#FAFAFA] border border-[#E9EAEB]"
+          >
+            10
+          </span>
+        </div>
+      </button>
       <!-- Products Divider -->
       <div v-if="!isCollapsed" class="flex items-center gap-2 py-2">
         <SectionIcon class="w-4 text-[#A4A7AE] flex-shrink-0 align-middle" />
