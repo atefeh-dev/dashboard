@@ -230,6 +230,7 @@ import {
   ChevronRight,
 } from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
+import AppPagination from "@/components/ui/AppPagination.vue";
 
 const store = useDocumentsStore();
 
