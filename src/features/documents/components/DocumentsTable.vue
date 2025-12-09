@@ -113,19 +113,23 @@
             <!-- Actions -->
             <td class="py-4 px-6">
               <div class="flex items-center gap-2">
-                <button
+                <AppButton
+                  variant="ghost"
+                  size="sm"
                   @click="remove(i)"
-                  class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
                   title="Delete"
+                  class="action-btn"
                 >
                   <Trash2 class="w-4 h-4" />
-                </button>
-                <button
-                  class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                </AppButton>
+                <AppButton
+                  variant="ghost"
+                  size="sm"
                   title="Edit"
+                  class="action-btn"
                 >
                   <Pencil class="w-4 h-4" />
-                </button>
+                </AppButton>
               </div>
             </td>
           </tr>
@@ -141,38 +145,120 @@
 
     <!-- Pagination -->
     <div
-      class="flex items-center justify-between px-6 py-4 border-t border-gray-200"
+      class="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-200"
     >
-      <div class="text-sm text-gray-500">
-        Showing {{ (store.currentPage - 1) * store.perPage + 1 }} to
-        {{ Math.min(store.currentPage * store.perPage, store.filtered.length) }}
-        of {{ store.filtered.length }} results
-      </div>
-      <div class="flex gap-2">
+      <!-- Previous Button -->
+      <AppButton
+        variant="secondary"
+        size="sm"
+        @click="prev"
+        :disabled="store.currentPage === 1"
+        class="pagination-btn"
+      >
+        <ChevronLeft class="w-4 h-4" />
+        <span class="hidden sm:inline">Previous</span>
+      </AppButton>
+
+      <!-- Page Numbers -->
+      <div class="hidden sm:flex items-center gap-1">
+        <!-- First Page -->
         <button
-          @click="prev"
-          :disabled="store.currentPage === 1"
-          class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          v-if="pageNumbers[0] > 1"
+          @click="goToPage(1)"
+          class="pagination-number"
         >
-          Previous
+          1
         </button>
+
+        <!-- Left Ellipsis -->
+        <span v-if="pageNumbers[0] > 2" class="px-2 text-gray-400">...</span>
+
+        <!-- Page Numbers -->
         <button
-          @click="next"
-          :disabled="store.currentPage === store.totalPages"
-          class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          v-for="page in pageNumbers"
+          :key="page"
+          @click="goToPage(page)"
+          :class="[
+            'pagination-number',
+            page === store.currentPage ? 'pagination-number-active' : '',
+          ]"
         >
-          Next
+          {{ page }}
+        </button>
+
+        <!-- Right Ellipsis -->
+        <span
+          v-if="pageNumbers[pageNumbers.length - 1] < store.totalPages - 1"
+          class="px-2 text-gray-400"
+          >...</span
+        >
+
+        <!-- Last Page -->
+        <button
+          v-if="pageNumbers[pageNumbers.length - 1] < store.totalPages"
+          @click="goToPage(store.totalPages)"
+          class="pagination-number"
+        >
+          {{ store.totalPages }}
         </button>
       </div>
+
+      <!-- Next Button -->
+      <AppButton
+        variant="secondary"
+        size="sm"
+        @click="next"
+        :disabled="store.currentPage === store.totalPages"
+        class="pagination-btn"
+      >
+        <span class="hidden sm:inline">Next</span>
+        <ChevronRight class="w-4 h-4" />
+      </AppButton>
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { useDocumentsStore } from "@/stores/useDocumentsStore";
-import { Trash2, Pencil, TrendingUp, TrendingDown } from "lucide-vue-next";
+import {
+  Trash2,
+  Pencil,
+  TrendingUp,
+  TrendingDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-vue-next";
+import AppButton from "@/components/ui/AppButton.vue";
 
 const store = useDocumentsStore();
+
+// Calculate which page numbers to show
+const pageNumbers = computed(() => {
+  const current = store.currentPage;
+  const total = store.totalPages;
+  const delta = 2; // Show 2 pages on each side of current page
+
+  const range = [];
+  const rangeWithDots = [];
+  let l;
+
+  for (let i = 1; i <= total; i++) {
+    if (
+      i === 1 ||
+      i === total ||
+      (i >= current - delta && i <= current + delta)
+    ) {
+      range.push(i);
+    }
+  }
+
+  return range;
+});
+
+function goToPage(page) {
+  store.goToPage(page);
+}
 
 function prev() {
   if (store.currentPage > 1) {
@@ -187,7 +273,76 @@ function next() {
 }
 
 function remove(index) {
-  // Pass the index directly - store will calculate the actual index
   store.removeDocument(index);
 }
 </script>
+
+<style scoped lang="scss">
+// Custom styles for action buttons
+.action-btn {
+  min-width: auto;
+  padding: 0.375rem;
+
+  &:hover {
+    background-color: #f3f4f6;
+  }
+}
+
+// Custom styles for pagination buttons
+.pagination-btn {
+  min-width: fit-content;
+
+  @media (max-width: 640px) {
+    padding: 0.5rem;
+  }
+}
+
+// Page number buttons
+.pagination-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  background-color: transparent;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  cursor: pointer;
+
+  &:hover:not(.pagination-number-active) {
+    background-color: #f3f4f6;
+    color: #111827;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  }
+}
+
+.pagination-number-active {
+  background-color: #6366f1;
+  color: white;
+  font-weight: 600;
+
+  &:hover {
+    background-color: #4f46e5;
+  }
+}
+
+// Ensure table is responsive
+@media (max-width: 768px) {
+  table {
+    font-size: 0.875rem;
+
+    th,
+    td {
+      padding: 0.75rem 1rem;
+    }
+  }
+}
+</style>

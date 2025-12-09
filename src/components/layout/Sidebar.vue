@@ -9,23 +9,19 @@
   >
     <!-- Header with Logo and Collapse Button -->
     <div
-      class="flex items-center justify-between px-5 py-4 border-b border-[#E9EAEB]"
+      class="flex items-center justify-between px-5 py-4"
       v-if="!isCollapsed"
     >
-      <!-- Logo -->
       <div class="flex items-center">
-        <span class="text-[#4539CC] font-bold text-xl">doc</span>
-        <span class="text-[#181D27] font-bold text-xl">last</span>
-        <span class="text-[#181D27] font-bold text-xl ml-0.5">|</span>
+        <DoclastLogo class="h-6" />
       </div>
 
-      <!-- Collapse Button -->
       <button
         class="p-1 hover:bg-gray-50 rounded transition-colors"
         @click="toggleCollapse"
         aria-label="Collapse sidebar"
       >
-        <ChevronsLeft class="w-5 h-5 text-[#A4A7AE]" />
+        <ChevronIcon class="w-5 h-5 text-[#A4A7AE]" />
       </button>
     </div>
 
@@ -42,182 +38,47 @@
       <button
         class="flex items-center gap-2 w-full px-3 py-2 bg-white border border-[#D5D7DA] rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
       >
-        <Building2 class="w-5 h-5 text-[#A4A7AE] flex-shrink-0" />
-        <span class="flex-1 text-left text-[#414651] text-sm font-normal"
-          >Workspace Name</span
-        >
-        <ChevronDown class="w-4 h-4 text-[#A4A7AE] flex-shrink-0" />
+        <WorkspaceIcon class="w-5 h-5 text-[#A4A7AE] flex-shrink-0" />
+        <span class="flex-1 text-left text-sm font-medium text-[#414651]">
+          Workspace Name
+        </span>
+        <ChevronDown class="w-4 h-4 text-[#A4A7AE]" />
       </button>
     </div>
 
     <!-- Navigation -->
     <nav class="flex-1 overflow-y-auto p-5 space-y-0.5">
-      <!-- Overview -->
+      <!-- Example Nav Item -->
       <button
-        @click="handleClick('Overview', '/overview')"
-        :class="navItemClass('Overview')"
+        v-for="item in menuItems"
+        :key="item.label"
+        @click="handleClick(item.label, item.route)"
+        :class="navItemClass(item.label)"
       >
-        <Home class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-semibold"
-          >Overview</span
-        >
-      </button>
-
-      <!-- Notifications -->
-      <button
-        @click="handleClick('Notifications', '/admin/notifications')"
-        :class="navItemClass('Notifications')"
-      >
-        <Bell class="w-5 h-5 flex-shrink-0 relative" />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Notifications</span
-        >
+        <component :is="item.icon" :class="iconClass(item.label)" />
         <span
           v-if="!isCollapsed"
-          class="w-2 h-2 rounded-full bg-[#17B26A] flex-shrink-0"
-        ></span>
-        <span
-          v-if="!isCollapsed"
-          class="px-2 py-0.5 bg-[#F2F4F7] text-[#344054] text-xs font-medium rounded-full flex-shrink-0"
-          >10</span
+          class="flex-1 text-left text-base font-semibold"
         >
+          {{ item.label }}
+        </span>
       </button>
 
-      <!-- Products Divider -->
-      <div v-if="!isCollapsed" class="flex items-center gap-1 py-2">
-        <ChevronRight class="w-4 h-4 text-[#A4A7AE] flex-shrink-0" />
-        <span class="text-xs font-medium text-[#535862] whitespace-nowrap"
-          >Products</span
-        >
-        <div class="flex-1 h-px bg-[#E9EAEB] ml-2"></div>
+      <!-- Example Section Divider -->
+      <div v-for="section in sections" :key="section.label">
+        <div v-if="!isCollapsed" class="flex items-center gap-2 py-2">
+          <SectionIcon class="w-4 h-4 flex-shrink-0 text-[#A4A7AE]" />
+          <span class="text-sm font-medium text-[#535862] whitespace-nowrap">
+            {{ section.label }}
+          </span>
+          <div class="flex-1 h-px bg-[#E9EAEB] ml-2 self-center"></div>
+        </div>
+        <div v-else class="w-full h-px bg-[#E9EAEB] my-2"></div>
       </div>
-      <div v-else class="w-full h-px bg-[#E9EAEB] my-2"></div>
-
-      <!-- All Products -->
-      <button
-        @click="handleClick('All Products')"
-        :class="navItemClass('All Products')"
-      >
-        <Package class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >All Products</span
-        >
-      </button>
-
-      <!-- Forms -->
-      <button @click="handleClick('Forms')" :class="navItemClass('Forms')">
-        <LayoutGrid class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Forms</span
-        >
-      </button>
-
-      <!-- Templates -->
-      <button
-        @click="handleClick('Templates')"
-        :class="navItemClass('Templates')"
-      >
-        <FileText class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Templates</span
-        >
-      </button>
-
-      <!-- Documents -->
-      <button
-        @click="handleClick('Documents', '/documents')"
-        :class="navItemClass('Documents')"
-      >
-        <FileText class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Documents</span
-        >
-      </button>
-
-      <!-- Automations -->
-      <button
-        @click="handleClick('Automations')"
-        :class="navItemClass('Automations')"
-      >
-        <Zap class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Automations</span
-        >
-      </button>
-
-      <!-- Reports -->
-      <button @click="handleClick('Reports')" :class="navItemClass('Reports')">
-        <BarChart3 class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Reports</span
-        >
-      </button>
-
-      <!-- Members and teams -->
-      <button
-        @click="handleClick('Members and teams')"
-        :class="navItemClass('Members and teams')"
-      >
-        <Users class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Members and teams</span
-        >
-      </button>
-
-      <!-- Records Divider -->
-      <div v-if="!isCollapsed" class="flex items-center gap-1 py-2">
-        <ChevronRight class="w-4 h-4 text-[#A4A7AE] flex-shrink-0" />
-        <span class="text-xs font-medium text-[#535862] whitespace-nowrap"
-          >Records</span
-        >
-        <div class="flex-1 h-px bg-[#E9EAEB] ml-2"></div>
-      </div>
-      <div v-else class="w-full h-px bg-[#E9EAEB] my-2"></div>
-
-      <!-- Companies -->
-      <button
-        @click="handleClick('Companies')"
-        :class="navItemClass('Companies')"
-      >
-        <Building2 class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Companies</span
-        >
-      </button>
-
-      <!-- People -->
-      <button @click="handleClick('People')" :class="navItemClass('People')">
-        <Users class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >People</span
-        >
-      </button>
-
-      <!-- Lists Divider -->
-      <div v-if="!isCollapsed" class="flex items-center gap-1 py-2">
-        <ChevronRight class="w-4 h-4 text-[#A4A7AE] flex-shrink-0" />
-        <span class="text-xs font-medium text-[#535862] whitespace-nowrap"
-          >Lists</span
-        >
-        <div class="flex-1 h-px bg-[#E9EAEB] ml-2"></div>
-      </div>
-      <div v-else class="w-full h-px bg-[#E9EAEB] my-2"></div>
-
-      <!-- 2024 Contracts -->
-      <button
-        @click="handleClick('2024 Contracts')"
-        :class="navItemClass('2024 Contracts')"
-      >
-        <FolderClosed class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >2024 Contracts</span
-        >
-      </button>
     </nav>
 
-    <!--User Footer -->
+    <!-- User Footer -->
     <div class="p-5 border-t border-[#E9EAEB]" v-if="!isCollapsed">
-      <!-- Administrator Badge (shown when user is admin) -->
       <div class="mb-4">
         <div
           class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full"
@@ -232,7 +93,6 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <!-- Avatar -->
         <div
           class="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden bg-gray-200"
         >
@@ -243,7 +103,6 @@
           />
         </div>
 
-        <!-- Name and Plan -->
         <div class="flex-1 min-w-0">
           <div class="text-sm font-semibold text-[#181D27]">Olivia Rhye</div>
           <div class="text-xs text-[#535862]">
@@ -251,7 +110,6 @@
           </div>
         </div>
 
-        <!-- Menu Button -->
         <button
           @click="handleUserMenu"
           class="p-1 hover:bg-gray-50 rounded transition-colors flex-shrink-0"
@@ -261,7 +119,6 @@
       </div>
     </div>
 
-    <!-- Collapsed User Footer -->
     <div v-else class="flex justify-center pb-5">
       <button
         @click="handleUserMenu"
@@ -279,23 +136,23 @@
 
 <script setup>
 import { ref } from "vue";
-import {
-  ChevronsLeft,
-  ChevronDown,
-  ChevronRight,
-  Building2,
-  Home,
-  Bell,
-  Package,
-  LayoutGrid,
-  FileText,
-  Zap,
-  BarChart3,
-  Users,
-  FolderClosed,
-  MoreVertical,
-} from "lucide-vue-next";
 import { useRouter } from "vue-router";
+
+import OverviewIcon from "../../assets/icons/sidebar/overview.svg?component";
+import NotificationIcon from "../../assets/icons/sidebar/notifications.svg?component";
+import TemplatesIcon from "../../assets/icons/sidebar/templates.svg?component";
+import DocumentsIcon from "../../assets/icons/sidebar/documents.svg?component";
+import AutomationsIcon from "../../assets/icons/sidebar/automations.svg?component";
+import ReportsIcon from "../../assets/icons/sidebar/reports.svg?component";
+import MembersIcon from "../../assets/icons/sidebar/members.svg?component";
+import CompaniesIcon from "../../assets/icons/sidebar/companies.svg?component";
+import PeopleIcon from "../../assets/icons/sidebar/people.svg?component";
+import ContractsIcon from "../../assets/icons/sidebar/contracts.svg?component";
+import SectionIcon from "../../assets/icons/sidebar/section.svg?component";
+import WorkspaceIcon from "../../assets/icons/sidebar/workspace.svg?component";
+import ChevronIcon from "../../assets/icons/sidebar/chervon.svg?component";
+import DoclastLogo from "../../assets/icons/logo/doclast-logo.svg?component";
+import MoreVertical from "../../assets/icons/sidebar/more-vertical.svg?component";
 
 const props = defineProps({
   sidebarOpen: Boolean,
@@ -307,20 +164,38 @@ const router = useRouter();
 
 const isCollapsed = ref(false);
 
+const menuItems = [
+  { label: "Overview", route: "/overview", icon: OverviewIcon },
+  {
+    label: "Notifications",
+    route: "/admin/notifications",
+    icon: NotificationIcon,
+  },
+  { label: "Templates", route: "/templates", icon: TemplatesIcon },
+  { label: "Documents", route: "/documents", icon: DocumentsIcon },
+  { label: "Automations", route: "/automations", icon: AutomationsIcon },
+  { label: "Reports", route: "/reports", icon: ReportsIcon },
+  { label: "Members and teams", route: "/members", icon: MembersIcon },
+  { label: "Companies", route: "/companies", icon: CompaniesIcon },
+  { label: "People", route: "/people", icon: PeopleIcon },
+  { label: "2024 Contracts", route: "/contracts", icon: ContractsIcon },
+];
+
+const sections = [
+  { label: "Products" },
+  { label: "Records" },
+  { label: "Lists" },
+];
+
 function toggleCollapse() {
   isCollapsed.value = !isCollapsed.value;
   emit("toggleCollapse", isCollapsed.value);
 }
 
 function handleClick(label, routePath = null) {
-  if (routePath) {
-    router.push(routePath).catch(() => {});
-  }
+  if (routePath) router.push(routePath).catch(() => {});
   emit("navigate", label);
-
-  if (window.innerWidth < 1024) {
-    emit("close");
-  }
+  if (window.innerWidth < 1024) emit("close");
 }
 
 function handleUserMenu() {
@@ -330,11 +205,19 @@ function handleUserMenu() {
 const navItemClass = (label) => {
   const isActive = props.activeNav === label;
   return [
-    "flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors w-full",
-    isCollapsed.value ? "justify-center" : "",
+    "flex items-center gap-2 px-3 py-2 rounded-md w-full transition-all",
+    isCollapsed.value ? "justify-center" : "text-base font-semibold",
     isActive
-      ? "text-[#4539CC] bg-[#F5F3FF] font-semibold"
-      : "text-[#414651] hover:bg-gray-50 font-normal",
+      ? "text-[#4539CC] bg-[#FAFAFA]"
+      : "text-[#414651] hover:bg-[#FAFAFA]",
+  ];
+};
+
+const iconClass = (label) => {
+  const isActive = props.activeNav === label;
+  return [
+    "w-5 h-5 flex-shrink-0",
+    isActive ? "text-[#4539CC]" : "text-[#A4A7AE]",
   ];
 };
 </script>
