@@ -1,208 +1,216 @@
 <template>
-  <MainLayout
-    :sidebarOpen="sidebarOpen"
-    :activeNav="'Notifications'"
-    :showNavbar="false"
-    @closeSidebar="toggleSidebar"
-    @navigate="handleNavigate"
-  >
-    <!-- Mobile menu button -->
-    <div class="lg:hidden mb-4">
-      <button class="p-2 hover:bg-gray-100 rounded-lg" @click="toggleSidebar">
-        <Menu class="w-6 h-4" />
-      </button>
-    </div>
-
-    <!-- Break out of MainLayout padding to align second sidebar with main sidebar -->
-    <div class="lg:-ml-8 lg:-mr-8 lg:-mt-8">
-      <div class="flex">
-        <!-- Second Sidebar (Admin Navigation) -->
-        <aside
-          class="hidden lg:block w-[280px] flex-shrink-0 border-r border-gray-200 bg-white pl-8 pr-6 py-6"
+  <nav class="navbar">
+    <div class="navbar__container">
+      <!-- Left: Mobile Menu + Breadcrumb -->
+      <div class="navbar__left">
+        <!-- Mobile Menu Button -->
+        <button
+          class="navbar__mobile-toggle"
+          @click="$emit('toggleSidebar')"
+          aria-label="Toggle sidebar"
         >
-          <div class="mb-6">
-            <div
-              class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full"
-            >
-              <div
-                class="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center"
-              >
-                <div class="w-2 h-2 rounded-full bg-white"></div>
-              </div>
-              <span class="text-sm font-medium text-indigo-700"
-                >Administrator</span
-              >
-            </div>
-          </div>
+          <Menu class="navbar__mobile-icon" />
+        </button>
 
-          <nav class="space-y-1">
-            <button
-              v-for="item in navItems"
-              :key="item.name"
-              @click="activeSection = item.name"
-              :class="[
-                'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group',
-                activeSection === item.name
-                  ? 'bg-gray-50 text-gray-900'
-                  : 'text-gray-700 hover:bg-gray-50',
-              ]"
-            >
-              <component :is="item.icon" class="w-5 h-5 text-gray-400" />
-              <span class="flex-1 text-sm font-normal">{{ item.name }}</span>
-              <span
-                v-if="item.count"
-                class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-md"
-              >
-                {{ item.count }}
-              </span>
-              <ChevronRight
-                v-else
-                class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
-              />
-            </button>
-          </nav>
-        </aside>
+        <!-- Breadcrumb -->
+        <div class="navbar__breadcrumb">
+          <Home class="navbar__breadcrumb-icon" />
+          <span class="navbar__breadcrumb-item">{{ workspaceName }}</span>
+          <span class="navbar__breadcrumb-separator">/</span>
+          <span class="navbar__breadcrumb-current">{{ currentPage }}</span>
+        </div>
+      </div>
 
-        <!-- Main Content Area -->
-        <main class="flex-1 min-w-0 px-8 py-6">
-          <div class="mb-8">
-            <h1 class="text-3xl font-semibold text-gray-900 mb-2">
-              Notifications
-            </h1>
-            <p class="text-sm text-gray-600">
-              Select when and how you'll be notified.
-            </p>
-          </div>
-
-          <div class="space-y-10">
-            <!-- General Notifications -->
-            <section>
-              <h2 class="text-sm font-semibold text-gray-900 mb-1">
-                General notifications
-              </h2>
-              <p class="text-sm text-gray-600 mb-6">
-                Select when you'll be notified when the following changes occur.
-              </p>
-
-              <div class="space-y-4">
-                <NotificationRow
-                  label="I'm mentioned in a message"
-                  :selected="generalNotifications.mentioned"
-                  @update="generalNotifications.mentioned = $event"
-                />
-                <NotificationRow
-                  label="Someone replies to any message"
-                  :selected="generalNotifications.replies"
-                  @update="generalNotifications.replies = $event"
-                />
-                <NotificationRow
-                  label="I'm assigned a task"
-                  :selected="generalNotifications.assigned"
-                  @update="generalNotifications.assigned = $event"
-                />
-                <NotificationRow
-                  label="A task is overdue"
-                  :selected="generalNotifications.overdue"
-                  @update="generalNotifications.overdue = $event"
-                />
-                <NotificationRow
-                  label="A task status is updated"
-                  :selected="generalNotifications.taskStatus"
-                  @update="generalNotifications.taskStatus = $event"
-                />
-              </div>
-            </section>
-
-            <!-- Summary Notifications -->
-            <section>
-              <h2 class="text-sm font-semibold text-gray-900 mb-1">
-                Summary notifications
-              </h2>
-              <p class="text-sm text-gray-600 mb-6">
-                Select when you'll be notified when the following summaries or
-                report are ready.
-              </p>
-
-              <div class="space-y-4">
-                <NotificationRow
-                  label="Daily summary"
-                  :selected="summaryNotifications.daily"
-                  @update="summaryNotifications.daily = $event"
-                />
-                <NotificationRow
-                  label="Weekly summary"
-                  :selected="summaryNotifications.weekly"
-                  @update="summaryNotifications.weekly = $event"
-                />
-                <NotificationRow
-                  label="Monthly summary"
-                  :selected="summaryNotifications.monthly"
-                  @update="summaryNotifications.monthly = $event"
-                />
-                <NotificationRow
-                  label="Quarterly summary"
-                  :selected="summaryNotifications.quarterly"
-                  @update="summaryNotifications.quarterly = $event"
-                />
-              </div>
-            </section>
-          </div>
-        </main>
+      <!-- Right: Search -->
+      <div class="navbar__right">
+        <div class="navbar__search">
+          <Search class="navbar__search-icon" />
+          <input
+            type="text"
+            :placeholder="searchPlaceholder"
+            class="navbar__search-input"
+            :value="modelValue"
+            @input="$emit('update:modelValue', $event.target.value)"
+          />
+        </div>
       </div>
     </div>
-  </MainLayout>
+  </nav>
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import MainLayout from "@/components/layout/MainLayout.vue";
-import NotificationRow from "../components/NotificationRow.vue";
-import {
-  Menu,
-  User,
-  Bell,
-  BarChart3,
-  FileText,
-  Settings,
-  ChevronRight,
-} from "lucide-vue-next";
+import { Menu, Home, Search } from "lucide-vue-next";
 
-const router = useRouter();
-const sidebarOpen = ref(false);
-const activeSection = ref("Notifications");
-
-const navItems = [
-  { name: "My details", icon: User },
-  { name: "Notifications", icon: Bell, count: 10 },
-  { name: "Analytics", icon: BarChart3 },
-  { name: "Saved reports", icon: FileText },
-  { name: "User reports", icon: FileText, count: 10 },
-  { name: "Settings", icon: Settings },
-];
-
-const generalNotifications = ref({
-  mentioned: "In-app",
-  replies: "None",
-  assigned: "Email",
-  overdue: "In-app",
-  taskStatus: "Email",
+defineProps({
+  workspaceName: {
+    type: String,
+    default: "Workspace Name",
+  },
+  currentPage: {
+    type: String,
+    required: true,
+  },
+  searchPlaceholder: {
+    type: String,
+    default: "search everything ...",
+  },
+  modelValue: {
+    type: String,
+    default: "",
+  },
 });
 
-const summaryNotifications = ref({
-  daily: "Email",
-  weekly: "In-app",
-  monthly: "None",
-  quarterly: "Email",
-});
-
-const toggleSidebar = () => {
-  sidebarOpen.value = !sidebarOpen.value;
-};
-
-const handleNavigate = (label) => {
-  if (label === "Overview") router.push("/overview");
-  if (label === "Documents") router.push("/documents");
-  if (label === "Notifications") router.push("/admin/notifications");
-};
+defineEmits(["toggleSidebar", "update:modelValue"]);
 </script>
+
+<style scoped lang="scss">
+.navbar {
+  background-color: transparent;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  // Modifier for white background (if needed)
+  &--solid {
+    background-color: #ffffff;
+  }
+
+  &__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    max-width: 80rem;
+    margin: 0 auto;
+
+    @media (min-width: 640px) {
+      padding: 1rem 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      padding: 1rem 2rem;
+    }
+  }
+
+  // Left section
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  // Mobile toggle button
+  &__mobile-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border: none;
+    background: transparent;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    @media (min-width: 1024px) {
+      display: none;
+    }
+
+    &:hover {
+      background-color: #f3f4f6;
+    }
+
+    &:active {
+      background-color: #e5e7eb;
+    }
+  }
+
+  &__mobile-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #6b7280;
+  }
+
+  // Breadcrumb
+  &__breadcrumb {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+
+    @media (min-width: 640px) {
+      display: flex;
+    }
+  }
+
+  &__breadcrumb-icon {
+    width: 1rem;
+    height: 1rem;
+    color: #9ca3af;
+    flex-shrink: 0;
+  }
+
+  &__breadcrumb-item {
+    color: #6b7280;
+    white-space: nowrap;
+  }
+
+  &__breadcrumb-separator {
+    color: #d1d5db;
+  }
+
+  &__breadcrumb-current {
+    color: #111827;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  // Right section
+  &__right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    max-width: 28rem;
+  }
+
+  // Search
+  &__search {
+    position: relative;
+    width: 100%;
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    color: #9ca3af;
+    pointer-events: none;
+  }
+
+  &__search-input {
+    width: 100%;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    font-size: 0.875rem;
+    color: #111827;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    outline: none;
+    transition: all 0.2s;
+
+    &::placeholder {
+      color: #9ca3af;
+    }
+
+    &:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+  }
+}
+</style>

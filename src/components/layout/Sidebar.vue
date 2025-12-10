@@ -1,301 +1,190 @@
 <template>
-  <aside
-    :class="[
-      'fixed top-0 left-0 h-screen bg-white border-r border-[#E9EAEB] flex flex-col z-30 transition-all duration-300',
-      isCollapsed ? 'w-16' : 'w-[280px]',
-      sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-      'lg:translate-x-0',
-    ]"
-  >
+  <aside :class="['sidebar', { 'sidebar--open': sidebarOpen }]">
     <!-- Header with Logo and Collapse Button -->
-    <div
-      class="flex items-center justify-between px-5 py-4"
-      v-if="!isCollapsed"
-    >
-      <!-- Logo -->
-      <div class="flex items-center">
-        <DoclastLogo class="h-22.64" />
+    <div class="sidebar__header">
+      <div class="sidebar__logo">
+        <DoclastLogo class="sidebar__logo-image" />
       </div>
 
-      <!-- Collapse Button -->
+      <!-- Collapse Button (for future use) -->
       <button
-        class="p-1 hover:bg-gray-50 rounded transition-colors"
-        @click="toggleCollapse"
-        aria-label="Collapse sidebar"
+        class="sidebar__collapse-btn"
+        @click="handleCollapse"
+        aria-label="Toggle sidebar"
       >
-        <ChevronIcon class="w-5 h-5 text-[#A4A7AE]" />
+        <ChevronIcon class="sidebar__collapse-icon" />
       </button>
     </div>
 
-    <!-- Collapsed Header -->
-    <div
-      v-else
-      class="flex items-center justify-center py-4 border-b border-[#E9EAEB]"
-    >
-      <span class="text-[#4539CC] font-bold text-xl">d</span>
-    </div>
-
     <!-- Workspace Dropdown -->
-    <div class="p-5" v-if="!isCollapsed">
-      <button
-        class="flex items-center gap-2 w-full px-3 py-2 bg-white border border-[#D5D7DA] rounded-lg hover:bg-gray-50 transition-colors shadow-xs"
-      >
-        <WorkspaceIcon class="w-5 h-5 text-[#A4A7AE] flex-shrink-0" />
-        <span class="flex-1 text-left text-[#414651] text-sm font-normal"
-          >Workspace Name</span
-        >
-        <ChevronDown class="w-4 h-4 text-[#A4A7AE] flex-shrink-0" />
+    <div class="sidebar__workspace">
+      <button class="sidebar__workspace-btn">
+        <WorkspaceIcon class="sidebar__workspace-icon" />
+        <span class="sidebar__workspace-text">Workspace Name</span>
+        <ChevronDown class="sidebar__workspace-chevron" />
       </button>
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 overflow-y-auto p-5 pt-0 space-y-0.5">
+    <nav class="sidebar__nav">
       <!-- Overview -->
       <button
         @click="handleClick('Overview', '/overview')"
-        :class="navItemClass('Overview')"
+        :class="getNavItemClass('Overview')"
       >
-        <OverviewIcon
-          class="w-5 h-5 flex-shrink-0"
-          :class="IconClass('Overview')"
-        />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Overview</span
-        >
+        <OverviewIcon :class="getIconClass('Overview')" />
+        <span class="sidebar__nav-text">Overview</span>
       </button>
 
       <!-- Notifications -->
       <button
         @click="handleClick('Notifications', '/admin/notifications')"
-        :class="navItemClass('Notifications')"
+        :class="getNavItemClass('Notifications')"
       >
-        <!-- Icon -->
-        <NotificationIcon
-          class="w-5 h-5 flex-shrink-0"
-          :class="IconClass('Notifications')"
-        />
+        <NotificationIcon :class="getIconClass('Notifications')" />
 
-        <!-- Text + green dot on left, count on right -->
-        <div
-          v-if="!isCollapsed"
-          class="flex items-center justify-between flex-1"
-        >
-          <span class="flex items-center gap-2 text-sm font-normal">
+        <div class="sidebar__nav-content">
+          <span class="sidebar__nav-label">
             Notifications
-            <!-- Green dot -->
-            <span class="w-2 h-2 rounded-full bg-[#17B26A]"></span>
+            <span class="sidebar__notification-dot"></span>
           </span>
-
-          <!-- Count badge aligned right -->
-          <span
-            class="flex items-center justify-center w-[30px] h-[22px] px-2 py-0.5 text-xs font-medium rounded-full bg-[#FAFAFA] border border-[#E9EAEB]"
-          >
-            10
-          </span>
+          <span class="sidebar__notification-badge">10</span>
         </div>
       </button>
+
       <!-- Products Divider -->
-      <div v-if="!isCollapsed" class="flex items-center gap-2 py-2">
-        <SectionIcon class="w-4 text-[#A4A7AE] flex-shrink-0 align-middle" />
-        <span class="text-xs font-medium text-[#535862] whitespace-nowraps"
-          >Products</span
-        >
-        <div class="flex-1 h-px bg-[#E9EAEB] ml-2"></div>
+      <div class="sidebar__divider">
+        <SectionIcon class="sidebar__divider-icon" />
+        <span class="sidebar__divider-text">Products</span>
+        <div class="sidebar__divider-line"></div>
       </div>
-      <div v-else class="w-full h-px bg-[#E9EAEB] my-2"></div>
 
       <!-- Templates -->
       <button
         @click="handleClick('Templates')"
-        :class="navItemClass('Templates')"
+        :class="getNavItemClass('Templates')"
       >
-        <TemplatesIcon
-          class="w-5 h-5 flex-shrink-0"
-          :class="IconClass('Templates')"
-        />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Templates</span
-        >
+        <TemplatesIcon :class="getIconClass('Templates')" />
+        <span class="sidebar__nav-text">Templates</span>
       </button>
 
       <!-- Documents -->
       <button
         @click="handleClick('Documents', '/documents')"
-        :class="navItemClass('Documents')"
+        :class="getNavItemClass('Documents')"
       >
-        <DocumentsIcon
-          class="w-5 h-5 flex-shrink-0"
-          :class="IconClass('Documents')"
-        />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Documents</span
-        >
+        <DocumentsIcon :class="getIconClass('Documents')" />
+        <span class="sidebar__nav-text">Documents</span>
       </button>
 
       <!-- Automations -->
       <button
         @click="handleClick('Automations')"
-        :class="navItemClass('Automations')"
+        :class="getNavItemClass('Automations')"
       >
-        <AutomationsIcon
-          class="w-5 h-5 flex-shrink-0"
-          :class="IconClass('Automations')"
-        />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Automations</span
-        >
+        <AutomationsIcon :class="getIconClass('Automations')" />
+        <span class="sidebar__nav-text">Automations</span>
       </button>
 
       <!-- Reports -->
-      <button @click="handleClick('Reports')" :class="navItemClass('Reports')">
-        <ReportsIcon
-          class="w-5 h-5 flex-shrink-0"
-          :class="IconClass('Reports')"
-        />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Reports</span
-        >
+      <button
+        @click="handleClick('Reports')"
+        :class="getNavItemClass('Reports')"
+      >
+        <ReportsIcon :class="getIconClass('Reports')" />
+        <span class="sidebar__nav-text">Reports</span>
       </button>
 
       <!-- Members and teams -->
       <button
         @click="handleClick('Members and teams')"
-        :class="navItemClass('Members and teams')"
+        :class="getNavItemClass('Members and teams')"
       >
-        <MembersIcon
-          class="w-5 h-5 flex-shrink-0"
-          :class="IconClass('Members and teams')"
-        />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Members and teams</span
-        >
+        <MembersIcon :class="getIconClass('Members and teams')" />
+        <span class="sidebar__nav-text">Members and teams</span>
       </button>
 
       <!-- Records Divider -->
-      <div v-if="!isCollapsed" class="flex items-center gap-1 py-2">
-        <SectionIcon class="w-4 text-[#A4A7AE] flex-shrink-0 align-middle" />
-        <span class="text-xs font-medium text-[#535862] whitespace-nowrap"
-          >Records</span
-        >
-        <div class="flex-1 h-px bg-[#E9EAEB] ml-2"></div>
+      <div class="sidebar__divider">
+        <SectionIcon class="sidebar__divider-icon" />
+        <span class="sidebar__divider-text">Records</span>
+        <div class="sidebar__divider-line"></div>
       </div>
-      <div v-else class="w-full h-px bg-[#E9EAEB] my-2"></div>
 
       <!-- Companies -->
       <button
         @click="handleClick('Companies')"
-        :class="navItemClass('Companies')"
+        :class="getNavItemClass('Companies')"
       >
-        <CompaniesIcon
-          class="w-5 h-5 flex-shrink-0"
-          :class="IconClass('Companies')"
-        />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >Companies</span
-        >
+        <CompaniesIcon :class="getIconClass('Companies')" />
+        <span class="sidebar__nav-text">Companies</span>
       </button>
 
       <!-- People -->
-      <button @click="handleClick('People')" :class="navItemClass('People')">
-        <PeopleIcon
-          class="w-5 h-5 flex-shrink-0"
-          :class="IconClass('People')"
-        />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >People</span
-        >
+      <button @click="handleClick('People')" :class="getNavItemClass('People')">
+        <PeopleIcon :class="getIconClass('People')" />
+        <span class="sidebar__nav-text">People</span>
       </button>
 
       <!-- Lists Divider -->
-      <div v-if="!isCollapsed" class="flex items-center gap-1 py-2">
-        <SectionIcon class="w-4 text-[#A4A7AE] flex-shrink-0 align-middle" />
-        <span class="text-xs font-medium text-[#535862] whitespace-nowrap"
-          >Lists</span
-        >
-        <div class="flex-1 h-px bg-[#E9EAEB] ml-2"></div>
+      <div class="sidebar__divider">
+        <SectionIcon class="sidebar__divider-icon" />
+        <span class="sidebar__divider-text">Lists</span>
+        <div class="sidebar__divider-line"></div>
       </div>
-      <div v-else class="w-full h-px bg-[#E9EAEB] my-2"></div>
 
       <!-- 2024 Contracts -->
       <button
         @click="handleClick('2024 Contracts')"
-        :class="navItemClass('2024 Contracts')"
+        :class="getNavItemClass('2024 Contracts')"
       >
-        <ContractsIcon
-          class="w-5 h-5 flex-shrink-0"
-          :class="IconClass('2024 Contracts')"
-        />
-        <span v-if="!isCollapsed" class="flex-1 text-left text-sm font-normal"
-          >2024 Contracts</span
-        >
+        <ContractsIcon :class="getIconClass('2024 Contracts')" />
+        <span class="sidebar__nav-text">2024 Contracts</span>
       </button>
     </nav>
 
-    <!--User Footer -->
-    <div class="p-5 border-t border-[#E9EAEB]" v-if="!isCollapsed">
-      <!-- Administrator Badge (shown when user is admin) -->
-      <div class="mb-4">
-        <div
-          class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full"
-        >
-          <div
-            class="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center"
-          >
-            <div class="w-2 h-2 rounded-full bg-white"></div>
-          </div>
-          <span class="text-sm font-medium text-indigo-700">Administrator</span>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <!-- Avatar -->
-        <div
-          class="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden bg-gray-200"
-        >
+    <!-- User Footer -->
+    <div class="sidebar__footer">
+      <div class="sidebar__user-card">
+        <div class="sidebar__user-avatar">
           <img
-            src="https://i.pravatar.cc/40?img=1"
+            src="https://i.pravatar.cc/80?img=1"
             alt="Olivia Rhye"
-            class="w-full h-full object-cover"
+            class="sidebar__user-image"
           />
         </div>
 
-        <!-- Name and Plan -->
-        <div class="flex-1 min-w-0">
-          <div class="text-sm font-semibold text-[#181D27]">Olivia Rhye</div>
-          <div class="text-xs text-[#535862]">
-            Active plan: <span class="text-[#4539CC]">Basic</span>
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name">Olivia Rhye</div>
+          <div class="sidebar__user-plan">
+            Active plan: <span class="sidebar__user-plan-name">Basic</span>
           </div>
         </div>
 
-        <!-- Menu Button -->
         <button
           @click="handleUserMenu"
-          class="p-1 hover:bg-gray-50 rounded transition-colors flex-shrink-0"
+          class="sidebar__user-menu"
+          aria-label="User menu"
         >
-          <MoreVertical class="w-5 h-5 text-[#A4A7AE]" />
+          <svg
+            class="sidebar__user-menu-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="18 15 12 9 6 15"></polyline>
+            <polyline points="18 20 12 14 6 20"></polyline>
+          </svg>
         </button>
       </div>
-    </div>
-
-    <!-- Collapsed User Footer -->
-    <div v-else class="flex justify-center pb-5">
-      <button
-        @click="handleUserMenu"
-        class="w-10 h-10 rounded overflow-hidden hover:ring-2 hover:ring-indigo-500 transition-all"
-      >
-        <img
-          src="https://i.pravatar.cc/40?img=1"
-          alt="Olivia Rhye"
-          class="w-full h-full object-cover"
-        />
-      </button>
     </div>
   </aside>
 </template>
 
 <script setup>
-import { ref } from "vue";
-
 import { useRouter } from "vue-router";
 import OverviewIcon from "../../assets/icons/sidebar/overview.svg";
 import NotificationIcon from "../../assets/icons/sidebar/notifications.svg";
@@ -311,20 +200,20 @@ import SectionIcon from "../../assets/icons/sidebar/section.svg";
 import WorkspaceIcon from "../../assets/icons/sidebar/workspace.svg";
 import ChevronIcon from "../../assets/icons/sidebar/chervon.svg";
 import DoclastLogo from "../../assets/icons/logo/doclast-logo.svg";
+import { ChevronDown } from "lucide-vue-next";
 
 const props = defineProps({
   sidebarOpen: Boolean,
   activeNav: String,
 });
 
-const emit = defineEmits(["close", "navigate", "toggleCollapse", "userMenu"]);
+const emit = defineEmits(["close", "navigate", "userMenu", "toggleCollapse"]);
 const router = useRouter();
 
-const isCollapsed = ref(false);
-
-function toggleCollapse() {
-  isCollapsed.value = !isCollapsed.value;
-  emit("toggleCollapse", isCollapsed.value);
+function handleCollapse() {
+  // Do nothing for now - ready for future implementation
+  console.log("Collapse clicked - ready for future implementation");
+  emit("toggleCollapse");
 }
 
 function handleClick(label, routePath = null) {
@@ -333,6 +222,7 @@ function handleClick(label, routePath = null) {
   }
   emit("navigate", label);
 
+  // Close sidebar on mobile after navigation
   if (window.innerWidth < 1024) {
     emit("close");
   }
@@ -342,27 +232,348 @@ function handleUserMenu() {
   emit("userMenu");
 }
 
-const navItemClass = (label) => {
+function getNavItemClass(label) {
   const isActive = props.activeNav === label;
-  return [
-    "flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors w-full",
-    isCollapsed.value ? "justify-center" : "",
-    isActive
-      ? "text-[#4539CC] bg-[#FAFAFA] font-semibold"
-      : "text-[#414651] hover:bg-[#FAFAFA] font-normal",
-  ];
-};
-const IconClass = (label) => {
+  return ["sidebar__nav-item", { "sidebar__nav-item--active": isActive }];
+}
+
+function getIconClass(label) {
   const isActive = props.activeNav === label;
-  return [
-    "w-5 h-5 flex-shrink-0",
-    isActive ? "text-[#4539CC]" : "text-[#A4A7AE]",
-  ];
-};
+  return ["sidebar__nav-icon", { "sidebar__nav-icon--active": isActive }];
+}
 </script>
 
-<style scoped>
-.shadow-xs {
-  box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
+<style scoped lang="scss">
+// ============================================
+// Sidebar Block (BEM)
+// ============================================
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 280px;
+  background-color: #ffffff;
+  border-right: 1px solid #e9eaeb;
+  display: flex;
+  flex-direction: column;
+  z-index: 40;
+  transition: transform 0.3s ease;
+
+  // Mobile: hidden by default
+  @media (max-width: 1023px) {
+    transform: translateX(-100%);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+  }
+
+  // Desktop: always visible
+  @media (min-width: 1024px) {
+    transform: translateX(0);
+  }
+
+  // Modifier for mobile open state
+  &--open {
+    transform: translateX(0);
+  }
+
+  // Header
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+  }
+
+  &__logo-image {
+    height: 22.64px;
+  }
+
+  &__collapse-btn {
+    padding: 0.25rem;
+    border: none;
+    background: transparent;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f9fafb;
+    }
+
+    &:active {
+      background-color: #f3f4f6;
+    }
+  }
+
+  &__collapse-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #a4a7ae;
+  }
+
+  // Workspace
+  &__workspace {
+    padding: 0 1.25rem 1.25rem;
+  }
+
+  &__workspace-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    background-color: #ffffff;
+    border: 1px solid #d5d7da;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
+
+    &:hover {
+      background-color: #f9fafb;
+    }
+  }
+
+  &__workspace-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #a4a7ae;
+    flex-shrink: 0;
+  }
+
+  &__workspace-text {
+    flex: 1;
+    text-align: left;
+    color: #414651;
+    font-size: 0.875rem;
+    font-weight: 400;
+  }
+
+  &__workspace-chevron {
+    width: 1rem;
+    height: 1rem;
+    color: #a4a7ae;
+    flex-shrink: 0;
+  }
+
+  // Navigation
+  &__nav {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 1.25rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+
+    // Custom scrollbar
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #d5d7da;
+      border-radius: 3px;
+
+      &:hover {
+        background: #a4a7ae;
+      }
+    }
+  }
+
+  &__nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    text-align: left;
+    color: #414651;
+    font-weight: 400;
+
+    &:hover {
+      background-color: #fafafa;
+    }
+
+    &--active {
+      color: #4539cc;
+      background-color: #fafafa;
+      font-weight: 600;
+    }
+  }
+
+  &__nav-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    color: #a4a7ae;
+
+    &--active {
+      color: #4539cc;
+    }
+  }
+
+  &__nav-text {
+    flex: 1;
+    text-align: left;
+  }
+
+  &__nav-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+  }
+
+  &__nav-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__notification-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: #17b26a;
+  }
+
+  &__notification-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 22px;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 9999px;
+    background-color: #fafafa;
+    border: 1px solid #e9eaeb;
+  }
+
+  // Dividers
+  &__divider {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+  }
+
+  &__divider-icon {
+    width: 1rem;
+    color: #a4a7ae;
+    flex-shrink: 0;
+  }
+
+  &__divider-text {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #535862;
+    white-space: nowrap;
+  }
+
+  &__divider-line {
+    flex: 1;
+    height: 1px;
+    background-color: #e9eaeb;
+    margin-left: 0.5rem;
+  }
+
+  // Footer
+  &__footer {
+    padding: 1.25rem;
+    border-top: 1px solid #e9eaeb;
+  }
+
+  &__user-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #ffffff;
+    border: 2px solid #e9eaeb;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  &__user-avatar {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    flex-shrink: 0;
+    background-color: #f3f4f6;
+  }
+
+  &__user-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__user-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__user-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #181d27;
+    margin-bottom: 0.125rem;
+  }
+
+  &__user-plan {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  &__user-plan-name {
+    color: #4539cc;
+    font-weight: 500;
+  }
+
+  &__user-menu {
+    padding: 0.5rem;
+    border: none;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: #e5e7eb;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  &__user-menu-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #6b7280;
+  }
 }
 </style>

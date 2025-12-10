@@ -1,101 +1,196 @@
 <template>
   <MainLayout
-    :sidebarOpen="store.sidebarOpen"
-    :activeNav="store.activeNav"
-    @closeSidebar="store.toggleSidebar"
+    :sidebar-open="store.sidebarOpen"
+    :active-nav="store.activeNav"
+    @close-sidebar="store.toggleSidebar"
     @navigate="handleNavigate"
   >
-    <div class="lg:hidden mb-4">
-      <button
-        class="p-2 hover:bg-gray-100 rounded-lg"
-        @click="store.toggleSidebar"
-      >
-        <Menu class="w-6 h-4" />
-      </button>
-    </div>
-    <!-- Header -->
-    <div class="mb-8">
-      <div
-        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-      >
-        <nav class="flex items-center gap-2 text-sm">
-          <Globe class="w-4 h-4 text-gray-400" />
-          <Home class="w-4 h-4 text-gray-400" />
-          <span class="text-gray-500">Workspace Name</span>
-          <span class="text-gray-400">/</span>
-          <span class="text-gray-900 font-semibold">Overview</span>
-        </nav>
-        <AppSearch
-          v-model="store.search"
-          placeholder="search everything ..."
-          class="w-full sm:max-w-md"
-        />
+    <!-- Navbar -->
+    <template #navbar>
+      <Navbar
+        current-page="Overview"
+        :model-value="store.search"
+        @update:model-value="store.setSearch"
+        @toggle-sidebar="store.toggleSidebar"
+      />
+    </template>
+
+    <!-- Main Content -->
+    <div class="overview">
+      <!-- Stats -->
+      <div class="overview__stats">
+        <StatsGrid :stats="store.stats" />
       </div>
-    </div>
-    <!-- Stats -->
-    <StatsGrid :stats="store.stats" />
-    <!-- Quick view -->
-    <div class="app-card">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h2 class="text-lg font-semibold text-gray-900">
-          Quick view of your data
-        </h2>
-        <p class="text-sm text-gray-500">
-          Keep track of everything you're working on
-        </p>
-      </div>
-      <div class="px-6 py-4 border-b border-gray-200">
-        <div class="flex items-center justify-between gap-4">
+
+      <!-- Quick view -->
+      <div class="overview__card">
+        <!-- Header -->
+        <div class="overview__card-header">
+          <h2 class="overview__card-title">Quick view of your data</h2>
+          <p class="overview__card-subtitle">
+            Keep track of everything you're working on
+          </p>
+        </div>
+
+        <!-- Tabs and Actions -->
+        <div class="overview__toolbar">
           <!-- Tabs - segmented control style -->
-          <div class="inline-flex bg-gray-50 border border-gray-200 rounded-lg">
+          <div class="overview__tabs">
             <button
               v-for="(tab, index) in tabs"
               :key="tab"
               @click="store.setActiveTab(tab)"
               :class="[
-                'relative px-6 py-2 text-sm font-medium rounded-md transition-all whitespace-nowrap border-color[#d5d7da]',
-                store.activeTab === tab
-                  ? 'bg-gray-50 text-gray-900'
-                  : 'text-gray-600 hover:text-gray-900 bg-white',
-                index !== tabs.length - 1
-                  ? 'after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:bg-gray-200'
-                  : '',
+                'overview__tab',
+                {
+                  'overview__tab--active': store.activeTab === tab,
+                  'overview__tab--with-divider': index !== tabs.length - 1,
+                },
               ]"
             >
               {{ tab.charAt(0).toUpperCase() + tab.slice(1) }}
             </button>
           </div>
-          <AppButton variant="primary">
-            <Plus class="w-4 h-4" />
+
+          <!-- Add Button -->
+          <AppButton variant="primary" class="overview__add-btn">
+            <Plus class="overview__add-icon" />
             <span>Add {{ store.activeTab.slice(0, -1) }}</span>
           </AppButton>
         </div>
+
+        <!-- Table -->
+        <OverviewTable />
       </div>
-      <OverviewTable />
     </div>
   </MainLayout>
 </template>
+
 <script setup>
 import { useRouter } from "vue-router";
 import MainLayout from "@/components/layout/MainLayout.vue";
+import Navbar from "@/components/layout/Navbar.vue";
 import OverviewTable from "../components/OverviewTable.vue";
 import StatsGrid from "@/components/common/StatsGrid.vue";
 import AppButton from "@/components/ui/AppButton.vue";
-import AppSearch from "@/components/ui/AppSearch.vue";
-import { Menu, Plus, Globe, Home } from "lucide-vue-next";
+import { Plus } from "lucide-vue-next";
 import { useDocumentsStore } from "../../../stores/useDocumentsStore";
+
 const store = useDocumentsStore();
 const router = useRouter();
+
 store.setActiveNav("Overview");
+
 const tabs = ["companies", "people", "documents", "templates"];
+
 const handleNavigate = (label) => {
   store.setActiveNav(label);
   if (label === "Documents") router.push("/documents");
   if (label === "Overview") router.push("/overview");
 };
 </script>
-<style scoped>
-.shadow-xs {
-  box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+
+<style scoped lang="scss">
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  // Card
+  &__card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  // Card Header
+  &__card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  &__card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.25rem;
+  }
+
+  &__card-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  // Toolbar
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  // Tabs
+  &__tabs {
+    display: inline-flex;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  &__tab {
+    position: relative;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    background-color: #ffffff;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+
+    &:hover:not(&--active) {
+      color: #111827;
+      background-color: #f9fafb;
+    }
+
+    &--active {
+      color: #111827;
+      background-color: #f9fafb;
+    }
+
+    &--with-divider::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: #e5e7eb;
+    }
+  }
+
+  // Add Button
+  &__add-btn {
+    flex-shrink: 0;
+
+    @media (max-width: 640px) {
+      width: 100%;
+    }
+  }
+
+  &__add-icon {
+    width: 1rem;
+    height: 1rem;
+  }
 }
 </style>
