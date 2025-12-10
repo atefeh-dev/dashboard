@@ -17,7 +17,7 @@
         { 'layout__content--collapsed': isCollapsed },
       ]"
     >
-      <!-- Navbar (if provided) -->
+      <!-- Navbar (sticky header) -->
       <header v-if="$slots.navbar" class="layout__navbar">
         <slot name="navbar" />
       </header>
@@ -71,12 +71,10 @@ function handleSidebarCollapse(collapsed) {
     min-height: 100vh;
     transition: margin-left 0.3s ease;
 
-    // Desktop: Add left margin for sidebar
     @media (min-width: 1024px) {
       margin-left: 280px;
     }
 
-    // Modifier for collapsed sidebar (future use)
     &--collapsed {
       @media (min-width: 1024px) {
         margin-left: 4rem;
@@ -84,20 +82,12 @@ function handleSidebarCollapse(collapsed) {
     }
   }
 
-  // Navbar Header
+  // Navbar Header - just positioning, no padding/styling
   &__navbar {
-    // padding: 1rem 1rem;
     position: sticky;
     top: 0;
     z-index: 10;
-
-    @media (min-width: 640px) {
-      // padding: 1rem 1.5rem;
-    }
-
-    @media (min-width: 1024px) {
-      // padding: 1rem 2rem;
-    }
+    background-color: #f9fafb; // Match layout background
   }
 
   // Main Content
@@ -105,33 +95,21 @@ function handleSidebarCollapse(collapsed) {
     flex: 1;
   }
 
-  // Container
+  // Container for page content
   &__container {
-    max-width: 80rem; // 1280px
+    max-width: 80rem;
     margin: 0 auto;
-    padding: 20px 16px;
-    width: 100%;
-
-    @media (min-width: 640px) {
-      // padding: 2rem 1.5rem;
-    }
-
-    @media (min-width: 1024px) {
-      // padding: 2rem 2rem;
-    }
+    padding: 1.25rem 1rem; // 20px 16px
   }
 
-  // Mobile Overlay - Light and modern
+  // Mobile Overlay
   &__overlay {
     display: none;
 
     @media (max-width: 1023px) {
       display: block;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
       background-color: rgba(0, 0, 0, 0.25);
       backdrop-filter: blur(4px);
       z-index: 30;
@@ -140,7 +118,6 @@ function handleSidebarCollapse(collapsed) {
   }
 }
 
-// Fade-in animation
 @keyframes fadeIn {
   from {
     opacity: 0;

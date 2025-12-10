@@ -64,7 +64,6 @@ defineProps({
   breadcrumbs: {
     type: Array,
     required: true,
-    // Example: ['Workspace Name', 'Records', 'People', 'John Doe']
     validator: (value) => value.length > 0,
   },
   searchPlaceholder: {
@@ -82,26 +81,17 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
 
 <style scoped lang="scss">
 .navbar {
+  width: 100%;
   background-color: transparent;
   border-bottom: 1px solid #e5e7eb;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-
-  // Modifier for white background (if needed)
-  &--solid {
-    background-color: #ffffff;
-  }
 
   &__container {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding-top: 1rem;
+    padding: 1rem;
     padding-bottom: 1.3125rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
     max-width: 80rem;
     margin: 0 auto;
   }
@@ -112,7 +102,7 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     align-items: center;
     gap: 0.75rem;
     flex-shrink: 0;
-    min-width: 0; // Allow breadcrumb to shrink
+    min-width: 0;
   }
 
   // Mobile toggle button
@@ -153,7 +143,7 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     font-size: 0.875rem;
     font-weight: 500;
     gap: 0.25rem;
-    min-width: 0; // Allow flex children to shrink
+    min-width: 0;
     overflow: hidden;
 
     @media (min-width: 640px) {
@@ -174,7 +164,6 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     overflow: hidden;
     text-overflow: ellipsis;
 
-    // Current/last item styling
     &--current {
       color: #414651;
     }
@@ -186,12 +175,9 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     width: 16px;
     height: 16px;
 
-    // Last separator before final breadcrumb item
     &--last {
       color: #d1d5db;
       opacity: 0.5;
-      // Alternative: use a lighter gray directly
-      // stroke: #e5e7eb;
     }
   }
 
