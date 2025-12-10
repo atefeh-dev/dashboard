@@ -36,9 +36,24 @@
         <span class="sidebar__nav-text">Overview</span>
       </button>
 
-      <!-- Notifications -->
-      <button
+      <!-- Notifications - Only show for admins -->
+      <!-- <button
+        v-if="authStore.isAdmin"
         @click="handleClick('Notifications', '/admin/notifications')"
+        :class="getNavItemClass('Notifications')"
+      >
+        <NotificationIcon :class="getIconClass('Notifications')" />
+
+        <div class="sidebar__nav-content">
+          <span class="sidebar__nav-label">
+            Notifications
+            <span class="sidebar__notification-dot"></span>
+          </span>
+          <span class="sidebar__notification-badge">10</span>
+        </div>
+      </button> -->
+      <button
+        @click="handleNotifications"
         :class="getNavItemClass('Notifications')"
       >
         <NotificationIcon :class="getIconClass('Notifications')" />
@@ -145,25 +160,23 @@
 
     <!-- User Footer -->
     <div class="sidebar__footer">
-      <div class="admin-badge">
-        <div class="admin-badge__wrapper">
-          <div class="admin-badge__icon">
-            <div class="admin-badge__icon-dot"></div>
-          </div>
-          <span class="admin-badge__label">Administrator</span>
-        </div>
-      </div>
+      <!-- Admin Badge - Only show for admins -->
+      <AdminBadge v-if="authStore.isAdmin" />
+
+      <!-- User Card -->
       <div class="sidebar__user-card">
         <div class="sidebar__user-avatar">
           <img
-            src="../../assets/images/Avatar.png"
-            alt="Olivia Rhye"
+            :src="authStore.user?.avatar || '../../assets/images/Avatar.png'"
+            :alt="authStore.user?.name || 'User'"
             class="sidebar__user-image"
           />
         </div>
 
         <div class="sidebar__user-info">
-          <div class="sidebar__user-name">Olivia Rhye</div>
+          <div class="sidebar__user-name">
+            {{ authStore.user?.name || "User" }}
+          </div>
           <div class="sidebar__user-plan">
             Active plan: <span class="sidebar__user-plan-name">Basic</span>
           </div>
@@ -183,6 +196,8 @@
 
 <script setup>
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/useAuthStore";
+import AdminBadge from "../common/AdminSideBarBadge.vue";
 import ActiveplanIcon from "../../assets/icons/sidebar/active-plan.svg";
 import OverviewIcon from "../../assets/icons/sidebar/overview.svg";
 import NotificationIcon from "../../assets/icons/sidebar/notifications.svg";
@@ -205,11 +220,44 @@ const props = defineProps({
   activeNav: String,
 });
 
+// const emit = defineEmits(["close", "navigate", "userMenu", "toggleCollapse"]);
+// const router = useRouter();
+// const authStore = useAuthStore();
+
+// function handleCollapse() {
+//   console.log("Collapse clicked - ready for future implementation");
+//   emit("toggleCollapse");
+// }
+
+// function handleClick(label, routePath = null) {
+//   if (routePath) {
+//     router.push(routePath).catch(() => {});
+//   }
+//   emit("navigate", label);
+
+//   if (window.innerWidth < 1024) {
+//     emit("close");
+//   }
+// }
+
+// function handleUserMenu() {
+//   emit("userMenu");
+// }
+
+// function getNavItemClass(label) {
+//   const isActive = props.activeNav === label;
+//   return ["sidebar__nav-item", { "sidebar__nav-item--active": isActive }];
+// }
+
+// function getIconClass(label) {
+//   const isActive = props.activeNav === label;
+//   return ["sidebar__nav-icon", { "sidebar__nav-icon--active": isActive }];
+// }
 const emit = defineEmits(["close", "navigate", "userMenu", "toggleCollapse"]);
 const router = useRouter();
+const authStore = useAuthStore();
 
 function handleCollapse() {
-  // Do nothing for now - ready for future implementation
   console.log("Collapse clicked - ready for future implementation");
   emit("toggleCollapse");
 }
@@ -220,7 +268,6 @@ function handleClick(label, routePath = null) {
   }
   emit("navigate", label);
 
-  // Close sidebar on mobile after navigation
   if (window.innerWidth < 1024) {
     emit("close");
   }
@@ -239,12 +286,30 @@ function getIconClass(label) {
   const isActive = props.activeNav === label;
   return ["sidebar__nav-icon", { "sidebar__nav-icon--active": isActive }];
 }
+
+/**
+ * New function to handle Notifications button dynamically
+ */
+function handleNotifications() {
+  if (authStore.isAdmin) {
+    router.push("/admin/notifications");
+    emit("navigate", "Notifications"); // optional: mark as active
+  } else {
+    // Replace this route with your user notifications page when ready
+    router.push("/user/notifications");
+    emit("navigate", "Notifications"); // optional: mark as active
+  }
+
+  // Close sidebar on mobile
+  if (window.innerWidth < 1024) {
+    emit("close");
+  }
+}
 </script>
 
 <style scoped lang="scss">
-// ============================================
-// Sidebar Block (BEM)
-// ============================================
+// ... (keep all existing sidebar styles from previous artifact)
+// Just showing the footer styles for clarity
 .sidebar {
   position: fixed;
   top: 0;

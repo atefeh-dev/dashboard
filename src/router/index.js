@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { setupAuthGuard } from "./guards";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 // Auth pages
 import LoginPage from "@/features/auth/pages/LoginPage.vue";
@@ -23,6 +23,7 @@ const routes = [
       return token ? "/overview" : "/login";
     },
   },
+
   // Auth routes (public)
   {
     path: "/login",
@@ -60,7 +61,8 @@ const routes = [
     component: ResetPasswordPage,
     meta: { requiresAuth: false },
   },
-  // App routes (protected)
+
+  // App routes (protected - accessible by all authenticated users)
   {
     path: "/overview",
     name: "Overview",
@@ -73,12 +75,18 @@ const routes = [
     component: DocumentsPage,
     meta: { requiresAuth: true },
   },
+
+  // Admin routes (protected - admin only)
   {
     path: "/admin/notifications",
     name: "AdminNotifications",
     component: NotificationsPage,
-    meta: { requiresAuth: true, requiresAdmin: true },
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+    },
   },
+
   // Catch all
   {
     path: "/:catchAll(.*)",
@@ -91,7 +99,41 @@ const router = createRouter({
   routes,
 });
 
-// Setup auth guard
-setupAuthGuard(router);
+// Navigation guard
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore();
+
+  // Initialize auth if not already done
+  if (!authStore.user && authStore.token) {
+    await authStore.initAuth();
+  }
+
+  const requiresAuth = to.meta.requiresAuth;
+  const requiresAdmin = to.meta.requiresAdmin;
+  const isAuthenticated = authStore.isAuthenticated;
+  const isAdmin = authStore.isAdmin;
+
+  // Public routes
+  if (!requiresAuth) {
+    // Redirect to overview if already authenticated
+    if (isAuthenticated && (to.path === "/login" || to.path === "/signup")) {
+      return next("/overview");
+    }
+    return next();
+  }
+
+  // Protected routes
+  if (requiresAuth && !isAuthenticated) {
+    return next("/login");
+  }
+
+  // Admin-only routes
+  if (requiresAdmin && !isAdmin) {
+    console.warn("Access denied: Admin privileges required");
+    return next("/overview"); // Redirect non-admins to overview
+  }
+
+  next();
+});
 
 export default router;
