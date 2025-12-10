@@ -18,7 +18,6 @@ const props = defineProps({
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
-  margin-bottom: 1.25rem; // 20px
 
   @media (min-width: 640px) {
     grid-template-columns: repeat(2, 1fr);
