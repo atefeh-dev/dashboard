@@ -17,7 +17,7 @@ const props = defineProps({
 .stats {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem; // 16px
+  gap: 8px;
   margin-bottom: 1.25rem; // 20px
 
   @media (min-width: 640px) {
@@ -30,21 +30,22 @@ const props = defineProps({
 
   &__item {
     background: #ffffff;
-    padding: 1.5rem; // 24px
-    border-radius: 0.5rem; // 8px
-    border: 1px solid #e5e7eb; // gray-200
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e9eaeb;
+    box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
   }
 
   &__label {
     font-size: 0.875rem; // 14px
-    color: #4b5563; // gray-600
-    margin-bottom: 0.5rem; // 8px
+    color: #535862; // gray-600
+    font-weight: 500;
   }
 
   &__value {
     font-size: 1.875rem; // 30px
     font-weight: 600;
-    color: #111827; // gray-900
+    color: #181d27; // gray-900
   }
 }
 </style>
