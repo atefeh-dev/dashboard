@@ -29,7 +29,7 @@
       <!-- Right: Search -->
       <div class="navbar__right">
         <div class="navbar__search">
-          <Search class="navbar__search-icon" />
+          <SearchIcon class="navbar__search-icon" />
           <input
             type="text"
             :placeholder="searchPlaceholder"
@@ -47,6 +47,7 @@
 import { Menu, Home, Search } from "lucide-vue-next";
 import ChevronRightIcon from "../../assets/icons/common/chevron-right.svg";
 import OverviewIcon from "../../assets/icons/sidebar/overview.svg";
+import SearchIcon from "../../assets/icons/common/search.svg";
 
 defineProps({
   workspaceName: {
@@ -172,7 +173,7 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
   &__breadcrumb-separator {
     color: #d1d5db;
   }
-  .navbar__breadcrumb-separator[id="second-separator"] ::v-deep path {
+  .navbar__breadcrumb-separator[id="second-separator"] {
     stroke: rgba(211, 211, 211, 0.264);
   }
 
@@ -186,7 +187,7 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     flex: 1;
     display: flex;
     justify-content: flex-end;
-    max-width: 28rem;
+    max-width: 320px;
   }
 
   // Search
@@ -200,8 +201,8 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     left: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
-    width: 1rem;
-    height: 1rem;
+    width: 20px;
+    height: 20px;
     color: #9ca3af;
     pointer-events: none;
   }
@@ -209,13 +210,15 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
   &__search-input {
     width: 100%;
     padding: 0.5rem 1rem 0.5rem 2.5rem;
-    font-size: 0.875rem;
-    color: #111827;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #717680;
     background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
+    border: 1px solid #d5d7da;
+    border-radius: 8px;
     outline: none;
     transition: all 0.2s;
+    box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
 
     &::placeholder {
       color: #9ca3af;
