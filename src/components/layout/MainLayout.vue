@@ -86,19 +86,17 @@ function handleSidebarCollapse(collapsed) {
 
   // Navbar Header
   &__navbar {
-    background-color: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 1rem 1rem;
+    // padding: 1rem 1rem;
     position: sticky;
     top: 0;
     z-index: 10;
 
     @media (min-width: 640px) {
-      padding: 1rem 1.5rem;
+      // padding: 1rem 1.5rem;
     }
 
     @media (min-width: 1024px) {
-      padding: 1rem 2rem;
+      // padding: 1rem 2rem;
     }
   }
 
@@ -111,15 +109,15 @@ function handleSidebarCollapse(collapsed) {
   &__container {
     max-width: 80rem; // 1280px
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 20px 16px;
     width: 100%;
 
     @media (min-width: 640px) {
-      padding: 2rem 1.5rem;
+      // padding: 2rem 1.5rem;
     }
 
     @media (min-width: 1024px) {
-      padding: 2rem 2rem;
+      // padding: 2rem 2rem;
     }
   }
 

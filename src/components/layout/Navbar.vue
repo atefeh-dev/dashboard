@@ -14,9 +14,14 @@
 
         <!-- Breadcrumb -->
         <div class="navbar__breadcrumb">
-          <Home class="navbar__breadcrumb-icon" />
+          <OverviewIcon class="navbar__breadcrumb-icon" />
+          <ChevronRightIcon class="navbar__breadcrumb-separator" />
+
           <span class="navbar__breadcrumb-item">{{ workspaceName }}</span>
-          <span class="navbar__breadcrumb-separator">/</span>
+          <ChevronRightIcon
+            class="navbar__breadcrumb-secound-separator"
+            id="second-separator"
+          />
           <span class="navbar__breadcrumb-current">{{ currentPage }}</span>
         </div>
       </div>
@@ -40,6 +45,8 @@
 
 <script setup>
 import { Menu, Home, Search } from "lucide-vue-next";
+import ChevronRightIcon from "../../assets/icons/common/chevron-right.svg";
+import OverviewIcon from "../../assets/icons/sidebar/overview.svg";
 
 defineProps({
   workspaceName: {
@@ -80,17 +87,20 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem;
-    max-width: 80rem;
+    gap: 1rem; /* already rem */
+    padding-top: 1rem; /* 16px */
+    padding-bottom: 1.3125rem; /* 21px */
+    padding-left: 1rem;
+    padding-right: 1rem;
+    max-width: 80rem; /* already rem */
     margin: 0 auto;
 
     @media (min-width: 640px) {
-      padding: 1rem 1.5rem;
+      // padding: 1rem 1.5rem;
     }
 
     @media (min-width: 1024px) {
-      padding: 1rem 2rem;
+      // padding: 1rem 2rem;
     }
   }
 
@@ -137,7 +147,8 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
   &__breadcrumb {
     display: none;
     align-items: center;
-    gap: 0.5rem;
+    font-size: 14px;
+    font-weight: 500;
     font-size: 0.875rem;
 
     @media (min-width: 640px) {
@@ -146,24 +157,27 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
   }
 
   &__breadcrumb-icon {
-    width: 1rem;
-    height: 1rem;
+    width: 20px;
+    height: 20px;
     color: #9ca3af;
     flex-shrink: 0;
   }
 
   &__breadcrumb-item {
-    color: #6b7280;
+    color: #717680;
+
     white-space: nowrap;
   }
 
   &__breadcrumb-separator {
     color: #d1d5db;
   }
+  .navbar__breadcrumb-separator[id="second-separator"] ::v-deep path {
+    stroke: rgba(211, 211, 211, 0.264);
+  }
 
   &__breadcrumb-current {
-    color: #111827;
-    font-weight: 500;
+    color: #414651;
     white-space: nowrap;
   }
 
