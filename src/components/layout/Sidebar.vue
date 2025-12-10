@@ -145,10 +145,18 @@
 
     <!-- User Footer -->
     <div class="sidebar__footer">
+      <div class="admin-badge">
+        <div class="admin-badge__wrapper">
+          <div class="admin-badge__icon">
+            <div class="admin-badge__icon-dot"></div>
+          </div>
+          <span class="admin-badge__label">Administrator</span>
+        </div>
+      </div>
       <div class="sidebar__user-card">
         <div class="sidebar__user-avatar">
           <img
-            src="https://i.pravatar.cc/80?img=1"
+            src="../../assets/images/Avatar.png"
             alt="Olivia Rhye"
             class="sidebar__user-image"
           />
@@ -166,18 +174,7 @@
           class="sidebar__user-menu"
           aria-label="User menu"
         >
-          <svg
-            class="sidebar__user-menu-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="18 15 12 9 6 15"></polyline>
-            <polyline points="18 20 12 14 6 20"></polyline>
-          </svg>
+          <ActiveplanIcon />
         </button>
       </div>
     </div>
@@ -186,6 +183,7 @@
 
 <script setup>
 import { useRouter } from "vue-router";
+import ActiveplanIcon from "../../assets/icons/sidebar/active-plan.svg";
 import OverviewIcon from "../../assets/icons/sidebar/overview.svg";
 import NotificationIcon from "../../assets/icons/sidebar/notifications.svg";
 import TemplatesIcon from "../../assets/icons/sidebar/templates.svg";
@@ -504,27 +502,33 @@ function getIconClass(label) {
   &__user-card {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 1rem;
+    height: 4rem; // 64px
+    gap: 1rem; // 16px
+    padding: 0.75rem; // 12px
     background: #ffffff;
-    border: 2px solid #e9eaeb;
-    border-radius: 1rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 0.0625rem solid #e9eaeb; // 1px
+    border-radius: 0.75rem; // 12px
+    // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   }
 
   &__user-avatar {
-    width: 4rem;
-    height: 4rem;
-    border-radius: 0.75rem;
+    width: 2.5rem; // 40px
+    height: 2.5rem; // 40px
+    border-radius: 0.25rem; // 4px
     overflow: hidden;
     flex-shrink: 0;
-    background-color: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 0 0.0625rem rgba(0, 0, 0, 0.08);
   }
 
   &__user-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+
+    // INNER border (1px, black, 8%)
   }
 
   &__user-info {
@@ -533,33 +537,36 @@ function getIconClass(label) {
   }
 
   &__user-name {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     color: #181d27;
     margin-bottom: 0.125rem;
   }
 
   &__user-plan {
-    font-size: 0.875rem;
-    color: #6b7280;
+    font-size: 12px;
+    font-weight: 400;
+    color: #535862;
   }
 
   &__user-plan-name {
     color: #4539cc;
-    font-weight: 500;
+    font-weight: 400;
   }
 
   &__user-menu {
-    padding: 0.5rem;
-    border: none;
-    background: #f9fafb;
-    border-radius: 0.5rem;
+    width: 2rem; // 32px
+    height: 2rem; // 32px
+    padding: 0.375rem; // 6px
+    border-radius: 0.375rem; // 6px
     cursor: pointer;
     transition: background-color 0.2s;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 0.0625rem solid rgba(10, 13, 18, 0.05); // 1px
+    box-shadow: 0 0.0625rem 0.125rem rgba(10, 13, 18, 0.05); // 1px 2px
 
     &:hover {
       background-color: #e5e7eb;
@@ -571,9 +578,8 @@ function getIconClass(label) {
   }
 
   &__user-menu-icon {
-    width: 1.25rem;
-    height: 1.25rem;
-    color: #6b7280;
+    width: 20px;
+    height: 20px;
   }
 }
 </style>

@@ -1,101 +1,114 @@
 <template>
-  <div>
-    <div class="table-wrapper">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Categories</th>
-            <th>Rating</th>
-            <th>Last assessed</th>
-            <th>Actions</th>
+  <div class="documents">
+    <div class="documents__table-wrapper">
+      <table class="documents__table">
+        <thead class="documents__thead">
+          <tr class="documents__row documents__row--head">
+            <th class="documents__th">Name</th>
+            <th class="documents__th">Categories</th>
+            <th class="documents__th">Rating</th>
+            <th class="documents__th">Last assessed</th>
+            <th class="documents__th">Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="(item, i) in store.paginated" :key="i">
-            <td>
-              <div class="font-medium text-gray-900">{{ item.name }}</div>
-              <div class="text-sm text-gray-500">{{ item.domain }}</div>
+
+        <tbody class="documents__tbody">
+          <tr
+            class="documents__row"
+            v-for="(item, i) in store.paginated"
+            :key="i"
+          >
+            <!-- NAME -->
+            <td class="documents__td">
+              <div class="documents__name">{{ item.name }}</div>
+              <div class="documents__domain">{{ item.domain }}</div>
             </td>
-            <td>
-              <div class="flex flex-wrap gap-2">
+
+            <!-- CATEGORIES -->
+            <td class="documents__td">
+              <div class="documents__categories">
                 <span
-                  :class="[
-                    'inline-flex items-center gap-1 px-2 py-1 text-xs rounded',
-                    item.status === 'Active'
-                      ? 'bg-green-50 text-green-700'
-                      : 'bg-gray-100 text-gray-600',
-                  ]"
+                  class="documents__badge documents__badge--status"
+                  :class="{
+                    'documents__badge--active': item.status === 'Active',
+                    'documents__badge--inactive': item.status !== 'Active',
+                  }"
                 >
                   <span
-                    :class="[
-                      'w-1.5 h-1.5 rounded-full',
-                      item.status === 'Active' ? 'bg-green-500' : 'bg-gray-400',
-                    ]"
-                  ></span>
+                    class="documents__dot"
+                    :class="{
+                      'documents__dot--active': item.status === 'Active',
+                      'documents__dot--inactive': item.status !== 'Active',
+                    }"
+                  />
                   {{ item.status }}
                 </span>
+
                 <span
                   v-for="(cat, idx) in item.categories"
                   :key="idx"
-                  class="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
+                  class="documents__badge"
                 >
                   {{ cat }}
                 </span>
-                <span
-                  v-if="item.tags > 0"
-                  class="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
-                >
+
+                <span v-if="item.tags > 0" class="documents__badge">
                   +{{ item.tags }}
                 </span>
               </div>
             </td>
-            <td>
-              <span class="px-2 py-1 text-xs bg-green-50 text-green-700 rounded"
-                >Active</span
-              >
+
+            <!-- RATING -->
+            <td class="documents__td">
+              <span class="documents__rating-badge">Active</span>
             </td>
-            <td>
+
+            <!-- LAST ASSESSED -->
+            <td class="documents__td">
               <span
-                :class="[
-                  'inline-flex items-center gap-1 text-sm font-medium',
-                  item.direction === 'up' ? 'text-green-600' : 'text-red-600',
-                ]"
+                class="documents__trend"
+                :class="{
+                  'documents__trend--up': item.direction === 'up',
+                  'documents__trend--down': item.direction === 'down',
+                }"
               >
                 {{ item.direction === "up" ? "↑" : "↓" }} {{ item.rating }}
               </span>
-              <div class="text-sm text-gray-500 mt-1">{{ item.date }}</div>
+              <div class="documents__date">{{ item.date }}</div>
             </td>
-            <td>
-              <div class="flex gap-2">
+
+            <!-- ACTIONS -->
+            <td class="documents__td">
+              <div class="documents__actions">
                 <button
-                  class="p-1 text-gray-400 hover:text-gray-600"
+                  class="documents__action-btn"
                   @click="store.removeDocument(i)"
                 >
-                  <Trash2 class="w-4 h-4" />
+                  <Trash2 class="documents__icon" />
                 </button>
-                <button class="p-1 text-gray-400 hover:text-gray-600">
-                  <Edit class="w-4 h-4" />
+
+                <button class="documents__action-btn">
+                  <Edit class="documents__icon" />
                 </button>
               </div>
             </td>
           </tr>
+
+          <!-- EMPTY -->
           <tr v-if="store.paginated.length === 0">
-            <td colspan="5" class="text-center py-6 text-gray-500">
-              No data found
-            </td>
+            <td class="documents__empty" colspan="5">No data found</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div
-      class="px-6 py-4 border-t border-gray-200 flex items-center justify-between"
-    >
-      <div class="text-sm text-gray-500">
+    <!-- FOOTER -->
+    <div class="documents__footer">
+      <div class="documents__page-info">
         Page {{ store.currentPage }} of {{ store.totalPages }}
       </div>
-      <div class="flex gap-2">
+
+      <div class="documents__pagination">
         <AppButton
           variant="secondary"
           @click="store.goToPage(store.currentPage - 1)"
@@ -103,6 +116,7 @@
         >
           Previous
         </AppButton>
+
         <AppButton
           variant="secondary"
           @click="store.goToPage(store.currentPage + 1)"
@@ -122,3 +136,172 @@ import { useDocumentsStore } from "../../../stores/useDocumentsStore";
 
 const store = useDocumentsStore();
 </script>
+
+<style lang="scss" scoped>
+.documents {
+  &__table-wrapper {
+    overflow-x: auto;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  /* HEAD */
+  &__thead {
+    background: #fafafa;
+  }
+
+  &__row--head th {
+    text-align: left;
+    padding: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4b5563;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  /* CELLS */
+  &__td {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+  }
+
+  /* NAME */
+  &__name {
+    font-weight: 600;
+    color: #111827;
+  }
+
+  &__domain {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 2px;
+  }
+
+  /* CATEGORIES */
+  &__categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  &__badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    background: #f3f4f6;
+    color: #374151;
+
+    &--status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    &--active {
+      background: #ecfdf5;
+      color: #047857;
+    }
+
+    &--inactive {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+  }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+
+    &--active {
+      background: #10b981;
+    }
+
+    &--inactive {
+      background: #9ca3af;
+    }
+  }
+
+  /* RATING */
+  &__rating-badge {
+    padding: 0.25rem 0.5rem;
+    background: #ecfdf5;
+    color: #047857;
+    border-radius: 4px;
+    font-size: 0.75rem;
+  }
+
+  /* TREND */
+  &__trend {
+    font-size: 0.875rem;
+    font-weight: 600;
+
+    &--up {
+      color: #059669;
+    }
+
+    &--down {
+      color: #dc2626;
+    }
+  }
+
+  &__date {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  /* ACTION ICONS */
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  &__action-btn {
+    padding: 0.25rem;
+    color: #9ca3af;
+    transition: 0.2s;
+
+    &:hover {
+      color: #4b5563;
+    }
+  }
+
+  &__icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* EMPTY */
+  &__empty {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+
+  /* FOOTER */
+  &__footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__page-info {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  &__pagination {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+</style>
