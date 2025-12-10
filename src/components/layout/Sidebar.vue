@@ -496,7 +496,6 @@ function getIconClass(label) {
   // Footer
   &__footer {
     padding: 1.25rem;
-    border-top: 1px solid #e9eaeb;
   }
 
   &__user-card {
