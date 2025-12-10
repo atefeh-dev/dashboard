@@ -197,44 +197,29 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
   }
 
   &__search-icon {
-    &__search-icon {
-      position: absolute;
-      left: 0.75rem;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      color: #9ca3af;
-      pointer-events: none;
-    }
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: #9ca3af;
+    pointer-events: none;
+  }
 
-    &__search-input {
-      width: 100%;
-      padding: 0.5rem 1rem 0.5rem 2.5rem;
-      font-size: 1rem;
-      font-weight: 400;
-      color: #717680;
-      background-color: #ffffff;
-      border: 1px solid #d5d7da;
-      border-radius: 8px;
-      outline: none;
-      transition: all 0.2s;
-      box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
-    }
+  &__search-input {
+    width: 100%;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #717680;
+    background-color: #ffffff;
+    border: 1px solid #d5d7da;
+    border-radius: 0.5rem; // 8px
+    outline: none;
+    transition: all 0.2s;
+    box-shadow: 0 0.0625rem 0.125rem rgba(10, 13, 18, 0.05);
 
-    &__search-input {
-      width: 100%;
-      padding: 0.5rem 1rem 0.5rem 2.5rem;
-      font-size: 1rem;
-      font-weight: 400;
-      color: #717680;
-      background-color: #ffffff;
-      border: 1px solid #d5d7da;
-      border-radius: 0.5rem; // 8px
-      outline: none;
-      transition: all 0.2s;
-      box-shadow: 0 0.0625rem 0.125rem rgba(10, 13, 18, 0.05);
-    }
     &::placeholder {
       color: #9ca3af;
     }
