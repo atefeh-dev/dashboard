@@ -8,7 +8,7 @@
     <!-- Navbar -->
     <template #navbar>
       <Navbar
-        current-page="Documents"
+        :breadcrumbs="['Workspace Name', 'Documents']"
         :model-value="store.search"
         @update:model-value="store.setSearch"
         @toggle-sidebar="store.toggleSidebar"

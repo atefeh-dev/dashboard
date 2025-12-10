@@ -12,17 +12,28 @@
           <Menu class="navbar__mobile-icon" />
         </button>
 
-        <!-- Breadcrumb -->
+        <!-- Dynamic Breadcrumb -->
         <div class="navbar__breadcrumb">
           <OverviewIcon class="navbar__breadcrumb-icon" />
-          <ChevronRightIcon class="navbar__breadcrumb-separator" />
 
-          <span class="navbar__breadcrumb-item">{{ workspaceName }}</span>
-          <ChevronRightIcon
-            class="navbar__breadcrumb-secound-separator"
-            id="second-separator"
-          />
-          <span class="navbar__breadcrumb-current">{{ currentPage }}</span>
+          <template v-for="(item, index) in breadcrumbs" :key="index">
+            <ChevronRightIcon
+              class="navbar__breadcrumb-separator"
+              :class="{
+                'navbar__breadcrumb-separator--last':
+                  index === breadcrumbs.length - 1,
+              }"
+            />
+            <span
+              class="navbar__breadcrumb-item"
+              :class="{
+                'navbar__breadcrumb-item--current':
+                  index === breadcrumbs.length - 1,
+              }"
+            >
+              {{ item }}
+            </span>
+          </template>
         </div>
       </div>
 
@@ -44,19 +55,17 @@
 </template>
 
 <script setup>
-import { Menu, Home, Search } from "lucide-vue-next";
+import { Menu } from "lucide-vue-next";
 import ChevronRightIcon from "../../assets/icons/common/chevron-right.svg";
 import OverviewIcon from "../../assets/icons/sidebar/overview.svg";
 import SearchIcon from "../../assets/icons/common/search.svg";
 
 defineProps({
-  workspaceName: {
-    type: String,
-    default: "Workspace Name",
-  },
-  currentPage: {
-    type: String,
+  breadcrumbs: {
+    type: Array,
     required: true,
+    // Example: ['Workspace Name', 'Records', 'People', 'John Doe']
+    validator: (value) => value.length > 0,
   },
   searchPlaceholder: {
     type: String,
@@ -88,21 +97,13 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem; /* already rem */
-    padding-top: 1rem; /* 16px */
-    padding-bottom: 1.3125rem; /* 21px */
+    gap: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1.3125rem;
     padding-left: 1rem;
     padding-right: 1rem;
-    max-width: 80rem; /* already rem */
+    max-width: 80rem;
     margin: 0 auto;
-
-    @media (min-width: 640px) {
-      // padding: 1rem 1.5rem;
-    }
-
-    @media (min-width: 1024px) {
-      // padding: 1rem 2rem;
-    }
   }
 
   // Left section
@@ -111,6 +112,7 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     align-items: center;
     gap: 0.75rem;
     flex-shrink: 0;
+    min-width: 0; // Allow breadcrumb to shrink
   }
 
   // Mobile toggle button
@@ -148,9 +150,11 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
   &__breadcrumb {
     display: none;
     align-items: center;
-    font-size: 14px;
-    font-weight: 500;
     font-size: 0.875rem;
+    font-weight: 500;
+    gap: 0.25rem;
+    min-width: 0; // Allow flex children to shrink
+    overflow: hidden;
 
     @media (min-width: 640px) {
       display: flex;
@@ -166,20 +170,29 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
 
   &__breadcrumb-item {
     color: #717680;
-
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    // Current/last item styling
+    &--current {
+      color: #414651;
+    }
   }
 
   &__breadcrumb-separator {
     color: #d1d5db;
-  }
-  .navbar__breadcrumb-separator[id="second-separator"] {
-    stroke: rgba(211, 211, 211, 0.264);
-  }
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
 
-  &__breadcrumb-current {
-    color: #414651;
-    white-space: nowrap;
+    // Last separator before final breadcrumb item
+    &--last {
+      color: #d1d5db;
+      opacity: 0.5;
+      // Alternative: use a lighter gray directly
+      // stroke: #e5e7eb;
+    }
   }
 
   // Right section
@@ -215,7 +228,7 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     color: #717680;
     background-color: #ffffff;
     border: 1px solid #d5d7da;
-    border-radius: 0.5rem; // 8px
+    border-radius: 0.5rem;
     outline: none;
     transition: all 0.2s;
     box-shadow: 0 0.0625rem 0.125rem rgba(10, 13, 18, 0.05);
