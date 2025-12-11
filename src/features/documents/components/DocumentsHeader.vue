@@ -48,23 +48,21 @@ defineProps({
   }
 
   &__title {
-    font-size: 1rem; // desktop default
+    font-size: 1rem;
     font-weight: 600;
     color: #181d27;
     margin-bottom: 0.5rem;
     line-height: 1.4;
-
-    // Desktop: single line with ellipsis
     overflow: hidden;
-    white-space: nowrap;
     text-overflow: ellipsis;
+    white-space: nowrap;
 
-    // Tablet / smaller screens: clamp 2 lines
     @media (max-width: 1024px) {
       white-space: normal;
       display: -webkit-box;
-      -webkit-line-clamp: 1;
       -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
       overflow: hidden;
     }
 
@@ -77,17 +75,15 @@ defineProps({
     font-size: 0.875rem;
     color: #535862;
     line-height: 1.5;
-
-    // Ellipsis / line clamp for all screens
     display: -webkit-box;
-    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
     overflow: hidden;
 
     @media (max-width: 639px) {
       font-size: 0.8125rem;
       line-height: 1.5;
-      -webkit-line-clamp: 1; // allow slightly more lines on mobile
     }
   }
 
