@@ -21,7 +21,6 @@
       <div class="documents__stats">
         <StatsGrid :stats="store.stats" />
       </div>
-
       <!-- Google Drive Info Card -->
       <GoogleDriveInfoCard
         v-if="!hasNoDocuments"
@@ -30,7 +29,6 @@
       <!-- Documents Section -->
       <div class="documents__card">
         <!-- Header - Always show -->
-
         <DocumentsHeader
           v-if="!hasNoDocuments"
           title="Your documents are important, we're keep an eye on them here"
@@ -38,10 +36,8 @@
           @create="onCreate"
           @import="onImport"
         />
-
         <!-- Show Empty State only when no documents -->
         <DocumentsEmptyState v-if="hasNoDocuments" @create="onCreate" />
-
         <!-- Show Table when documents exist -->
         <DocumentsTable v-else />
       </div>
