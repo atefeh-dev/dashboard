@@ -166,8 +166,11 @@
           <div class="sidebar__user-name">
             {{ authStore.user?.name || "User" }}
           </div>
-          <div class="sidebar__user-plan">
+          <div v-if="!authStore.isAdmin" class="sidebar__user-plan">
             Active plan: <span class="sidebar__user-plan-name">Basic</span>
+          </div>
+          <div v-else class="sidebar__admin-plan">
+            <span class="sidebar__admin-plan-name">Administrator</span>
           </div>
         </div>
 
@@ -590,7 +593,11 @@ function getIconClass(label) {
     font-weight: 400;
     color: #535862;
   }
-
+  &__admin-plan {
+    font-size: 14px;
+    font-weight: 400;
+    color: #535862;
+  }
   &__user-plan-name {
     color: #4539cc;
     font-weight: 400;
@@ -611,7 +618,7 @@ function getIconClass(label) {
     box-shadow: 0 0.0625rem 0.125rem rgba(10, 13, 18, 0.05);
 
     &:hover {
-      background-color: #e5e7eb;
+      background-color: transparent;
     }
 
     &:active {
