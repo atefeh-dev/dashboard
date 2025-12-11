@@ -109,18 +109,5 @@ defineProps({
       }
     }
   }
-
-  &__icon {
-    width: 1rem;
-    height: 1rem;
-    margin-right: 0.5rem;
-    flex-shrink: 0;
-
-    @media (max-width: 639px) {
-      width: 0.875rem;
-      height: 0.875rem;
-      margin-right: 0.375rem;
-    }
-  }
 }
 </style>
