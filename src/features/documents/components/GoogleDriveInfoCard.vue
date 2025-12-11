@@ -14,6 +14,7 @@
         <p class="gdrive-card__text">{{ description }}</p>
 
         <AppButton variant="secondary" size="md" @click="$emit('connect')">
+          <GoogleDriveIcon />
           {{ buttonLabel }}
         </AppButton>
       </div>
@@ -23,12 +24,13 @@
 
 <script setup>
 import AppButton from "@/components/ui/AppButton.vue";
+import GoogleDriveAvatar from "../../../assets/images/google-drive-avatar.png";
+import GoogleDriveIcon from "../../../assets/icons/common/google_drive.svg";
 
 defineProps({
   image: {
     type: String,
-    default:
-      "https://upload.wikimedia.org/wikipedia/commons/4/4e/Google_Drive_logo_2013.png",
+    default: GoogleDriveAvatar,
   },
   title: {
     type: String,
@@ -49,14 +51,14 @@ defineProps({
 <style scoped lang="scss">
 .gdrive-card {
   background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
+  border: 1px solid #e9eaeb;
+  border-left: 0;
+  border-radius: 0.75rem;
 
   &__content {
     display: flex;
-    gap: 1.5rem;
-    align-items: center;
+    align-items: stretch;
+    height: 11rem;
 
     @media (max-width: 768px) {
       flex-direction: column;
@@ -69,8 +71,8 @@ defineProps({
   }
 
   &__image-wrapper {
-    width: 11rem;
-    height: 11rem;
+    width: 14.938rem;
+    height: 100%;
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
     border-radius: 0.5rem;
     display: flex;
@@ -81,26 +83,27 @@ defineProps({
   &__logo {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    padding: 1rem;
+    border-top-left-radius: 0.75rem;
+    border-bottom-left-radius: 0.75rem;
+    object-fit: fill;
   }
 
   &__info {
     flex: 1;
+    padding: 1.5rem;
   }
 
   &__title {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 600;
-    color: #111827;
-    margin-bottom: 0.5rem;
+    color: #181d27;
   }
 
   &__text {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: #535862;
     line-height: 1.6;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
   }
 }
 </style>

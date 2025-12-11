@@ -7,12 +7,12 @@
 
     <div class="documents-header__actions">
       <AppButton variant="ghost" size="md" @click="$emit('import')">
-        <Upload class="documents-header__icon" />
+        <UploadCloudIcon class="documents-header__icon" />
         Import / Export
       </AppButton>
 
       <AppButton variant="primary" size="md" @click="$emit('create')">
-        <Plus class="documents-header__icon" />
+        <PlusIcon class="documents-header__icon" />
         New document
       </AppButton>
     </div>
@@ -21,7 +21,8 @@
 
 <script setup>
 import AppButton from "@/components/ui/AppButton.vue";
-import { Upload, Plus } from "lucide-vue-next";
+import UploadCloudIcon from "@/assets/icons/common/upload-cloude.svg";
+import PlusIcon from "@/assets/icons/common/plus.svg";
 
 defineProps({
   title: { type: String, required: true },
@@ -31,7 +32,7 @@ defineProps({
 
 <style scoped lang="scss">
 .documents-header {
-  padding: 1.5rem;
+  padding: 1.25rem;
   border-bottom: 1px solid #e5e7eb;
   display: flex;
   align-items: flex-start;
@@ -49,13 +50,12 @@ defineProps({
   &__title {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #111827;
-    margin-bottom: 0.25rem;
+    color: #181027;
   }
 
   &__subtitle {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: #535862;
   }
 
   &__actions {

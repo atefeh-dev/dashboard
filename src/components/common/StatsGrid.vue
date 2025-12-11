@@ -29,8 +29,8 @@ const props = defineProps({
 
   &__item {
     background: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
+    padding: 1.3rem;
+    border-radius: 0.75rem;
     border: 1px solid #e9eaeb;
     box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
   }
