@@ -5,8 +5,6 @@
       <div class="sidebar__logo">
         <DoclastLogo class="sidebar__logo-image" />
       </div>
-
-      <!-- Collapse Button (for future use) -->
       <button
         class="sidebar__collapse-btn"
         @click="handleCollapse"
@@ -29,35 +27,19 @@
     <nav class="sidebar__nav">
       <!-- Overview -->
       <button
-        @click="handleClick('Overview', '/overview')"
+        @click="handleClick('Overview')"
         :class="getNavItemClass('Overview')"
       >
         <OverviewIcon :class="getIconClass('Overview')" />
         <span class="sidebar__nav-text">Overview</span>
       </button>
 
-      <!-- Notifications - Only show for admins -->
-      <!-- <button
-        v-if="authStore.isAdmin"
-        @click="handleClick('Notifications', '/admin/notifications')"
-        :class="getNavItemClass('Notifications')"
-      >
-        <NotificationIcon :class="getIconClass('Notifications')" />
-
-        <div class="sidebar__nav-content">
-          <span class="sidebar__nav-label">
-            Notifications
-            <span class="sidebar__notification-dot"></span>
-          </span>
-          <span class="sidebar__notification-badge">10</span>
-        </div>
-      </button> -->
+      <!-- Notifications -->
       <button
-        @click="handleNotifications"
+        @click="handleClick('Notifications')"
         :class="getNavItemClass('Notifications')"
       >
         <NotificationIcon :class="getIconClass('Notifications')" />
-
         <div class="sidebar__nav-content">
           <span class="sidebar__nav-label">
             Notifications
@@ -85,7 +67,7 @@
 
       <!-- Documents -->
       <button
-        @click="handleClick('Documents', '/documents')"
+        @click="handleClick('Documents')"
         :class="getNavItemClass('Documents')"
       >
         <DocumentsIcon :class="getIconClass('Documents')" />
@@ -160,16 +142,23 @@
 
     <!-- User Footer -->
     <div class="sidebar__footer">
-      <!-- Admin Badge - Only show for admins -->
+      <!-- Admin Badge -->
       <AdminBadge v-if="authStore.isAdmin" />
 
       <!-- User Card -->
       <div class="sidebar__user-card">
         <div class="sidebar__user-avatar">
           <img
-            :src="authStore.user?.avatar || '../../assets/images/Avatar.png'"
+            :src="
+              authStore.isAdmin
+                ? authStore.user?.adminAvatar ||
+                  authStore.user?.avatar ||
+                  avatarImage
+                : authStore.user?.avatar || avatarImage
+            "
             :alt="authStore.user?.name || 'User'"
             class="sidebar__user-image"
+            @error="handleImageError"
           />
         </div>
 
@@ -195,6 +184,7 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/useAuthStore";
 import AdminBadge from "../common/AdminSideBarBadge.vue";
@@ -220,54 +210,74 @@ const props = defineProps({
   activeNav: String,
 });
 
-// const emit = defineEmits(["close", "navigate", "userMenu", "toggleCollapse"]);
-// const router = useRouter();
-// const authStore = useAuthStore();
-
-// function handleCollapse() {
-//   console.log("Collapse clicked - ready for future implementation");
-//   emit("toggleCollapse");
-// }
-
-// function handleClick(label, routePath = null) {
-//   if (routePath) {
-//     router.push(routePath).catch(() => {});
-//   }
-//   emit("navigate", label);
-
-//   if (window.innerWidth < 1024) {
-//     emit("close");
-//   }
-// }
-
-// function handleUserMenu() {
-//   emit("userMenu");
-// }
-
-// function getNavItemClass(label) {
-//   const isActive = props.activeNav === label;
-//   return ["sidebar__nav-item", { "sidebar__nav-item--active": isActive }];
-// }
-
-// function getIconClass(label) {
-//   const isActive = props.activeNav === label;
-//   return ["sidebar__nav-icon", { "sidebar__nav-icon--active": isActive }];
-// }
 const emit = defineEmits(["close", "navigate", "userMenu", "toggleCollapse"]);
 const router = useRouter();
 const authStore = useAuthStore();
+
+// Route map: Only include implemented routes
+// If route doesn't exist here, clicking will just console.log
+const routeMap = {
+  // User routes (clean URLs)
+  Overview: {
+    admin: "/admin/overview",
+    user: "/overview",
+  },
+  Documents: {
+    admin: "/admin/documents",
+    user: "/documents",
+  },
+  // Admin-only routes
+  Notifications: {
+    admin: "/admin/notifications",
+    user: null, // User notifications not implemented yet
+  },
+
+  // Add routes here as you implement them:
+  // Templates: { admin: "/admin/templates", user: "/templates" },
+  // Automations: { admin: "/admin/automations", user: "/automations" },
+  // Reports: { admin: "/admin/reports", user: "/reports" },
+  // "Members and teams": { admin: "/admin/members", user: "/members" },
+  // Companies: { admin: "/admin/companies", user: "/companies" },
+  // People: { admin: "/admin/people", user: "/people" },
+  // "2024 Contracts": { admin: "/admin/contracts", user: "/contracts" },
+};
 
 function handleCollapse() {
   console.log("Collapse clicked - ready for future implementation");
   emit("toggleCollapse");
 }
 
-function handleClick(label, routePath = null) {
-  if (routePath) {
-    router.push(routePath).catch(() => {});
+function handleClick(label) {
+  const routes = routeMap[label];
+
+  if (!routes) {
+    // Route not in map at all - log it
+    console.log(`Clicked: ${label} (route not yet implemented)`);
+    return; // Don't navigate, don't emit
   }
+
+  // Get the appropriate route based on user role
+  const targetRoute = authStore.isAdmin ? routes.admin : routes.user;
+
+  if (!targetRoute) {
+    // Route exists for other role but not this one
+    console.log(
+      `Clicked: ${label} (not available for ${
+        authStore.isAdmin ? "admin" : "user"
+      } yet)`
+    );
+    return; // Don't navigate, don't emit
+  }
+
+  // Navigate to the route
+  router.push(targetRoute).catch((err) => {
+    console.error("Navigation error:", err);
+  });
+
+  // Emit navigate event (this updates activeNav)
   emit("navigate", label);
 
+  // Close sidebar on mobile
   if (window.innerWidth < 1024) {
     emit("close");
   }
@@ -286,30 +296,9 @@ function getIconClass(label) {
   const isActive = props.activeNav === label;
   return ["sidebar__nav-icon", { "sidebar__nav-icon--active": isActive }];
 }
-
-/**
- * New function to handle Notifications button dynamically
- */
-function handleNotifications() {
-  if (authStore.isAdmin) {
-    router.push("/admin/notifications");
-    emit("navigate", "Notifications"); // optional: mark as active
-  } else {
-    // Replace this route with your user notifications page when ready
-    router.push("/user/notifications");
-    emit("navigate", "Notifications"); // optional: mark as active
-  }
-
-  // Close sidebar on mobile
-  if (window.innerWidth < 1024) {
-    emit("close");
-  }
-}
 </script>
 
 <style scoped lang="scss">
-// ... (keep all existing sidebar styles from previous artifact)
-// Just showing the footer styles for clarity
 .sidebar {
   position: fixed;
   top: 0;
@@ -323,23 +312,19 @@ function handleNotifications() {
   z-index: 40;
   transition: transform 0.3s ease;
 
-  // Mobile: hidden by default
   @media (max-width: 1023px) {
     transform: translateX(-100%);
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
   }
 
-  // Desktop: always visible
   @media (min-width: 1024px) {
     transform: translateX(0);
   }
 
-  // Modifier for mobile open state
   &--open {
     transform: translateX(0);
   }
 
-  // Header
   &__header {
     display: flex;
     align-items: center;
@@ -379,7 +364,6 @@ function handleNotifications() {
     color: #a4a7ae;
   }
 
-  // Workspace
   &__workspace {
     padding: 0 1.25rem 1.25rem;
   }
@@ -424,7 +408,6 @@ function handleNotifications() {
     flex-shrink: 0;
   }
 
-  // Navigation
   &__nav {
     flex: 1;
     overflow-y: auto;
@@ -434,7 +417,6 @@ function handleNotifications() {
     flex-direction: column;
     gap: 0.125rem;
 
-    // Custom scrollbar
     &::-webkit-scrollbar {
       width: 6px;
     }
@@ -530,7 +512,6 @@ function handleNotifications() {
     border: 1px solid #e9eaeb;
   }
 
-  // Dividers
   &__divider {
     display: flex;
     align-items: center;
@@ -558,7 +539,6 @@ function handleNotifications() {
     margin-left: 0.5rem;
   }
 
-  // Footer
   &__footer {
     padding: 1.25rem;
   }
@@ -566,33 +546,31 @@ function handleNotifications() {
   &__user-card {
     display: flex;
     align-items: center;
-    height: 4rem; // 64px
-    gap: 1rem; // 16px
-    padding: 0.75rem; // 12px
+    height: 4rem;
+    gap: 1rem;
+    padding: 0.75rem;
     background: #ffffff;
-    border: 0.0625rem solid #e9eaeb; // 1px
-    border-radius: 0.75rem; // 12px
-    // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 0.0625rem solid #e9eaeb;
+    border-radius: 0.75rem;
   }
 
   &__user-avatar {
-    width: 2.5rem; // 40px
-    height: 2.5rem; // 40px
-    border-radius: 0.25rem; // 4px
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.25rem;
     overflow: hidden;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: inset 0 0 0 0.0625rem rgba(0, 0, 0, 0.08);
+    background-color: #e5e7eb;
   }
 
   &__user-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-
-    // INNER border (1px, black, 8%)
   }
 
   &__user-info {
@@ -619,18 +597,18 @@ function handleNotifications() {
   }
 
   &__user-menu {
-    width: 2rem; // 32px
-    height: 2rem; // 32px
-    padding: 0.375rem; // 6px
-    border-radius: 0.375rem; // 6px
+    width: 2rem;
+    height: 2rem;
+    padding: 0.375rem;
+    border-radius: 0.375rem;
     cursor: pointer;
     transition: background-color 0.2s;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 0.0625rem solid rgba(10, 13, 18, 0.05); // 1px
-    box-shadow: 0 0.0625rem 0.125rem rgba(10, 13, 18, 0.05); // 1px 2px
+    border: 0.0625rem solid rgba(10, 13, 18, 0.05);
+    box-shadow: 0 0.0625rem 0.125rem rgba(10, 13, 18, 0.05);
 
     &:hover {
       background-color: #e5e7eb;
@@ -639,11 +617,6 @@ function handleNotifications() {
     &:active {
       transform: scale(0.95);
     }
-  }
-
-  &__user-menu-icon {
-    width: 20px;
-    height: 20px;
   }
 }
 </style>

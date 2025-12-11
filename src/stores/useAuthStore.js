@@ -1,6 +1,8 @@
+// stores/useAuthStore.js
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import avatarImage from "@/assets/images/avatar.png";
 
 export const useAuthStore = defineStore("auth", () => {
   const router = useRouter();
@@ -11,92 +13,69 @@ export const useAuthStore = defineStore("auth", () => {
   const isLoading = ref(false);
   const error = ref(null);
 
-  // Computed
+  // Getters
   const isAuthenticated = computed(() => !!token.value && !!user.value);
   const isAdmin = computed(() => user.value?.role === "admin");
-  const isUser = computed(() => user.value?.role === "user");
 
-  // Dev users for testing
-  const DEV_USERS = {
-    admin: {
+  // Mock users for development
+  const mockUsers = {
+    "admin@admin.com": {
       email: "admin@admin.com",
       password: "admin",
-      userData: {
+      user: {
         id: 1,
-        name: "Olivia Rhye",
         email: "admin@admin.com",
         role: "admin",
-        avatar: "/src/assets/images/Avatar.png",
+        name: "Olivia Rhye",
+        avatar: avatarImage, // ← Avatar comes from store
       },
     },
-    user: {
+    "user@user.com": {
       email: "user@user.com",
       password: "users",
-      userData: {
+      user: {
         id: 2,
-        name: "John Doe",
         email: "user@user.com",
         role: "user",
-        avatar: "/src/assets/images/Avatar.png",
+        name: "Olivia Rhye",
+        avatar: avatarImage, // ← Avatar comes from store
       },
     },
   };
 
-  // Dev-only login helper
-  async function devLogin(userType = "admin") {
-    if (import.meta.env.MODE !== "development") {
-      console.error("Dev login only available in development mode");
-      return { success: false };
-    }
-
-    const devUser = DEV_USERS[userType];
-    if (!devUser) {
-      console.error("Invalid user type");
-      return { success: false };
-    }
-
-    console.log(`🔧 DEV MODE: Logging in as ${userType}`);
-    user.value = devUser.userData;
-    token.value = `dev-token-${userType}-${Date.now()}`;
-    localStorage.setItem("auth_token", token.value);
-
-    // Redirect based on role
-    if (userType === "admin") {
-      router.push("/overview");
-    } else {
-      router.push("/overview"); // Regular users also see overview
-    }
-
-    return { success: true };
-  }
-
-  // Login function
+  // Actions
   async function login(email, password) {
     isLoading.value = true;
     error.value = null;
 
     try {
-      // DEV MODE: Check for dev credentials
+      // DEVELOPMENT MODE: Use mock auth
       if (import.meta.env.MODE === "development") {
-        // Check admin credentials
-        if (
-          email === DEV_USERS.admin.email &&
-          password === DEV_USERS.admin.password
-        ) {
-          console.log("🔧 DEV MODE: Admin login");
-          return await devLogin("admin");
+        await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
+
+        const mockUser = mockUsers[email];
+
+        if (!mockUser || mockUser.password !== password) {
+          throw new Error("Invalid email or password");
         }
-        // Check user credentials
-        if (
-          email === DEV_USERS.user.email &&
-          password === DEV_USERS.user.password
-        ) {
-          console.log("🔧 DEV MODE: User login");
-          return await devLogin("user");
-        }
+
+        // Mock successful login
+        const mockToken = `mock-token-${Date.now()}`;
+
+        user.value = mockUser.user;
+        token.value = mockToken;
+        localStorage.setItem("auth_token", mockToken);
+
+        // Role-based redirect
+        const redirectPath =
+          mockUser.user.role === "admin" ? "/admin/overview" : "/overview";
+
+        await router.push(redirectPath);
+
+        return { success: true };
       }
 
-      // Normal login flow (production)
+      // PRODUCTION MODE: Use real API
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -109,79 +88,29 @@ export const useAuthStore = defineStore("auth", () => {
       }
 
       const data = await response.json();
-      token.value = data.token;
+
+      // Set auth state
       user.value = data.user;
+      token.value = data.token;
       localStorage.setItem("auth_token", data.token);
 
-      // Redirect based on role
-      if (data.user.role === "admin") {
-        router.push("/overview");
-      } else {
-        router.push("/overview");
-      }
+      // Role-based redirect
+      const redirectPath =
+        data.user.role === "admin" ? "/admin/overview" : "/overview";
+
+      await router.push(redirectPath);
 
       return { success: true };
     } catch (err) {
-      error.value = err.message;
-      return { success: false, error: err.message };
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  async function register(email, password) {
-    isLoading.value = true;
-    error.value = null;
-
-    try {
-      // DEV MODE: Simulate successful registration
-      if (import.meta.env.MODE === "development") {
-        console.log("🔧 DEV MODE: Simulating registration");
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        user.value = {
-          id: Date.now(),
-          name: email.split("@")[0],
-          email: email,
-          role: "user", // New registrations are regular users
-          avatar: "/src/assets/images/Avatar.png",
-        };
-        token.value = "dev-token-" + Date.now();
-        localStorage.setItem("auth_token", token.value);
-        router.push("/overview");
-        return { success: true };
-      }
-
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Registration failed");
-      }
-
-      const data = await response.json();
-
-      // Auto-login after registration
-      token.value = data.token;
-      user.value = data.user;
-      localStorage.setItem("auth_token", data.token);
-      router.push("/overview");
-
-      return { success: true };
-    } catch (err) {
-      error.value = err.message;
-      return { success: false, error: err.message };
+      error.value = err.message || "Login failed";
+      return { success: false, error: error.value };
     } finally {
       isLoading.value = false;
     }
   }
 
   async function loginWithGoogle() {
-    console.log("Google login not implemented yet");
+    console.log("Google OAuth not implemented");
   }
 
   async function sendPasswordReset(email) {
@@ -189,16 +118,14 @@ export const useAuthStore = defineStore("auth", () => {
     error.value = null;
 
     try {
-      // DEV MODE: Simulate successful password reset request
+      // DEVELOPMENT MODE: Mock password reset
       if (import.meta.env.MODE === "development") {
-        console.log(
-          "🔧 DEV MODE: Simulating password reset email sent to",
-          email
-        );
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        console.log("Mock: Password reset code sent to", email);
         return { success: true };
       }
 
+      // PRODUCTION MODE: Real API
       const response = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -212,35 +139,36 @@ export const useAuthStore = defineStore("auth", () => {
 
       return { success: true };
     } catch (err) {
-      error.value = err.message;
-      return { success: false, error: err.message };
+      error.value = err.message || "Failed to send reset code";
+      return { success: false, error: error.value };
     } finally {
       isLoading.value = false;
     }
   }
 
-  async function resetPassword(email, code, password) {
+  async function resetPassword(email, code, newPassword) {
     isLoading.value = true;
     error.value = null;
 
     try {
-      // DEV MODE: Simulate successful password reset
+      // DEVELOPMENT MODE: Mock password reset
       if (import.meta.env.MODE === "development") {
-        console.log("🔧 DEV MODE: Simulating password reset for", email);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // Validate code format in dev mode
-        if (code.length !== 4 || !/^\d+$/.test(code)) {
+        // Simple validation
+        if (code !== "1234") {
           throw new Error("Invalid verification code");
         }
 
+        console.log("Mock: Password reset successful for", email);
         return { success: true };
       }
 
+      // PRODUCTION MODE: Real API
       const response = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code, password }),
+        body: JSON.stringify({ email, code, newPassword }),
       });
 
       if (!response.ok) {
@@ -250,10 +178,51 @@ export const useAuthStore = defineStore("auth", () => {
 
       return { success: true };
     } catch (err) {
-      error.value = err.message;
-      return { success: false, error: err.message };
+      error.value = err.message || "Password reset failed";
+      return { success: false, error: error.value };
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  async function initAuth() {
+    if (!token.value) {
+      return;
+    }
+
+    try {
+      // DEVELOPMENT MODE: Mock user from token
+      if (import.meta.env.MODE === "development") {
+        // Try to restore user from localStorage
+        const storedUser = localStorage.getItem("auth_user");
+        if (storedUser) {
+          user.value = JSON.parse(storedUser);
+          return;
+        }
+
+        // If no stored user, assume admin for development
+        user.value = mockUsers["admin@admin.com"].user;
+        localStorage.setItem("auth_user", JSON.stringify(user.value));
+        return;
+      }
+
+      // PRODUCTION MODE: Fetch from API
+      const response = await fetch("/api/auth/me", {
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user");
+      }
+
+      const data = await response.json();
+      user.value = data.user;
+      localStorage.setItem("auth_user", JSON.stringify(user.value));
+    } catch (err) {
+      console.error("Auth initialization failed:", err);
+      logout();
     }
   }
 
@@ -261,45 +230,27 @@ export const useAuthStore = defineStore("auth", () => {
     user.value = null;
     token.value = null;
     localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_user");
     router.push("/login");
   }
 
-  async function initAuth() {
-    if (token.value) {
-      try {
-        // DEV MODE: Auto-login with stored token
-        if (import.meta.env.MODE === "development") {
-          // Try to restore user from token
-          if (token.value.includes("admin")) {
-            user.value = DEV_USERS.admin.userData;
-          } else {
-            user.value = DEV_USERS.user.userData;
-          }
-          return;
-        }
-
-        // TODO: Fetch user data from API using token
-      } catch (err) {
-        logout();
-      }
-    }
-  }
-
   return {
+    // State
     user,
     token,
     isLoading,
     error,
+
+    // Getters
     isAuthenticated,
     isAdmin,
-    isUser,
+
+    // Actions
     login,
-    register,
     loginWithGoogle,
     sendPasswordReset,
     resetPassword,
-    logout,
     initAuth,
-    devLogin,
+    logout,
   };
 });
