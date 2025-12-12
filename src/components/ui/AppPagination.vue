@@ -1,41 +1,42 @@
 <template>
-  <div
-    class="pagination px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4"
-  >
+  <div class="pagination">
+    <!-- Previous -->
     <AppButton
       variant="secondary"
-      class="w-full sm:w-auto"
+      class="pagination__button"
       @click="$emit('prev')"
       :disabled="store.currentPage === 1"
     >
-      <ArrowLeft class="w-4 h-4 mr-1" /> Previous
+      <ArrowLeft class="pagination__icon pagination__icon--left" />
+      Previous
     </AppButton>
 
-    <div class="flex-1 flex justify-center gap-1 sm:gap-2 overflow-x-auto">
+    <!-- Page numbers -->
+    <div class="pagination__numbers">
       <button
         v-for="(p, idx) in pages"
         :key="idx"
         :disabled="p === '...'"
         @click="onClick(p)"
         :class="[
-          'w-8 h-8 sm:w-10 sm:h-10 text-sm font-medium rounded-lg flex items-center justify-center flex-shrink-0 transition',
-          p === current ? 'text-gray-600' : 'text-gray-500',
-          p !== current && p !== '...' ? 'hover:bg-gray-100' : '',
-          p === '...' ? 'text-gray-400 cursor-default' : '',
+          'pagination__number',
+          p === current ? 'pagination__number--active' : '',
+          p === '...' ? 'pagination__number--ellipsis' : '',
         ]"
-        :style="p === current ? activeStyle : null"
       >
         {{ p }}
       </button>
     </div>
 
+    <!-- Next -->
     <AppButton
       variant="secondary"
-      class="w-full sm:w-auto"
+      class="pagination__button"
       @click="$emit('next')"
       :disabled="store.currentPage === store.totalPages"
     >
-      Next <ArrowRight class="w-4 h-4 ml-1" />
+      Next
+      <ArrowRight class="pagination__icon pagination__icon--right" />
     </AppButton>
   </div>
 </template>
@@ -54,15 +55,98 @@ const props = defineProps({
 
 const emit = defineEmits(["change", "prev", "next"]);
 
-const activeStyle = {
-  backgroundColor: "rgb(243 244 246)", // gray-100
-  color: "rgb(107 114 128)", // gray-600
-};
-
 function onClick(p) {
   if (p === "...") return;
   emit("change", Number(p));
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.pagination {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Buttons (Prev / Next) */
+  &__button {
+    width: 100%;
+
+    @media (min-width: 640px) {
+      width: auto;
+    }
+  }
+
+  /* Page numbers container */
+  &__numbers {
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+
+    @media (min-width: 640px) {
+      // gap: 0.5rem;
+    }
+  }
+
+  /* Individual page number */
+  &__number {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #717680;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s ease;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    @media (min-width: 640px) {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    &:hover:not(&--active):not(&--ellipsis) {
+      background: #f3f4f6;
+      color: #374151;
+    }
+  }
+
+  /* Active (current page) */
+  &__number--active {
+    background: #fafafa;
+    color: #414651;
+    cursor: default;
+  }
+
+  /* Ellipsis (…) */
+  &__number--ellipsis {
+    color: #9ca3af;
+    cursor: default;
+  }
+
+  /* Icons */
+  &__icon {
+    width: 1rem;
+    height: 1rem;
+
+    &--left {
+      margin-right: 0.25rem;
+    }
+    &--right {
+      margin-left: 0.25rem;
+    }
+  }
+}
+</style>
