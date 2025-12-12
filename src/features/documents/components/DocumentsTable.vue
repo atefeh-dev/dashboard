@@ -4,9 +4,15 @@
       <table class="documents-table__table">
         <thead class="documents-table__head">
           <tr class="documents-table__row documents-table__row--header">
-            <th class="documents-table__header">Name</th>
+            <th class="documents-table__header">
+              <span class="document-table__header-name"
+                >Name <ArrowDownIcon
+              /></span>
+            </th>
             <th class="documents-table__header">Categories</th>
             <th class="documents-table__header">Rating</th>
+            <th class="documents-table__header"></th>
+
             <th class="documents-table__header">Last assessed</th>
             <th class="documents-table__header">Actions</th>
           </tr>
@@ -27,15 +33,15 @@
             <!-- Categories -->
             <td class="documents-table__cell">
               <div class="documents-table__categories">
-                <span
-                  :class="[
-                    'documents-table__badge',
-                    doc.status === 'Active'
-                      ? 'documents-table__badge--active'
-                      : 'documents-table__badge--inactive',
-                  ]"
-                >
-                  <span class="documents-table__badge-dot"></span>
+                <span class="documents-table__badge">
+                  <span
+                    :class="[
+                      doc.status === 'Active'
+                        ? 'documents-table__badge-dot--active'
+                        : 'documents-table__badge---dot-inactive',
+                      'documents-table__badge-dot',
+                    ]"
+                  ></span>
                   {{ doc.status }}
                 </span>
 
@@ -54,34 +60,46 @@
 
             <!-- Rating -->
             <td class="documents-table__cell">
-              <span
-                :class="[
-                  'documents-table__status',
-                  doc.status === 'Active'
-                    ? 'documents-table__status--active'
-                    : 'documents-table__status--inactive',
-                ]"
-              >
-                {{ doc.status }}
-              </span>
+              <div class="documents-table__rating">
+                <span
+                  :class="[
+                    'documents-table__status',
+                    doc.status === 'Active'
+                      ? 'documents-table__status--active'
+                      : 'documents-table__status--inactive',
+                  ]"
+                >
+                  {{ doc.status }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Rating score -->
+            <td class="documents-table__cell">
+              <div class="documents-table__rating-score">
+                <span
+                  :class="[
+                    'documents-table__rating',
+                    doc.direction === 'up'
+                      ? 'documents-table__rating--up'
+                      : 'documents-table__rating--down',
+                  ]"
+                >
+                  <component
+                    :is="
+                      doc.direction === 'up'
+                        ? ArrowDownRedIcon
+                        : ArrowUpGreenIcon
+                    "
+                    class="documents-table__rating-icon"
+                  />
+                  {{ doc.rating }}
+                </span>
+              </div>
             </td>
 
             <!-- Last Assessed -->
             <td class="documents-table__cell">
-              <div
-                :class="[
-                  'documents-table__rating',
-                  doc.direction === 'up'
-                    ? 'documents-table__rating--up'
-                    : 'documents-table__rating--down',
-                ]"
-              >
-                <component
-                  :is="doc.direction === 'up' ? TrendingUp : TrendingDown"
-                  class="documents-table__rating-icon"
-                />
-                {{ doc.rating }}
-              </div>
               <div class="documents-table__date">{{ doc.date }}</div>
             </td>
 
@@ -89,21 +107,21 @@
             <td class="documents-table__cell">
               <div class="documents-table__actions">
                 <AppButton
-                  variant="ghost"
+                  variant="blank"
                   size="sm"
                   @click="remove(i)"
                   title="Delete"
                   class="documents-table__action-btn"
                 >
-                  <Trash2 class="documents-table__action-icon" />
+                  <TrashIcon class="documents-table__action-icon" />
                 </AppButton>
                 <AppButton
-                  variant="ghost"
+                  variant="blank"
                   size="sm"
                   title="Edit"
                   class="documents-table__action-btn"
                 >
-                  <Pencil class="documents-table__action-icon" />
+                  <EditIcon class="documents-table__action-icon" />
                 </AppButton>
               </div>
             </td>
@@ -133,16 +151,13 @@
 <script setup>
 import { computed } from "vue";
 import { useDocumentsStore } from "@/stores/useDocumentsStore";
-import {
-  Trash2,
-  Pencil,
-  TrendingUp,
-  TrendingDown,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
 import AppPagination from "@/components/ui/AppPagination.vue";
+import ArrowDownIcon from "@/assets/icons/common/arrow-down.svg";
+import ArrowDownRedIcon from "@/assets/icons/common/arrow-down-red.svg";
+import ArrowUpGreenIcon from "@/assets/icons/common/arrow-up-green.svg";
+import TrashIcon from "@/assets/icons/common/trash.svg";
+import EditIcon from "@/assets/icons/common/edit.svg";
 
 const store = useDocumentsStore();
 
@@ -251,10 +266,22 @@ function remove(index) {
     text-align: left;
     padding: 0.75rem 1.5rem;
     font-size: 0.75rem;
-    font-weight: 500;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-weight: 600;
+    background-color: #fafafa;
+    color: #717680;
+    border-bottom: 1px solid #e9eaeb;
+
+    & .document-table__header-name {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+
+      svg {
+        width: 0.75rem;
+        height: 0.75rem;
+        flex-shrink: 0;
+      }
+    }
   }
 
   // Table cell
@@ -266,13 +293,15 @@ function remove(index) {
   // Name column
   &__name {
     font-weight: 500;
-    color: #111827;
-    margin-bottom: 0.25rem;
+    color: #181d27;
+    font-size: 0.875rem;
+    // margin-bottom: 0.25rem;
   }
 
   &__domain {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: #535862;
+    font-weight: 400;
   }
 
   // Categories
@@ -286,20 +315,14 @@ function remove(index) {
   &__badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.5rem;
+    padding: 0.125rem 0.375rem;
     font-size: 0.75rem;
-    border-radius: 0.25rem;
-
-    &--active {
-      background-color: #d1fae5;
-      color: #065f46;
-    }
-
-    &--inactive {
-      background-color: #f3f4f6;
-      color: #4b5563;
-    }
+    background-color: #f3f4f6;
+    color: #374151;
+    border-radius: 0.375rem;
+    border: 1px solid #d5d7da;
+    box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
+    gap: 0.25rem;
   }
 
   &__badge-dot {
@@ -307,37 +330,49 @@ function remove(index) {
     height: 0.375rem;
     border-radius: 50%;
     background-color: currentColor;
+
+    &--active {
+      color: #17b26a;
+    }
+
+    &--inactive {
+      color: #717680;
+    }
   }
 
   // Tag
   &__tag {
     display: inline-flex;
     align-items: center;
-    padding: 0.25rem 0.5rem;
+    padding: 0.125rem 0.375rem;
     font-size: 0.75rem;
     background-color: #f3f4f6;
     color: #374151;
-    border-radius: 0.25rem;
+    border-radius: 0.375rem;
+    border: 1px solid #d5d7da;
+    box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
   }
 
   // Status badge
   &__status {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
+    // gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
     font-weight: 500;
     border-radius: 9999px;
 
     &--active {
-      background-color: #d1fae5;
-      color: #065f46;
+      background-color: #ecfdf3;
+      color: #067647;
+      border: 1px solid #abefc6;
     }
 
     &--inactive {
       background-color: #f3f4f6;
-      color: #374151;
+      color: #717680;
+      border: 1px solid #d5d7da;
     }
   }
 
@@ -345,29 +380,42 @@ function remove(index) {
   &__rating {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    font-size: 0.875rem;
+    gap: 0.125rem;
+    color: #414651;
+    font-size: 0.75rem;
     font-weight: 500;
-    margin-bottom: 0.25rem;
+  }
+  &__rating-score {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.375rem;
+    font-size: 0.75rem;
+    color: #374151;
+    border-radius: 0.375rem;
+    border: 1px solid #d5d7da;
+    box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
 
-    &--up {
-      color: #059669;
+    &__rating--up {
+      color: #16a34a; // green-600
     }
-
-    &--down {
-      color: #dc2626;
+    &__rating--down {
+      color: #dc2626; // red-600
     }
   }
 
   &__rating-icon {
-    width: 1rem;
-    height: 1rem;
-    flex-shrink: 0;
+    display: flex;
+    svg {
+      width: 0.75rem;
+      height: 0.75rem;
+      flex-shrink: 0;
+    }
   }
 
   &__date {
     font-size: 0.875rem;
-    color: #6b7280;
+    font-weight: 400;
+    color: #535863;
   }
 
   // Actions

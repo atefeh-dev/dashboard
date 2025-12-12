@@ -142,7 +142,19 @@ body {
     background-color: #e5e7eb;
   }
 }
+.btn-blank {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
 
+  &:hover:not(.btn-disabled) {
+    background-color: #f3f4f6;
+  }
+
+  &:active:not(.btn-disabled) {
+    background-color: #e5e7eb;
+  }
+}
 .btn-danger {
   background-color: #ef4444;
   color: white;
@@ -206,50 +218,50 @@ body {
   }
 }
 
-.table-wrapper {
-  overflow-x: auto;
-}
+// .table-wrapper {
+//   overflow-x: auto;
+// }
 
-.table {
-  width: 100%;
-  min-width: 800px;
+// .table {
+//   width: 100%;
+//   min-width: 800px;
 
-  th {
-    background-color: rgb(249 250 251);
-    border-bottom: 1px solid rgb(229 231 235);
-    padding: 0.75rem 1rem;
-    text-align: left;
-    font-size: 0.75rem;
-    line-height: 1rem;
-    font-weight: 500;
-    color: rgb(107 114 128);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+//   th {
+//     background-color: rgb(249 250 251);
+//     border-bottom: 1px solid rgb(229 231 235);
+//     padding: 0.75rem 1rem;
+//     text-align: left;
+//     font-size: 0.75rem;
+//     line-height: 1rem;
+//     font-weight: 500;
+//     color: rgb(107 114 128);
+//     text-transform: uppercase;
+//     letter-spacing: 0.05em;
 
-    @media (min-width: 640px) {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
-  }
+//     @media (min-width: 640px) {
+//       padding-left: 1.5rem;
+//       padding-right: 1.5rem;
+//     }
+//   }
 
-  td {
-    padding: 1rem;
-    border-bottom: 1px solid rgb(243 244 246);
+//   td {
+//     padding: 1rem;
+//     border-bottom: 1px solid rgb(243 244 246);
 
-    @media (min-width: 640px) {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
-  }
+//     @media (min-width: 640px) {
+//       padding-left: 1.5rem;
+//       padding-right: 1.5rem;
+//     }
+//   }
 
-  tr {
-    transition: background-color 200ms;
+//   tr {
+//     transition: background-color 200ms;
 
-    &:hover {
-      background-color: rgb(249 250 251);
-    }
-  }
-}
+//     &:hover {
+//       background-color: rgb(249 250 251);
+//     }
+//   }
+// }
 
 .search-box {
   position: relative;

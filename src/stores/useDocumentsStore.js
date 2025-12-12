@@ -419,7 +419,7 @@ export const useDocumentsStore = defineStore("documents", () => {
       {
         name: "Q4 Report",
         domain: "report-2024.pdf",
-        status: "Active",
+        status: "Inactive",
         categories: ["Financial", "Reports"],
         rating: "7%",
         direction: "up",

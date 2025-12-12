@@ -40,7 +40,7 @@
                       'documents__dot--active': item.status === 'Active',
                       'documents__dot--inactive': item.status !== 'Active',
                     }"
-                  />
+                  ></span>
                   {{ item.status }}
                 </span>
 
@@ -78,7 +78,7 @@
             </td>
 
             <!-- ACTIONS -->
-            <td class="documents__td">
+            <td class="documents__td table-cell table-cell--actions">
               <div class="documents__actions">
                 <button
                   class="documents__action-btn"
@@ -138,6 +138,45 @@ const store = useDocumentsStore();
 </script>
 
 <style lang="scss" scoped>
+.table-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.875rem;
+  border-radius: 9999px;
+  background: transparent;
+  color: #374151;
+}
+
+.table-badge-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: #9ca3af; /* gray-400 default */
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.table-badge--active .table-badge-dot {
+  background-color: #10b981; /* green-500 */
+}
+
+.table-badge--inactive .table-badge-dot {
+  background-color: #9ca3af; /* gray-400 */
+}
+
+.table-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.8125rem;
+  background: #f3f4f6;
+  border-radius: 0.375rem;
+  color: #374151;
+  margin-right: 0.25rem;
+}
+
 .documents {
   &__table-wrapper {
     overflow-x: auto;
@@ -305,3 +344,4 @@ const store = useDocumentsStore();
   }
 }
 </style>
+.table-cell--actions { width: 72px; max-width: 72px; white-space: nowrap; }
