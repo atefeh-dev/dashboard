@@ -38,7 +38,7 @@ const props = defineProps({
   size: {
     type: String,
     default: "md",
-    validator: (value) => ["sm", "md", "lg"].includes(value),
+    validator: (value) => ["sm", "sm-blank", "md", "lg"].includes(value),
   },
   // Button type
   type: {
