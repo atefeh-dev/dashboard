@@ -1,7 +1,10 @@
 <template>
   <div class="empty-state">
     <!-- Background SVG -->
-    <EmptyContentPic class="empty-state__background" />
+    <img
+      src="../../../assets/icons/common/empty-content.svg"
+      class="empty-state__background"
+    />
 
     <!-- Foreground Content -->
     <div class="empty-state__content">
@@ -62,16 +65,32 @@ defineEmits(["create"]);
     left: 50%;
     transform: translate(-50%, -50%);
     // CRITICAL: No width/height = auto-centers based on SVG's intrinsic size
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 70%;
+    max-height: 70%;
     pointer-events: none;
     user-select: none;
     z-index: 0;
-    opacity: 0.6;
+    opacity: 0.7;
 
-    // DON'T override fill - let SVG keep its concentric circle design
-    // Just set the color property which SVG can inherit
     color: #e9eaeb;
+
+    /* Radial fade mask */
+    -webkit-mask-image: radial-gradient(
+      circle,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 40%,
+      rgba(0, 0, 0, 0.6) 60%,
+      rgba(0, 0, 0, 0.2) 75%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    mask-image: radial-gradient(
+      circle,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 40%,
+      rgba(0, 0, 0, 0.6) 60%,
+      rgba(0, 0, 0, 0.2) 75%,
+      rgba(0, 0, 0, 0) 100%
+    );
   }
 
   // Foreground Content
