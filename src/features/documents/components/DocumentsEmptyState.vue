@@ -49,7 +49,7 @@ defineEmits(["create"]);
 .empty-state {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   min-height: 720px;
   padding: 2rem 1rem;
@@ -77,6 +77,7 @@ defineEmits(["create"]);
     /* Radial fade mask */
     -webkit-mask-image: radial-gradient(
       circle,
+      circle,
       rgba(0, 0, 0, 1) 0%,
       rgba(0, 0, 0, 1) 40%,
       rgba(0, 0, 0, 0.6) 60%,
@@ -84,6 +85,7 @@ defineEmits(["create"]);
       rgba(0, 0, 0, 0) 100%
     );
     mask-image: radial-gradient(
+      circle,
       circle,
       rgba(0, 0, 0, 1) 0%,
       rgba(0, 0, 0, 1) 40%,
@@ -99,6 +101,7 @@ defineEmits(["create"]);
     width: 100%;
     max-width: 22rem;
     z-index: 10;
+    margin-top: 19%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -122,6 +125,7 @@ defineEmits(["create"]);
   &__icon-svg {
     width: 1.75rem;
     height: 1.75rem;
+    margin-left: 0.313rem;
   }
 
   // Title
@@ -138,13 +142,7 @@ defineEmits(["create"]);
     font-size: 1rem;
     color: #535862;
     line-height: 1.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  // Button icon
-  &__button-icon {
-    width: 1rem;
-    height: 1rem;
+    margin-bottom: 2rem;
   }
 }
 </style>
