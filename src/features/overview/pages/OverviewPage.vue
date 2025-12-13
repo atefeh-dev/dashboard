@@ -106,20 +106,20 @@ const handleNavigate = (label) => {
 
   // Card Header
   &__card-header {
-    padding: 1.5rem;
+    padding: 1.25rem 1.5rem 1.313rem 1.5rem;
     border-bottom: 1px solid #e5e7eb;
   }
 
   &__card-title {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #111827;
-    margin-bottom: 0.25rem;
+    color: #181d27;
   }
 
   &__card-subtitle {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: #535862;
+    font-weight: 400;
   }
 
   // Toolbar
@@ -128,8 +128,7 @@ const handleNavigate = (label) => {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 0.75rem 1.5rem;
 
     @media (max-width: 640px) {
       flex-direction: column;
@@ -148,10 +147,10 @@ const handleNavigate = (label) => {
 
   &__tab {
     position: relative;
-    padding: 0.5rem 1.5rem;
+    padding: 0.5rem 1rem;
     font-size: 0.875rem;
-    font-weight: 500;
-    color: #6b7280;
+    font-weight: 600;
+    color: #414651;
     background-color: #ffffff;
     border: none;
     cursor: pointer;
@@ -164,8 +163,8 @@ const handleNavigate = (label) => {
     }
 
     &--active {
-      color: #111827;
-      background-color: #f9fafb;
+      color: #252d37;
+      background-color: #fafafa;
     }
 
     &--with-divider::after {
