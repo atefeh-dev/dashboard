@@ -3,6 +3,11 @@ body {
   margin: 0;
   padding: 0;
 }
+// ============================================
+// Button Component Styles
+// Senior Dev Approach: Order matters!
+// ============================================
+
 .btn {
   // Display and layout
   display: inline-flex;
@@ -54,7 +59,6 @@ body {
     position: relative;
     cursor: wait;
 
-    // Optional: Add loading spinner
     &::after {
       content: "";
       position: absolute;
@@ -69,7 +73,9 @@ body {
   }
 }
 
-// Size variants
+// ============================================
+// Size variants (Base padding)
+// ============================================
 .btn-sm {
   padding: 0.5rem 0.875rem;
   font-size: 0.875rem;
@@ -88,7 +94,6 @@ body {
 }
 
 .btn-lg {
-  // padding: 0.75rem 1.5rem;
   padding: 0.625rem 0.875rem;
   font-size: 1rem;
   min-height: 3rem;
@@ -99,7 +104,9 @@ body {
   }
 }
 
+// ============================================
 // Color variants
+// ============================================
 .btn-primary {
   background-color: #4539cc;
   box-shadow: inset 0 0 0 2px #d6bbfb16;
@@ -142,20 +149,7 @@ body {
     background-color: #e5e7eb;
   }
 }
-.btn-blank {
-  background-color: transparent;
-  border: none;
-  box-shadow: none;
-  padding-left: 0;
 
-  &:hover:not(.btn-disabled) {
-    background-color: #f3f4f6;
-  }
-
-  &:active:not(.btn-disabled) {
-    background-color: #e5e7eb;
-  }
-}
 .btn-danger {
   background-color: #ef4444;
   color: white;
@@ -169,13 +163,57 @@ body {
   }
 }
 
+// ============================================
+// Blank variant (MUST come AFTER size variants)
+// This overrides size padding with higher specificity
+// ============================================
+.btn-blank {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+
+  &:hover:not(.btn-disabled) {
+    background-color: #f3f4f6;
+  }
+
+  &:active:not(.btn-disabled) {
+    background-color: #e5e7eb;
+  }
+
+  // Remove horizontal padding for blank buttons
+  // Using combined selectors for proper specificity without !important
+  &.btn-sm,
+  &.btn-md,
+  &.btn-lg {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+// ============================================
 // Loading animation
+// ============================================
 @keyframes btn-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
+// ============================================
+// Usage Examples:
+// ============================================
+/*
+<!-- Primary button -->
+<button class="btn btn-primary btn-md">Save</button>
+
+<!-- Blank button (no horizontal padding) -->
+<button class="btn btn-blank btn-sm">
+  <TrashIcon />
+</button>
+
+<!-- Ghost button -->
+<button class="btn btn-ghost btn-lg">Cancel</button>
+*/
 // Responsive adjustments
 @media (max-width: 640px) {
   .btn {

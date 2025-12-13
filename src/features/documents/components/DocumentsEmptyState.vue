@@ -1,38 +1,32 @@
 <template>
-  <div
-    class="relative flex items-center justify-center min-h-[720px] md:min-h-[calc(100vh-200px)] px-4"
-  >
+  <div class="empty-state">
     <!-- Background SVG -->
-    <img
-      :src="emptyState"
-      alt=""
-      class="absolute inset-0 m-auto w-[480px] max-w-full pointer-events-none select-none"
-      style="z-index: 0"
-    />
+    <EmptyContentPic class="empty-state__background" />
 
     <!-- Foreground Content -->
-    <div class="relative z-10 flex flex-col items-center text-center">
+    <div class="empty-state__content">
       <!-- Icon -->
-      <div
-        class="w-14 h-14 mb-6 bg-gray-50 rounded-2xl flex items-center justify-center border border-gray-200"
-      >
-        <FileText class="w-7 h-7 text-gray-400" />
+      <div class="empty-state__icon">
+        <EmptyIcon class="empty-state__icon-svg" />
       </div>
 
       <!-- Title -->
-      <h3 class="text-lg font-semibold text-gray-900 mb-2">
-        No document created yet
-      </h3>
+      <h3 class="empty-state__title">No document created yet</h3>
 
       <!-- Description -->
-      <p class="text-sm text-gray-500 mb-6 max-w-lg leading-relaxed">
+      <p class="empty-state__description">
         Here you can manage every document you create and of course we'll take
         care of them.
       </p>
 
       <!-- CTA Button -->
-      <AppButton variant="primary" size="md" @click="$emit('create')">
-        <Plus class="w-4 h-4 mr-2" />
+      <AppButton
+        variant="primary"
+        size="md"
+        @click="$emit('create')"
+        class="empty-state__button"
+      >
+        <PlusIcon class="empty-state__button-icon" />
         Create your first document
       </AppButton>
     </div>
@@ -41,8 +35,97 @@
 
 <script setup>
 import AppButton from "@/components/ui/AppButton.vue";
-import { Plus, FileText } from "lucide-vue-next";
-import emptyState from "@/assets/images/empty_state.svg";
+import EmptyIcon from "@/assets/icons/common/export.svg";
+import PlusIcon from "../../../assets/icons/common/plus.svg";
+import EmptyContentPic from "../../../assets/icons/common/empty-content.svg";
 
 defineEmits(["create"]);
 </script>
+
+<style scoped lang="scss">
+.empty-state {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 720px;
+  padding: 2rem 1rem;
+
+  @media (min-width: 768px) {
+    min-height: calc(100vh - 200px);
+  }
+
+  // Background SVG - FINAL FIX
+  &__background {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    // CRITICAL: No width/height = auto-centers based on SVG's intrinsic size
+    max-width: 90%;
+    max-height: 90%;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+    opacity: 0.6;
+
+    // DON'T override fill - let SVG keep its concentric circle design
+    // Just set the color property which SVG can inherit
+    color: #e9eaeb;
+  }
+
+  // Foreground Content
+  &__content {
+    position: relative;
+    width: 100%;
+    max-width: 22rem;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  // Icon Container
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-bottom: 1.25rem;
+    background-color: #ffffff;
+    border: 1px solid #d5d7da;
+    border-radius: 0.75rem;
+    box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
+  }
+
+  &__icon-svg {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  // Title
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #181d27;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+  }
+
+  // Description
+  &__description {
+    font-size: 1rem;
+    color: #535862;
+    line-height: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  // Button icon
+  &__button-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+</style>

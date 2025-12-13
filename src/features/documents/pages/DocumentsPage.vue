@@ -27,7 +27,12 @@
         @connect="() => console.log('Connect to Google Drive')"
       />
       <!-- Documents Section -->
-      <div class="documents__card">
+      <div
+        :class="[
+          'documents__card',
+          { 'documents__card--no-overflow': hasNoDocuments },
+        ]"
+      >
         <!-- Header - Always show -->
         <DocumentsHeader
           v-if="!hasNoDocuments"
@@ -105,5 +110,11 @@ function onImport() {
     height: 1rem;
     margin-right: 0.5rem;
   }
+}
+</style>
+
+<style scoped lang="scss">
+.documents__card--no-overflow {
+  overflow: visible;
 }
 </style>

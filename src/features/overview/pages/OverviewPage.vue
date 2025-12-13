@@ -143,6 +143,7 @@ const handleNavigate = (label) => {
     border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
     overflow: hidden;
+    box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
   }
 
   &__tab {
