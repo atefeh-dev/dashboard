@@ -44,19 +44,33 @@ const options = ["None", "In-app", "Email"];
   align-items: center;
   justify-content: space-between;
   padding: 1rem 0;
+  gap: 1rem;
+
+  @media (min-width: 640px) {
+    align-items: flex-start;
+    min-height: 3.5rem;
+  }
 
   @media (max-width: 639px) {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 0.75rem;
   }
 
   &__label {
     font-size: 0.875rem;
     color: #111827;
+    line-height: 1.5;
+    flex-shrink: 1;
+    min-width: 0;
+
+    @media (min-width: 640px) {
+      padding-top: 0.375rem;
+    }
 
     @media (max-width: 639px) {
       width: 100%;
+      padding-top: 0;
     }
   }
 
@@ -67,15 +81,17 @@ const options = ["None", "In-app", "Email"];
     border-radius: 0.5rem;
     padding: 0.125rem;
     gap: 0.125rem;
+    flex-shrink: 0;
 
     @media (max-width: 639px) {
       width: 100%;
+      display: flex;
     }
   }
 
   &__button {
     position: relative;
-    padding: 0.5rem 1.5rem;
+    padding: 0.5rem 1.25rem;
     font-size: 0.875rem;
     font-weight: 500;
     border-radius: 0.375rem;
@@ -88,7 +104,7 @@ const options = ["None", "In-app", "Email"];
 
     @media (max-width: 639px) {
       flex: 1;
-      padding: 0.5rem 0.75rem;
+      padding: 0.5rem 0.5rem;
       font-size: 0.8125rem;
     }
 

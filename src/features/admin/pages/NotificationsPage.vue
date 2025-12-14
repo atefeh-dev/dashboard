@@ -451,6 +451,7 @@ const handleNavigate = (label) => {
 
   &__container {
     max-width: 100%;
+    width: 100%;
   }
 
   &__header {
@@ -495,6 +496,11 @@ const handleNavigate = (label) => {
   &__section-row {
     display: flex;
     gap: 2rem;
+    align-items: flex-start;
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+      gap: 1rem;
+    }
 
     @media (max-width: 767px) {
       flex-direction: column;
@@ -514,8 +520,8 @@ const handleNavigate = (label) => {
     width: 280px;
     flex-shrink: 0;
 
-    @media (min-width: 768px) and (max-width: 1279px) {
-      width: 240px;
+    @media (min-width: 768px) and (max-width: 1199px) {
+      width: 180px;
     }
 
     @media (max-width: 767px) {
@@ -529,25 +535,39 @@ const handleNavigate = (label) => {
     color: #111827;
     margin-bottom: 0.25rem;
     line-height: 1.4;
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+      font-size: 0.8125rem;
+    }
   }
 
   &__section-description {
     font-size: 0.875rem;
     color: #4b5563;
     line-height: 1.5;
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+      font-size: 0.8125rem;
+      line-height: 1.4;
+    }
   }
 
   &__section-right {
     flex: 1;
     min-width: 0;
+    width: 100%;
+
+    @media (max-width: 639px) {
+      width: 100%;
+    }
   }
 
   &__section-spacer {
     width: 280px;
     flex-shrink: 0;
 
-    @media (min-width: 768px) and (max-width: 1279px) {
-      width: 240px;
+    @media (min-width: 768px) and (max-width: 1199px) {
+      width: 180px;
     }
 
     @media (max-width: 767px) {
@@ -570,8 +590,8 @@ const handleNavigate = (label) => {
     margin-bottom: 3rem;
     max-width: calc(280px + 2rem + 512px);
 
-    @media (min-width: 768px) and (max-width: 1279px) {
-      max-width: calc(240px + 2rem + 512px);
+    @media (min-width: 768px) and (max-width: 1199px) {
+      max-width: calc(180px + 1rem + 512px);
     }
 
     @media (max-width: 767px) {
