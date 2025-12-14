@@ -45,10 +45,13 @@
             >
               <NotificationsIcon class="notifications-page__nav-icon" />
               <span class="notifications-page__nav-label">Notifications</span>
-              <span class="notifications-page__nav-badge">10</span>
-            </button>
 
-            <div class="notifications-page__nav-divider"></div>
+              <span
+                class="notifications-page__nav-badge"
+                id="notifications-badge"
+                >10 <ChevronRightIcon class="notifications-page__nav-chevron" />
+              </span>
+            </button>
 
             <button
               @click="activeSection = 'Analytics'"
@@ -62,7 +65,6 @@
             >
               <LineChartIcon class="notifications-page__nav-icon" />
               <span class="notifications-page__nav-label">Analytics</span>
-              <ChevronRight class="notifications-page__nav-chevron" />
             </button>
 
             <button
@@ -77,7 +79,6 @@
             >
               <StarIcon class="notifications-page__nav-icon" />
               <span class="notifications-page__nav-label">Saved reports</span>
-              <ChevronRight class="notifications-page__nav-chevron" />
             </button>
 
             <!-- <button
@@ -223,7 +224,6 @@
                 </div>
               </div>
 
-              <!-- Remaining rows -->
               <div
                 class="notifications-page__section-row notifications-page__section-row--no-title"
               >
@@ -270,6 +270,7 @@ import NotificationsIcon from "@/assets/icons/sidebar/notifications.svg";
 import LineChartIcon from "@/assets/icons/sidebar/line-chart.svg";
 import StarIcon from "@/assets/icons/sidebar/star.svg";
 import SettingsIcon from "@/assets/icons/sidebar/settings.svg";
+import ChevronRightIcon from "@/assets/icons/sidebar/chervon-right.svg";
 
 const router = useRouter();
 const sidebarOpen = ref(false);
@@ -338,11 +339,11 @@ const handleNavigate = (label) => {
   // Sidebar
   &__sidebar {
     display: none;
-    width: 280px;
+    width: 16rem;
     flex-shrink: 0;
     border-right: 1px solid #e5e7eb;
     background-color: #ffffff;
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1rem;
 
     @media (min-width: 1024px) {
       display: block;
@@ -352,34 +353,32 @@ const handleNavigate = (label) => {
   &__nav {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.125rem;
   }
-
   &__nav-item {
-    width: 100%;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s;
-    text-align: left;
-    background: transparent;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
     border: none;
+    background: transparent;
     cursor: pointer;
-    color: #374151;
+    transition: all 0.2s;
+    width: 100%;
+    text-align: left;
+    color: #414651;
+    font-weight: 600;
 
     &:hover {
-      background-color: #f9fafb;
-
-      .notifications-page__nav-chevron {
-        opacity: 1;
-      }
+      background-color: #fafafa;
     }
 
     &--active {
-      background-color: #f9fafb;
-      color: #111827;
+      color: #4539cc;
+      background-color: #fafafa;
+      font-weight: 600;
     }
   }
 
@@ -402,26 +401,22 @@ const handleNavigate = (label) => {
   }
 
   &__nav-badge {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.125rem 0.5rem;
-    background-color: #f3f4f6;
-    color: #374151;
+    gap: 0.25rem;
+    min-width: 30px;
+    height: 22px;
     font-size: 0.75rem;
     font-weight: 500;
-    border-radius: 0.375rem;
-    line-height: 1.25;
-    min-width: 1.5rem;
+    border-radius: 9999px;
+    background-color: #fafafa;
+    border: 1px solid #e9eaeb;
   }
-
-  &__nav-chevron {
-    width: 1rem;
-    height: 1rem;
-    color: #9ca3af;
-    opacity: 0;
-    transition: opacity 0.2s;
-    flex-shrink: 0;
+  #notifications-badge {
+    background-color: #f9f5ff;
+    border: 1px solid #e9d7fe;
+    padding: 0.125rem 0.375rem 0.125rem 0.5rem;
   }
 
   // Main content
@@ -573,11 +568,6 @@ const handleNavigate = (label) => {
     flex-direction: column;
   }
 
-  &__section-divider {
-    border-top: 1px solid #e5e7eb;
-  }
-
-  // Big divider
   &__big-divider {
     border-top: 1px solid #e5e7eb;
     margin-bottom: 3rem;

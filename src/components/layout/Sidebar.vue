@@ -452,7 +452,7 @@ function getIconClass(label) {
     width: 100%;
     text-align: left;
     color: #414651;
-    font-weight: 400;
+    font-weight: 600;
 
     &:hover {
       background-color: #fafafa;
@@ -479,6 +479,7 @@ function getIconClass(label) {
   &__nav-text {
     flex: 1;
     text-align: left;
+    font-size: 1rem;
   }
 
   &__nav-content {
