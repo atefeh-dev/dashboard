@@ -178,19 +178,16 @@
                       :selected="generalNotifications.replies"
                       @update="generalNotifications.replies = $event"
                     />
-                    <div class="notifications-page__section-divider"></div>
                     <NotificationRowSimple
                       label="I'm assigned a task"
                       :selected="generalNotifications.assigned"
                       @update="generalNotifications.assigned = $event"
                     />
-                    <div class="notifications-page__section-divider"></div>
                     <NotificationRowSimple
                       label="A task is overdue"
                       :selected="generalNotifications.overdue"
                       @update="generalNotifications.overdue = $event"
                     />
-                    <div class="notifications-page__section-divider"></div>
                     <NotificationRowSimple
                       label="A task status is updated"
                       :selected="generalNotifications.taskStatus"
@@ -427,12 +424,6 @@ const handleNavigate = (label) => {
     flex-shrink: 0;
   }
 
-  &__nav-divider {
-    height: 1px;
-    background-color: #e5e7eb;
-    margin: 0.5rem 0;
-  }
-
   // Main content
   &__main {
     flex: 1;
@@ -455,7 +446,8 @@ const handleNavigate = (label) => {
   }
 
   &__header {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
 
     @media (max-width: 639px) {
       margin-bottom: 2rem;
@@ -463,9 +455,9 @@ const handleNavigate = (label) => {
   }
 
   &__title {
-    font-size: 1.875rem;
+    font-size: 1.5rem;
     font-weight: 600;
-    color: #111827;
+    color: #181d27;
     margin-bottom: 0.5rem;
     line-height: 1.2;
 
@@ -475,9 +467,10 @@ const handleNavigate = (label) => {
   }
 
   &__subtitle {
-    font-size: 0.875rem;
-    color: #4b5563;
+    font-size: 1rem;
+    color: #535862;
     line-height: 1.5;
+    padding-bottom: 1.063rem;
   }
 
   // Section
@@ -532,7 +525,7 @@ const handleNavigate = (label) => {
   &__section-title {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #111827;
+    color: #414651;
     margin-bottom: 0.25rem;
     line-height: 1.4;
 
@@ -543,9 +536,9 @@ const handleNavigate = (label) => {
 
   &__section-description {
     font-size: 0.875rem;
-    color: #4b5563;
+    color: #535862;
+    font-weight: 400;
     line-height: 1.5;
-
     @media (min-width: 768px) and (max-width: 1199px) {
       font-size: 0.8125rem;
       line-height: 1.4;

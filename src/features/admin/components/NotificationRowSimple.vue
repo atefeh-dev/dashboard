@@ -59,7 +59,7 @@ const options = ["None", "In-app", "Email"];
 
   &__label {
     font-size: 0.875rem;
-    color: #111827;
+    color: #414651;
     line-height: 1.5;
     flex-shrink: 1;
     min-width: 0;
@@ -79,8 +79,8 @@ const options = ["None", "In-app", "Email"];
     background-color: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
-    padding: 0.125rem;
-    gap: 0.125rem;
+    // padding: 0.5rem 1rem;
+    box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
     flex-shrink: 0;
 
     @media (max-width: 639px) {
@@ -91,7 +91,7 @@ const options = ["None", "In-app", "Email"];
 
   &__button {
     position: relative;
-    padding: 0.5rem 1.25rem;
+    padding: 0.5rem 1rem;
     font-size: 0.875rem;
     font-weight: 500;
     border-radius: 0.375rem;
@@ -100,7 +100,7 @@ const options = ["None", "In-app", "Email"];
     background: transparent;
     border: none;
     cursor: pointer;
-    color: #4b5563;
+    color: #414651;
 
     @media (max-width: 639px) {
       flex: 1;
@@ -113,8 +113,8 @@ const options = ["None", "In-app", "Email"];
     }
 
     &--active {
-      background-color: #f9fafb;
-      color: #111827;
+      background-color: #fafafa;
+      color: #252b37;
     }
 
     &--with-divider::after {
