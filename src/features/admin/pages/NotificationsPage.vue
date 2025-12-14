@@ -6,170 +6,157 @@
     @navigate="handleNavigate"
   >
     <!-- Mobile menu button -->
-    <div class="lg:hidden mb-4">
-      <button class="p-2 hover:bg-gray-100 rounded-lg" @click="toggleSidebar">
-        <Menu class="w-6 h-4" />
+    <div class="notifications-page__mobile-menu">
+      <button class="notifications-page__mobile-btn" @click="toggleSidebar">
+        <Menu class="notifications-page__mobile-icon" />
       </button>
     </div>
 
     <!-- Break out of MainLayout's max-w and padding constraints -->
     <div class="-mx-4 sm:-mx-6 lg:-mx-8 -my-8">
-      <div class="flex min-h-screen">
+      <div class="notifications-page">
         <!-- Second Sidebar (Admin Navigation) -->
-        <aside
-          class="hidden lg:block w-[280px] flex-shrink-0 border-r border-gray-200 bg-white px-6 py-8"
-        >
-          <nav class="space-y-1">
+        <aside class="notifications-page__sidebar">
+          <nav class="notifications-page__nav">
             <button
               @click="activeSection = 'My details'"
               :class="[
-                'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group',
-                activeSection === 'My details'
-                  ? 'bg-gray-50 text-gray-900'
-                  : 'text-gray-700 hover:bg-gray-50',
+                'notifications-page__nav-item',
+                {
+                  'notifications-page__nav-item--active':
+                    activeSection === 'My details',
+                },
               ]"
             >
-              <User class="w-5 h-5 text-gray-400" />
-              <span class="flex-1 text-sm font-normal">My details</span>
-              <ChevronRight
-                class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
-              />
+              <User class="notifications-page__nav-icon" />
+              <span class="notifications-page__nav-label">My details</span>
+              <ChevronRight class="notifications-page__nav-chevron" />
             </button>
 
             <button
               @click="activeSection = 'Notifications'"
               :class="[
-                'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group',
-                activeSection === 'Notifications'
-                  ? 'bg-gray-50 text-gray-900'
-                  : 'text-gray-700 hover:bg-gray-50',
+                'notifications-page__nav-item',
+                {
+                  'notifications-page__nav-item--active':
+                    activeSection === 'Notifications',
+                },
               ]"
             >
-              <Bell class="w-5 h-5 text-gray-400" />
-              <span class="flex-1 text-sm font-normal">Notifications</span>
-              <span
-                class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-md"
-                >10</span
-              >
+              <Bell class="notifications-page__nav-icon" />
+              <span class="notifications-page__nav-label">Notifications</span>
+              <span class="notifications-page__nav-badge">10</span>
             </button>
 
-            <div class="h-px bg-gray-200 my-2"></div>
+            <div class="notifications-page__nav-divider"></div>
 
             <button
               @click="activeSection = 'Analytics'"
               :class="[
-                'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group',
-                activeSection === 'Analytics'
-                  ? 'bg-gray-50 text-gray-900'
-                  : 'text-gray-700 hover:bg-gray-50',
+                'notifications-page__nav-item',
+                {
+                  'notifications-page__nav-item--active':
+                    activeSection === 'Analytics',
+                },
               ]"
             >
-              <BarChart3 class="w-5 h-5 text-gray-400" />
-              <span class="flex-1 text-sm font-normal">Analytics</span>
-              <ChevronRight
-                class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
-              />
+              <BarChart3 class="notifications-page__nav-icon" />
+              <span class="notifications-page__nav-label">Analytics</span>
+              <ChevronRight class="notifications-page__nav-chevron" />
             </button>
 
             <button
               @click="activeSection = 'Saved reports'"
               :class="[
-                'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group',
-                activeSection === 'Saved reports'
-                  ? 'bg-gray-50 text-gray-900'
-                  : 'text-gray-700 hover:bg-gray-50',
+                'notifications-page__nav-item',
+                {
+                  'notifications-page__nav-item--active':
+                    activeSection === 'Saved reports',
+                },
               ]"
             >
-              <FileText class="w-5 h-5 text-gray-400" />
-              <span class="flex-1 text-sm font-normal">Saved reports</span>
-              <ChevronRight
-                class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
-              />
+              <FileText class="notifications-page__nav-icon" />
+              <span class="notifications-page__nav-label">Saved reports</span>
+              <ChevronRight class="notifications-page__nav-chevron" />
             </button>
 
-            <div class="h-px bg-gray-200 my-2"></div>
+            <div class="notifications-page__nav-divider"></div>
 
             <button
               @click="activeSection = 'My details 2'"
               :class="[
-                'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group',
-                activeSection === 'My details 2'
-                  ? 'bg-gray-50 text-gray-900'
-                  : 'text-gray-700 hover:bg-gray-50',
+                'notifications-page__nav-item',
+                {
+                  'notifications-page__nav-item--active':
+                    activeSection === 'My details 2',
+                },
               ]"
             >
-              <User class="w-5 h-5 text-gray-400" />
-              <span class="flex-1 text-sm font-normal">My details</span>
-              <ChevronRight
-                class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
-              />
+              <User class="notifications-page__nav-icon" />
+              <span class="notifications-page__nav-label">My details</span>
+              <ChevronRight class="notifications-page__nav-chevron" />
             </button>
 
             <button
               @click="activeSection = 'User reports'"
               :class="[
-                'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group',
-                activeSection === 'User reports'
-                  ? 'bg-gray-50 text-gray-900'
-                  : 'text-gray-700 hover:bg-gray-50',
+                'notifications-page__nav-item',
+                {
+                  'notifications-page__nav-item--active':
+                    activeSection === 'User reports',
+                },
               ]"
             >
-              <FileText class="w-5 h-5 text-gray-400" />
-              <span class="flex-1 text-sm font-normal">User reports</span>
-              <span
-                class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-md"
-                >10</span
-              >
+              <FileText class="notifications-page__nav-icon" />
+              <span class="notifications-page__nav-label">User reports</span>
+              <span class="notifications-page__nav-badge">10</span>
             </button>
 
-            <div class="h-px bg-gray-200 my-2"></div>
+            <div class="notifications-page__nav-divider"></div>
 
             <button
               @click="activeSection = 'Settings'"
               :class="[
-                'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group',
-                activeSection === 'Settings'
-                  ? 'bg-gray-50 text-gray-900'
-                  : 'text-gray-700 hover:bg-gray-50',
+                'notifications-page__nav-item',
+                {
+                  'notifications-page__nav-item--active':
+                    activeSection === 'Settings',
+                },
               ]"
             >
-              <Settings class="w-5 h-5 text-gray-400" />
-              <span class="flex-1 text-sm font-normal">Settings</span>
-              <ChevronRight
-                class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
-              />
+              <Settings class="notifications-page__nav-icon" />
+              <span class="notifications-page__nav-label">Settings</span>
+              <ChevronRight class="notifications-page__nav-chevron" />
             </button>
           </nav>
         </aside>
 
         <!-- Main Content Area -->
-        <main class="flex-1 min-w-0 px-8 py-8 bg-gray-50">
-          <div class="max-w-5xl">
-            <div class="mb-12">
-              <h1 class="text-3xl font-semibold text-gray-900 mb-2">
-                Notifications
-              </h1>
-              <p class="text-sm text-gray-600">
+        <main class="notifications-page__main">
+          <div class="notifications-page__container">
+            <div class="notifications-page__header">
+              <h1 class="notifications-page__title">Notifications</h1>
+              <p class="notifications-page__subtitle">
                 Select when and how you'll be notified.
               </p>
             </div>
 
             <!-- General Notifications Section -->
-            <div class="mb-12">
-              <div class="flex gap-8">
+            <div class="notifications-page__section">
+              <div class="notifications-page__section-row">
                 <!-- Left: Section Description -->
-                <div class="w-[370px] flex-shrink-0">
-                  <h2 class="text-sm font-semibold text-gray-900 mb-1">
+                <div class="notifications-page__section-left">
+                  <h2 class="notifications-page__section-title">
                     General notifications
                   </h2>
-                  <p class="text-sm text-gray-600">
+                  <p class="notifications-page__section-description">
                     Select when you'll be notified when the following changes
                     occur.
                   </p>
                 </div>
 
                 <!-- Right: First Row -->
-                <div class="flex-1">
+                <div class="notifications-page__section-right">
                   <NotificationRowSimple
                     label="I'm mentioned in a message"
                     :selected="generalNotifications.mentioned"
@@ -178,60 +165,61 @@
                 </div>
               </div>
 
-              <!-- Remaining rows (right side only with 512px lines) -->
-              <div class="flex gap-8">
-                <div class="w-[370px] flex-shrink-0"></div>
-                <div class="flex-1 space-y-0">
-                  <div class="border-t border-gray-200"></div>
-                  <NotificationRowSimple
-                    label="Someone replies to any message"
-                    :selected="generalNotifications.replies"
-                    @update="generalNotifications.replies = $event"
-                  />
-                  <div class="border-t border-gray-200"></div>
-                  <NotificationRowSimple
-                    label="I'm assigned a task"
-                    :selected="generalNotifications.assigned"
-                    @update="generalNotifications.assigned = $event"
-                  />
-                  <div class="border-t border-gray-200"></div>
-                  <NotificationRowSimple
-                    label="A task is overdue"
-                    :selected="generalNotifications.overdue"
-                    @update="generalNotifications.overdue = $event"
-                  />
-                  <div class="border-t border-gray-200"></div>
-                  <NotificationRowSimple
-                    label="A task status is updated"
-                    :selected="generalNotifications.taskStatus"
-                    @update="generalNotifications.taskStatus = $event"
-                  />
+              <!-- Remaining rows -->
+              <div
+                class="notifications-page__section-row notifications-page__section-row--no-title"
+              >
+                <div class="notifications-page__section-spacer"></div>
+                <div class="notifications-page__section-right">
+                  <div class="notifications-page__section-list">
+                    <div class="notifications-page__section-divider"></div>
+                    <NotificationRowSimple
+                      label="Someone replies to any message"
+                      :selected="generalNotifications.replies"
+                      @update="generalNotifications.replies = $event"
+                    />
+                    <div class="notifications-page__section-divider"></div>
+                    <NotificationRowSimple
+                      label="I'm assigned a task"
+                      :selected="generalNotifications.assigned"
+                      @update="generalNotifications.assigned = $event"
+                    />
+                    <div class="notifications-page__section-divider"></div>
+                    <NotificationRowSimple
+                      label="A task is overdue"
+                      :selected="generalNotifications.overdue"
+                      @update="generalNotifications.overdue = $event"
+                    />
+                    <div class="notifications-page__section-divider"></div>
+                    <NotificationRowSimple
+                      label="A task status is updated"
+                      :selected="generalNotifications.taskStatus"
+                      @update="generalNotifications.taskStatus = $event"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Big horizontal divider (888px - spans both columns) -->
-            <div
-              class="border-t border-gray-200 mb-12"
-              style="max-width: 888px"
-            ></div>
+            <!-- Big horizontal divider -->
+            <div class="notifications-page__big-divider"></div>
 
             <!-- Summary Notifications Section -->
-            <div>
-              <div class="flex gap-8">
+            <div class="notifications-page__section">
+              <div class="notifications-page__section-row">
                 <!-- Left: Section Description -->
-                <div class="w-[370px] flex-shrink-0">
-                  <h2 class="text-sm font-semibold text-gray-900 mb-1">
+                <div class="notifications-page__section-left">
+                  <h2 class="notifications-page__section-title">
                     Summary notifications
                   </h2>
-                  <p class="text-sm text-gray-600">
+                  <p class="notifications-page__section-description">
                     Select when you'll be notified when the following summaries
                     or report are ready.
                   </p>
                 </div>
 
                 <!-- Right: First Row -->
-                <div class="flex-1">
+                <div class="notifications-page__section-right">
                   <NotificationRowSimple
                     label="Daily summary"
                     :selected="summaryNotifications.daily"
@@ -240,28 +228,32 @@
                 </div>
               </div>
 
-              <!-- Remaining rows (right side only with 512px lines) -->
-              <div class="flex gap-8">
-                <div class="w-[370px] flex-shrink-0"></div>
-                <div class="flex-1 space-y-0">
-                  <div class="border-t border-gray-200"></div>
-                  <NotificationRowSimple
-                    label="Weekly summary"
-                    :selected="summaryNotifications.weekly"
-                    @update="summaryNotifications.weekly = $event"
-                  />
-                  <div class="border-t border-gray-200"></div>
-                  <NotificationRowSimple
-                    label="Monthly summary"
-                    :selected="summaryNotifications.monthly"
-                    @update="summaryNotifications.monthly = $event"
-                  />
-                  <div class="border-t border-gray-200"></div>
-                  <NotificationRowSimple
-                    label="Quarterly summary"
-                    :selected="summaryNotifications.quarterly"
-                    @update="summaryNotifications.quarterly = $event"
-                  />
+              <!-- Remaining rows -->
+              <div
+                class="notifications-page__section-row notifications-page__section-row--no-title"
+              >
+                <div class="notifications-page__section-spacer"></div>
+                <div class="notifications-page__section-right">
+                  <div class="notifications-page__section-list">
+                    <div class="notifications-page__section-divider"></div>
+                    <NotificationRowSimple
+                      label="Weekly summary"
+                      :selected="summaryNotifications.weekly"
+                      @update="summaryNotifications.weekly = $event"
+                    />
+                    <div class="notifications-page__section-divider"></div>
+                    <NotificationRowSimple
+                      label="Monthly summary"
+                      :selected="summaryNotifications.monthly"
+                      @update="summaryNotifications.monthly = $event"
+                    />
+                    <div class="notifications-page__section-divider"></div>
+                    <NotificationRowSimple
+                      label="Quarterly summary"
+                      :selected="summaryNotifications.quarterly"
+                      @update="summaryNotifications.quarterly = $event"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -316,3 +308,276 @@ const handleNavigate = (label) => {
   if (label === "Notifications") router.push("/admin/notifications");
 };
 </script>
+
+<style scoped lang="scss">
+.notifications-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9fafb;
+
+  // Mobile menu
+  &__mobile-menu {
+    display: block;
+    margin-bottom: 1rem;
+
+    @media (min-width: 1024px) {
+      display: none;
+    }
+  }
+
+  &__mobile-btn {
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f3f4f6;
+    }
+  }
+
+  &__mobile-icon {
+    width: 1.5rem;
+    height: 1rem;
+  }
+
+  // Sidebar
+  &__sidebar {
+    display: none;
+    width: 280px;
+    flex-shrink: 0;
+    border-right: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    padding: 2rem 1.5rem;
+
+    @media (min-width: 1024px) {
+      display: block;
+    }
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  &__nav-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    text-align: left;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #374151;
+
+    &:hover {
+      background-color: #f9fafb;
+
+      .notifications-page__nav-chevron {
+        opacity: 1;
+      }
+    }
+
+    &--active {
+      background-color: #f9fafb;
+      color: #111827;
+    }
+  }
+
+  &__nav-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #9ca3af;
+    flex-shrink: 0;
+  }
+
+  &__nav-label {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 400;
+  }
+
+  &__nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.125rem 0.5rem;
+    background-color: #f3f4f6;
+    color: #374151;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    line-height: 1.25;
+    min-width: 1.5rem;
+  }
+
+  &__nav-chevron {
+    width: 1rem;
+    height: 1rem;
+    color: #9ca3af;
+    opacity: 0;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+  }
+
+  &__nav-divider {
+    height: 1px;
+    background-color: #e5e7eb;
+    margin: 0.5rem 0;
+  }
+
+  // Main content
+  &__main {
+    flex: 1;
+    min-width: 0;
+    padding: 2rem;
+    background-color: #f9fafb;
+
+    @media (max-width: 1023px) {
+      padding: 2rem 1.5rem;
+    }
+
+    @media (max-width: 639px) {
+      padding: 1.5rem 1rem;
+    }
+  }
+
+  &__container {
+    max-width: 100%;
+  }
+
+  &__header {
+    margin-bottom: 3rem;
+
+    @media (max-width: 639px) {
+      margin-bottom: 2rem;
+    }
+  }
+
+  &__title {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+
+    @media (max-width: 639px) {
+      font-size: 1.5rem;
+    }
+  }
+
+  &__subtitle {
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.5;
+  }
+
+  // Section
+  &__section {
+    margin-bottom: 3rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 639px) {
+      margin-bottom: 2rem;
+    }
+  }
+
+  &__section-row {
+    display: flex;
+    gap: 2rem;
+
+    @media (max-width: 767px) {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    &--no-title {
+      @media (max-width: 767px) {
+        .notifications-page__section-spacer {
+          display: none;
+        }
+      }
+    }
+  }
+
+  &__section-left {
+    width: 280px;
+    flex-shrink: 0;
+
+    @media (min-width: 768px) and (max-width: 1279px) {
+      width: 240px;
+    }
+
+    @media (max-width: 767px) {
+      width: 100%;
+    }
+  }
+
+  &__section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+  }
+
+  &__section-description {
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.5;
+  }
+
+  &__section-right {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__section-spacer {
+    width: 280px;
+    flex-shrink: 0;
+
+    @media (min-width: 768px) and (max-width: 1279px) {
+      width: 240px;
+    }
+
+    @media (max-width: 767px) {
+      display: none;
+    }
+  }
+
+  &__section-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__section-divider {
+    border-top: 1px solid #e5e7eb;
+  }
+
+  // Big divider
+  &__big-divider {
+    border-top: 1px solid #e5e7eb;
+    margin-bottom: 3rem;
+    max-width: calc(280px + 2rem + 512px);
+
+    @media (min-width: 768px) and (max-width: 1279px) {
+      max-width: calc(240px + 2rem + 512px);
+    }
+
+    @media (max-width: 767px) {
+      margin-bottom: 2rem;
+      max-width: 100%;
+    }
+  }
+}
+</style>

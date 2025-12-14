@@ -1,22 +1,18 @@
 <template>
-  <div class="flex items-center justify-between py-4">
-    <span class="text-sm text-gray-900">{{ label }}</span>
-
-    <div
-      class="inline-flex bg-white border border-gray-200 rounded-lg p-0.5 gap-0.5"
-    >
+  <div class="notification-row">
+    <span class="notification-row__label">{{ label }}</span>
+    <div class="notification-row__controls">
       <button
         v-for="(option, index) in options"
         :key="option"
         @click="$emit('update', option)"
         :class="[
-          'relative px-6 py-2 text-sm font-medium rounded-md transition-all whitespace-nowrap',
-          selected === option
-            ? 'bg-gray-50 text-gray-900'
-            : 'text-gray-600 hover:text-gray-900',
-          index !== options.length - 1
-            ? 'after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:bg-gray-200'
-            : '',
+          'notification-row__button',
+          {
+            'notification-row__button--active': selected === option,
+            'notification-row__button--with-divider':
+              index !== options.length - 1,
+          },
         ]"
       >
         {{ option }}
@@ -41,3 +37,83 @@ defineEmits(["update"]);
 
 const options = ["None", "In-app", "Email"];
 </script>
+
+<style scoped lang="scss">
+.notification-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+
+  @media (max-width: 639px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  &__label {
+    font-size: 0.875rem;
+    color: #111827;
+
+    @media (max-width: 639px) {
+      width: 100%;
+    }
+  }
+
+  &__controls {
+    display: inline-flex;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.125rem;
+    gap: 0.125rem;
+
+    @media (max-width: 639px) {
+      width: 100%;
+    }
+  }
+
+  &__button {
+    position: relative;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #4b5563;
+
+    @media (max-width: 639px) {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8125rem;
+    }
+
+    &:hover {
+      color: #111827;
+    }
+
+    &--active {
+      background-color: #f9fafb;
+      color: #111827;
+    }
+
+    &--with-divider::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: #e5e7eb;
+
+      @media (max-width: 639px) {
+        display: none;
+      }
+    }
+  }
+}
+</style>
