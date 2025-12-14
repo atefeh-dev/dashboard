@@ -28,7 +28,7 @@
                 },
               ]"
             >
-              <User class="notifications-page__nav-icon" />
+              <FlagIcon class="notifications-page__nav-icon" />
               <span class="notifications-page__nav-label">My details</span>
               <ChevronRight class="notifications-page__nav-chevron" />
             </button>
@@ -43,7 +43,7 @@
                 },
               ]"
             >
-              <Bell class="notifications-page__nav-icon" />
+              <NotificationsIcon class="notifications-page__nav-icon" />
               <span class="notifications-page__nav-label">Notifications</span>
               <span class="notifications-page__nav-badge">10</span>
             </button>
@@ -60,7 +60,7 @@
                 },
               ]"
             >
-              <BarChart3 class="notifications-page__nav-icon" />
+              <LineChartIcon class="notifications-page__nav-icon" />
               <span class="notifications-page__nav-label">Analytics</span>
               <ChevronRight class="notifications-page__nav-chevron" />
             </button>
@@ -75,14 +75,12 @@
                 },
               ]"
             >
-              <FileText class="notifications-page__nav-icon" />
+              <StarIcon class="notifications-page__nav-icon" />
               <span class="notifications-page__nav-label">Saved reports</span>
               <ChevronRight class="notifications-page__nav-chevron" />
             </button>
 
-            <div class="notifications-page__nav-divider"></div>
-
-            <button
+            <!-- <button
               @click="activeSection = 'My details 2'"
               :class="[
                 'notifications-page__nav-item',
@@ -94,8 +92,8 @@
             >
               <User class="notifications-page__nav-icon" />
               <span class="notifications-page__nav-label">My details</span>
-              <ChevronRight class="notifications-page__nav-chevron" />
-            </button>
+              <Flag class="notifications-page__nav-chevron" />
+            </button> -->
 
             <button
               @click="activeSection = 'User reports'"
@@ -107,7 +105,7 @@
                 },
               ]"
             >
-              <FileText class="notifications-page__nav-icon" />
+              <NotificationsIcon class="notifications-page__nav-icon" />
               <span class="notifications-page__nav-label">User reports</span>
               <span class="notifications-page__nav-badge">10</span>
             </button>
@@ -124,7 +122,7 @@
                 },
               ]"
             >
-              <Settings class="notifications-page__nav-icon" />
+              <SettingsIcon class="notifications-page__nav-icon" />
               <span class="notifications-page__nav-label">Settings</span>
               <ChevronRight class="notifications-page__nav-chevron" />
             </button>
@@ -266,15 +264,12 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import MainLayout from "@/components/layout/MainLayout.vue";
 import NotificationRowSimple from "../components/NotificationRowSimple.vue";
-import {
-  Menu,
-  User,
-  Bell,
-  BarChart3,
-  FileText,
-  Settings,
-  ChevronRight,
-} from "lucide-vue-next";
+
+import FlagIcon from "@/assets/icons/sidebar/flag.svg";
+import NotificationsIcon from "@/assets/icons/sidebar/notifications.svg";
+import LineChartIcon from "@/assets/icons/sidebar/line-chart.svg";
+import StarIcon from "@/assets/icons/sidebar/star.svg";
+import SettingsIcon from "@/assets/icons/sidebar/settings.svg";
 
 const router = useRouter();
 const sidebarOpen = ref(false);
@@ -391,14 +386,19 @@ const handleNavigate = (label) => {
   &__nav-icon {
     width: 1.25rem;
     height: 1.25rem;
-    color: #9ca3af;
     flex-shrink: 0;
+    color: #a4a7ae;
+
+    &--active {
+      color: #4539cc;
+    }
   }
 
   &__nav-label {
     flex: 1;
-    font-size: 0.875rem;
-    font-weight: 400;
+    font-size: 1rem;
+    color: #414651;
+    font-weight: 600;
   }
 
   &__nav-badge {
