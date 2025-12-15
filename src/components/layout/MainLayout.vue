@@ -17,19 +17,16 @@
         { 'layout__content--collapsed': isCollapsed },
       ]"
     >
-      <!-- Navbar (sticky header) -->
       <header v-if="$slots.navbar" class="layout__navbar">
         <slot name="navbar" />
       </header>
 
-      <!-- Main Content -->
       <main class="layout__main">
-        <div class="layout__container">
+        <div :class="['layout__container', `layout__container--${variant}`]">
           <slot />
         </div>
       </main>
     </div>
-
     <!-- Mobile Overlay -->
     <div
       v-if="sidebarOpen"
@@ -46,6 +43,11 @@ import Sidebar from "./Sidebar.vue";
 defineProps({
   sidebarOpen: { type: Boolean, default: false },
   activeNav: { type: String, default: "" },
+  variant: {
+    type: String,
+    default: "default",
+    validator: (v) => ["default", "admin"].includes(v),
+  },
 });
 
 const emit = defineEmits(["closeSidebar", "navigate", "userMenu"]);
@@ -59,17 +61,11 @@ function handleSidebarCollapse(collapsed) {
 
 <style scoped lang="scss">
 .layout {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f9fafb;
-
-  // Main Content Area
   &__content {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    transition: margin-left 0.3s ease;
 
     @media (min-width: 1024px) {
       margin-left: 280px;
@@ -80,6 +76,24 @@ function handleSidebarCollapse(collapsed) {
         margin-left: 4rem;
       }
     }
+  }
+
+  &__container {
+    width: 100%;
+  }
+
+  /* DEFAULT */
+  &__container--default {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 1.25rem 1rem;
+  }
+
+  /* ADMIN */
+  &__container--admin {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
   // Navbar Header - just positioning, no padding/styling
@@ -96,10 +110,16 @@ function handleSidebarCollapse(collapsed) {
   }
 
   // Container for page content
-  &__container {
-    max-width: 80rem;
+  &__container--default {
     margin: 0 auto;
-    padding: 1.25rem 1rem; // 20px 16px
+    padding: 1.25rem 1rem;
+    max-width: 80rem;
+  }
+
+  /* ADMIN PAGES (FULL BLEED) */
+  &__container--admin {
+    padding: 0;
+    margin: 0;
   }
 
   // Mobile Overlay
