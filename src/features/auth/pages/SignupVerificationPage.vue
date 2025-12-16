@@ -13,12 +13,12 @@
         <div class="auth-form__email-display">
           {{ email }}
         </div>
+        <p class="auth-form__message">
+          We sent a 4-digit verification code to your inbox.
+        </p>
       </div>
 
       <!-- Success Message -->
-      <p class="auth-form__message">
-        We sent a 4-digit verification code to your inbox.
-      </p>
 
       <!-- Verification Form -->
       <form @submit="onSubmit">

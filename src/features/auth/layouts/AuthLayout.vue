@@ -104,9 +104,9 @@ defineEmits(["google-login"]);
   &__title {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #000000;
+    color: #181d27;
     text-align: left;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
     line-height: 1.3;
 
     @media (max-width: 639px) {
