@@ -1,13 +1,12 @@
 <template>
   <AuthLayout
-    title="Send password Reset code"
+    title="Send password reset code"
     subtitle="We'll send a 4-digit reset code to your email."
     :showGoogleButton="false"
     :showDivider="false"
     :isLoading="authStore.isLoading"
     variant="forgot"
   >
-    <!-- Form Content -->
     <form @submit.prevent="onSubmit" class="auth-form">
       <!-- Email -->
       <div class="auth-form__field">
@@ -19,17 +18,13 @@
             id="email"
             type="email"
             placeholder="you@example.com"
+            :disabled="success"
             :error="meta.touched && meta.invalid"
           />
         </Field>
 
         <ErrorMessage name="email" class="auth-form__error" />
       </div>
-
-      <!-- Success Alert -->
-      <!-- <div v-if="success" class="auth-form__alert auth-form__alert--success">
-        Reset code sent! Redirecting...
-      </div> -->
 
       <!-- Error Alert -->
       <div v-if="authStore.error" class="auth-form__alert">
@@ -40,18 +35,18 @@
       <AppButton
         type="submit"
         variant="primary"
-        :disabled="authStore.isLoading"
+        :disabled="authStore.isLoading || success"
         class="auth-form__submit"
       >
-        <span v-if="!authStore.isLoading">Send</span>
-        <span v-else class="auth-form__loading">
+        <span v-if="success">Code sent</span>
+        <span v-else-if="authStore.isLoading" class="auth-form__loading">
           <Loader2 class="auth-form__loading-icon" />
-          Sending...
+          Sending…
         </span>
+        <span v-else>Send</span>
       </AppButton>
     </form>
 
-    <!-- Footer -->
     <template #footer>
       <div class="auth-footer">
         <p class="auth-footer__text">
@@ -64,7 +59,6 @@
     </template>
   </AuthLayout>
 </template>
-
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";

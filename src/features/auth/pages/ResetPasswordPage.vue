@@ -5,9 +5,33 @@
     :showGoogleButton="false"
     :showDivider="false"
     :isLoading="isLoading"
+    variant="forgot"
   >
     <!-- Form Content -->
     <form @submit.prevent="onSubmit" class="auth-form">
+      <div class="auth-form__field">
+        <label class="auth-form__label">Verification code</label>
+        <div class="auth-form__code-inputs auth-reset">
+          <input
+            v-for="(digit, index) in code"
+            :key="index"
+            :ref="(el) => (codeInputs[index] = el)"
+            v-model="code[index]"
+            type="text"
+            maxlength="1"
+            inputmode="numeric"
+            pattern="[0-9]"
+            @input="handleCodeInput(index, $event)"
+            @keydown="handleKeyDown(index, $event)"
+            @paste="handlePaste"
+            class="auth-form__code-input"
+            :class="{ 'auth-form__code-input--error': codeError }"
+          />
+        </div>
+        <p v-if="codeError" class="auth-form__error">
+          {{ codeError }}
+        </p>
+      </div>
       <!-- Password -->
       <div class="auth-form__field">
         <label class="auth-form__label">New password</label>
@@ -226,4 +250,7 @@ const onSubmit = handleSubmit(async (values) => {
 
 <style scoped lang="scss">
 @use "../styles/auth.scss";
+.auth-reset {
+  margin-bottom: 0;
+}
 </style>
