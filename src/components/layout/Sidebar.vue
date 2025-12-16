@@ -153,8 +153,8 @@
               authStore.isAdmin
                 ? authStore.user?.adminAvatar ||
                   authStore.user?.avatar ||
-                  avatarImage
-                : authStore.user?.avatar || avatarImage
+                  AvatarImage
+                : authStore.user?.avatar || AvatarImage
             "
             :alt="authStore.user?.name || 'User'"
             class="sidebar__user-image"

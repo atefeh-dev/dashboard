@@ -38,7 +38,7 @@ export const useAuthStore = defineStore("auth", () => {
         email: "user@user.com",
         role: "user",
         name: "Olivia Rhye",
-        avatar: avatarImage, // ← Avatar comes from store
+        avatar: AvatarImage, // ← Avatar comes from store
       },
     },
   };
