@@ -1,144 +1,106 @@
-<!-- features/auth/pages/SignupOnboardingPage.vue - Final Version -->
 <template>
-  <div
-    class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12"
+  <AuthLayout
+    title="Get Started with doclast"
+    subtitle="We are very happy to see you here, please tell us a little more about yourself so that we can help you better together from now on."
+    :showGoogleButton="false"
+    :showDivider="false"
+    :isLoading="isLoading"
   >
-    <div class="w-full max-w-md">
-      <!-- Logo -->
-      <div class="text-center mb-8">
-        <h1 class="text-indigo-600 font-bold text-3xl">doclast |</h1>
+    <!-- Form Content -->
+    <form @submit="onSubmit" class="auth-form">
+      <!-- First Name -->
+      <div class="auth-form__field">
+        <label for="firstName" class="auth-form__label">First name</label>
+        <Field v-slot="{ field, meta }" name="firstName">
+          <AppInput
+            v-bind="field"
+            id="firstName"
+            type="text"
+            :error="!meta.valid && meta.touched"
+          />
+        </Field>
+        <ErrorMessage name="firstName" class="auth-form__error" />
       </div>
 
-      <!-- Title & Subtitle -->
-      <h2 class="text-2xl font-semibold text-gray-900 mb-2">
-        Get Started with doclast
-      </h2>
-      <p class="text-sm text-gray-600 mb-8">
-        We are very happy to see you here, please tell us a little more about
-        yourself so that we can help you better together from now on.
-      </p>
-
-      <!-- Onboarding Form -->
-      <form @submit="onSubmit" class="space-y-4">
-        <!-- First Name -->
-        <div>
-          <label
-            for="firstName"
-            class="block text-sm font-medium text-gray-700 mb-2"
-            >First name</label
-          >
-          <Field
-            id="firstName"
-            name="firstName"
-            type="text"
-            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-            :class="{ 'border-red-500 focus:ring-red-500': errors.firstName }"
-          />
-          <ErrorMessage name="firstName" class="mt-1 text-sm text-red-600" />
-        </div>
-
-        <!-- Last Name -->
-        <div>
-          <label
-            for="lastName"
-            class="block text-sm font-medium text-gray-700 mb-2"
-            >Last name</label
-          >
-          <Field
+      <!-- Last Name -->
+      <div class="auth-form__field">
+        <label for="lastName" class="auth-form__label">Last name</label>
+        <Field v-slot="{ field, meta }" name="lastName">
+          <AppInput
+            v-bind="field"
             id="lastName"
-            name="lastName"
             type="text"
-            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-            :class="{ 'border-red-500 focus:ring-red-500': errors.lastName }"
+            :error="!meta.valid && meta.touched"
           />
-          <ErrorMessage name="lastName" class="mt-1 text-sm text-red-600" />
-        </div>
+        </Field>
+        <ErrorMessage name="lastName" class="auth-form__error" />
+      </div>
 
-        <!-- Password -->
-        <div>
-          <label
-            for="password"
-            class="block text-sm font-medium text-gray-700 mb-2"
-            >Choose a password</label
-          >
-          <div class="relative">
-            <Field
+      <!-- Password -->
+      <div class="auth-form__field">
+        <label for="password" class="auth-form__label">Choose a password</label>
+        <div class="auth-form__password-wrapper">
+          <Field v-slot="{ field, meta }" name="password">
+            <AppInput
+              v-bind="field"
               id="password"
-              name="password"
               :type="showPassword ? 'text' : 'password'"
-              class="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              :class="{ 'border-red-500 focus:ring-red-500': errors.password }"
+              :password="true"
+              :error="!meta.valid && meta.touched"
             />
-            <button
-              type="button"
-              @click="showPassword = !showPassword"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <Eye v-if="!showPassword" class="w-5 h-5" />
-              <EyeOff v-else class="w-5 h-5" />
-            </button>
-          </div>
-          <ErrorMessage name="password" class="mt-1 text-sm text-red-600" />
+          </Field>
         </div>
+        <ErrorMessage name="password" class="auth-form__error" />
+      </div>
 
-        <!-- Workspace Name -->
-        <div>
-          <label
-            for="workspace"
-            class="block text-sm font-medium text-gray-700 mb-2"
-            >Name your workspace</label
-          >
-          <Field
+      <!-- Workspace Name -->
+      <div class="auth-form__field">
+        <label for="workspace" class="auth-form__label"
+          >Name your workspace</label
+        >
+        <Field v-slot="{ field, meta }" name="workspaceName">
+          <AppInput
+            v-bind="field"
             id="workspace"
-            name="workspaceName"
             type="text"
-            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-            :class="{
-              'border-red-500 focus:ring-red-500': errors.workspaceName,
-            }"
             placeholder='for example "Personal"'
+            :error="!meta.valid && meta.touched"
           />
-          <ErrorMessage
-            name="workspaceName"
-            class="mt-1 text-sm text-red-600"
-          />
-        </div>
+        </Field>
+        <ErrorMessage name="workspaceName" class="auth-form__error" />
+      </div>
 
-        <!-- Error Alert -->
-        <div
-          v-if="generalError"
-          class="px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600"
-        >
-          {{ generalError }}
-        </div>
+      <!-- Error Alert -->
+      <div v-if="generalError" class="auth-form__alert">
+        {{ generalError }}
+      </div>
 
-        <!-- Submit Button -->
-        <AppButton
-          type="submit"
-          variant="primary"
-          :disabled="isLoading"
-          :loading="isLoading"
-          class="w-full"
-        >
-          <span v-if="!isLoading">Continue</span>
-          <span v-else class="flex items-center justify-center gap-2">
-            <Loader2 class="w-4 h-4 animate-spin" />
-            Creating your account...
-          </span>
-        </AppButton>
-      </form>
+      <!-- Submit Button -->
+      <AppButton
+        type="submit"
+        variant="primary"
+        :disabled="isLoading"
+        :loading="isLoading"
+        class="auth-form__submit"
+      >
+        <span v-if="!isLoading">Continue</span>
+        <span v-else class="auth-form__loading">
+          <Loader2 class="auth-form__loading-icon" />
+          Creating your account...
+        </span>
+      </AppButton>
+    </form>
 
-      <!-- Footer -->
-      <div class="mt-6 text-center">
-        <p class="text-xs text-gray-500">
+    <!-- Footer -->
+    <template #footer>
+      <div class="auth-footer">
+        <p class="auth-footer__terms">
           By signing up, you agree to our
-          <a href="#" class="text-indigo-600 hover:text-indigo-700"
-            >Terms & Privacy</a
-          >.
+          <a href="#" class="auth-footer__terms-link">Terms & Privacy</a>.
         </p>
       </div>
-    </div>
-  </div>
+    </template>
+  </AuthLayout>
 </template>
 
 <script setup>
@@ -148,6 +110,8 @@ import { useForm, Field, ErrorMessage } from "vee-validate";
 import * as yup from "yup";
 import { Eye, EyeOff, Loader2 } from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
+import AppInput from "@/components/ui/AppInput.vue";
+import AuthLayout from "../layouts/AuthLayout.vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const router = useRouter();
@@ -240,3 +204,7 @@ const onSubmit = handleSubmit(async (values) => {
   }
 });
 </script>
+
+<style scoped lang="scss">
+@use "../styles/auth.scss";
+</style>
