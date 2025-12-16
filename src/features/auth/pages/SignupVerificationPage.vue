@@ -52,7 +52,6 @@
           type="submit"
           variant="primary"
           :disabled="isLoading || !isCodeComplete"
-          :loading="isLoading"
           class="auth-form__submit"
         >
           <span v-if="!isLoading">Continue</span>

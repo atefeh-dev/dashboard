@@ -53,7 +53,6 @@
         type="submit"
         variant="primary"
         :disabled="authStore.isLoading"
-        :loading="authStore.isLoading"
         class="auth-form__submit"
       >
         <span v-if="!authStore.isLoading">Continue</span>
