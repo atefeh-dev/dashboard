@@ -4,25 +4,21 @@
     <img
       src="../../../assets/icons/common/empty-content.svg"
       class="empty-state__background"
+      alt="empty state background"
     />
 
     <!-- Foreground Content -->
     <div class="empty-state__content">
-      <!-- Icon -->
       <div class="empty-state__icon">
         <EmptyIcon class="empty-state__icon-svg" />
       </div>
 
-      <!-- Title -->
       <h3 class="empty-state__title">No document created yet</h3>
-
-      <!-- Description -->
       <p class="empty-state__description">
         Here you can manage every document you create and of course we'll take
         care of them.
       </p>
 
-      <!-- CTA Button -->
       <AppButton
         variant="primary"
         size="md"
@@ -40,7 +36,6 @@
 import AppButton from "@/components/ui/AppButton.vue";
 import EmptyIcon from "@/assets/icons/common/export.svg";
 import PlusIcon from "../../../assets/icons/common/plus.svg";
-import EmptyContentPic from "../../../assets/icons/common/empty-content.svg";
 
 defineEmits(["create"]);
 </script>
@@ -58,57 +53,55 @@ defineEmits(["create"]);
     min-height: calc(100vh - 200px);
   }
 
-  // Background SVG - FINAL FIX
   &__background {
     position: absolute;
-    top: 50%;
+    top: 45%;
     left: 50%;
     transform: translate(-50%, -50%);
-    // CRITICAL: No width/height = auto-centers based on SVG's intrinsic size
     max-width: 70%;
     max-height: 70%;
     pointer-events: none;
     user-select: none;
     z-index: 0;
-    opacity: 0.7;
 
-    color: #e9eaeb;
-
-    /* Radial fade mask */
+    opacity: 1; // lower opacity so it’s faint
+    /* Better radial fade */
     -webkit-mask-image: radial-gradient(
-      circle,
-      circle,
+      circle at center,
       rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 1) 40%,
-      rgba(0, 0, 0, 0.6) 60%,
-      rgba(0, 0, 0, 0.2) 75%,
+      rgba(0, 0, 0, 0.8) 40%,
+      rgba(0, 0, 0, 0.5) 70%,
       rgba(0, 0, 0, 0) 100%
     );
     mask-image: radial-gradient(
-      circle,
-      circle,
+      circle at center,
       rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 1) 40%,
-      rgba(0, 0, 0, 0.6) 60%,
-      rgba(0, 0, 0, 0.2) 75%,
+      rgba(0, 0, 0, 0.8) 40%,
+      rgba(0, 0, 0, 0.5) 70%,
       rgba(0, 0, 0, 0) 100%
     );
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: cover;
+    mask-size: cover;
   }
 
-  // Foreground Content
   &__content {
     position: relative;
     width: 100%;
     max-width: 22rem;
     z-index: 10;
-    margin-top: 19%;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
+
+    margin-top: auto;
+    margin-bottom: auto;
+
+    transform: translateY(-25%);
   }
 
-  // Icon Container
   &__icon {
     display: flex;
     align-items: center;
@@ -128,7 +121,6 @@ defineEmits(["create"]);
     margin-left: 0.313rem;
   }
 
-  // Title
   &__title {
     font-size: 1.25rem;
     font-weight: 600;
@@ -137,7 +129,6 @@ defineEmits(["create"]);
     line-height: 1.5;
   }
 
-  // Description
   &__description {
     font-size: 1rem;
     color: #535862;
