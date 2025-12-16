@@ -47,6 +47,10 @@ const options = ["None", "In-app", "Email"];
   gap: 1rem;
   width: 100%;
 
+  @media (min-width: 1024px) and (max-width: 1178px) {
+    display: grid;
+  }
+
   @media (min-width: 640px) {
     align-items: flex-start;
     min-height: 3.5rem;

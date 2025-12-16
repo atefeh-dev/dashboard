@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
   stats: { type: Array, default: () => [] },
 });
 </script>
@@ -33,18 +33,28 @@ const props = defineProps({
     border-radius: 0.75rem;
     border: 1px solid #e9eaeb;
     box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
+
+    /* ✅ KEY FIX */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 96px; // keeps cards visually equal
   }
 
   &__label {
-    font-size: 0.875rem; // 14px
-    color: #535862; // gray-600
+    font-size: 0.875rem;
+    color: #535862;
     font-weight: 500;
+    line-height: 1.25rem;
+
+    /* allow wrap, no forced height */
+    word-break: break-word;
   }
 
   &__value {
-    font-size: 1.875rem; // 30px
+    font-size: 1.875rem;
     font-weight: 600;
-    color: #181d27; // gray-900
+    color: #181d27;
   }
 }
 </style>

@@ -124,7 +124,7 @@ const handleClick = (sectionId) => {
 .admin-sidebar__nav-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   padding: 0.5rem 0.75rem;
   border-radius: 0.375rem;
   border: none;

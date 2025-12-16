@@ -375,6 +375,7 @@ function getIconClass(label) {
     display: flex;
     align-items: center;
     width: 100%;
+    gap: 0.5rem;
     padding: 0.5rem 0.75rem;
     background-color: #ffffff;
     border: 1px solid #d5d7da;
