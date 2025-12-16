@@ -163,10 +163,6 @@ body {
   }
 }
 
-// ============================================
-// Blank variant (MUST come AFTER size variants)
-// This overrides size padding with higher specificity
-// ============================================
 .btn-blank {
   background-color: transparent;
   border: none;
@@ -184,8 +180,6 @@ body {
     box-shadow: none;
   }
 
-  // Remove horizontal padding for blank buttons
-  // Using combined selectors for proper specificity without !important
   &.btn-sm,
   &.btn-md,
   &.btn-lg {
@@ -194,31 +188,12 @@ body {
   }
 }
 
-// ============================================
-// Loading animation
-// ============================================
 @keyframes btn-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-// ============================================
-// Usage Examples:
-// ============================================
-/*
-<!-- Primary button -->
-<button class="btn btn-primary btn-md">Save</button>
-
-<!-- Blank button (no horizontal padding) -->
-<button class="btn btn-blank btn-sm">
-  <TrashIcon />
-</button>
-
-<!-- Ghost button -->
-<button class="btn btn-ghost btn-lg">Cancel</button>
-*/
-// Responsive adjustments
 @media (max-width: 640px) {
   .btn {
     // Ensure buttons are touch-friendly
@@ -260,51 +235,6 @@ body {
     padding: 1.5rem;
   }
 }
-
-// .table-wrapper {
-//   overflow-x: auto;
-// }
-
-// .table {
-//   width: 100%;
-//   min-width: 800px;
-
-//   th {
-//     background-color: rgb(249 250 251);
-//     border-bottom: 1px solid rgb(229 231 235);
-//     padding: 0.75rem 1rem;
-//     text-align: left;
-//     font-size: 0.75rem;
-//     line-height: 1rem;
-//     font-weight: 500;
-//     color: rgb(107 114 128);
-//     text-transform: uppercase;
-//     letter-spacing: 0.05em;
-
-//     @media (min-width: 640px) {
-//       padding-left: 1.5rem;
-//       padding-right: 1.5rem;
-//     }
-//   }
-
-//   td {
-//     padding: 1rem;
-//     border-bottom: 1px solid rgb(243 244 246);
-
-//     @media (min-width: 640px) {
-//       padding-left: 1.5rem;
-//       padding-right: 1.5rem;
-//     }
-//   }
-
-//   tr {
-//     transition: background-color 200ms;
-
-//     &:hover {
-//       background-color: rgb(249 250 251);
-//     }
-//   }
-// }
 
 .search-box {
   position: relative;
