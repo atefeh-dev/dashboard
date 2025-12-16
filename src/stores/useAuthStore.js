@@ -2,7 +2,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import avatarImage from "@/assets/images/avatar.png";
+import AvatarImage from "@/assets/images/avatar.png";
 
 export const useAuthStore = defineStore("auth", () => {
   const router = useRouter();
@@ -27,7 +27,7 @@ export const useAuthStore = defineStore("auth", () => {
         email: "admin@admin.com",
         role: "admin",
         name: "Olivia Rhye",
-        avatar: avatarImage, // ← Avatar comes from store
+        avatar: AvatarImage, // ← Avatar comes from store
       },
     },
     "user@user.com": {
