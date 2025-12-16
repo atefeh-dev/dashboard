@@ -7,10 +7,21 @@
       </div>
 
       <!-- Title -->
-      <h2 class="auth-layout__title">{{ title }}</h2>
+      <h2
+        class="auth-layout__title"
+        :class="{ 'auth-layout__title--forgot': variant === 'forgot' }"
+      >
+        {{ title }}
+      </h2>
 
       <!-- Subtitle (optional) -->
-      <p v-if="subtitle" class="auth-layout__subtitle">{{ subtitle }}</p>
+      <p
+        v-if="subtitle"
+        class="auth-layout__subtitle"
+        :class="{ 'auth-layout__subtitle--forgot': variant === 'forgot' }"
+      >
+        {{ subtitle }}
+      </p>
 
       <!-- Google Button -->
       <AppButton
@@ -27,22 +38,23 @@
       <!-- Divider -->
       <div v-if="showDivider" class="auth-layout__divider">
         <div class="auth-layout__divider-line"></div>
-        <span class="auth-layout__divider-text">or</span>
+        <span v-if="dividerText" class="auth-layout__divider-text">
+          {{ dividerText }}
+        </span>
       </div>
 
-      <!-- Form Content (slot) -->
+      <!-- Form Content -->
       <div class="auth-layout__content">
         <slot />
       </div>
 
-      <!-- Footer Links (slot) -->
+      <!-- Footer -->
       <div class="auth-layout__footer">
         <slot name="footer" />
       </div>
     </div>
   </div>
 </template>
-
 <script setup>
 import AppButton from "@/components/ui/AppButton.vue";
 import GoogleIcon from "@/assets/icons/common/google.svg";
@@ -65,15 +77,22 @@ defineProps({
     type: Boolean,
     default: true,
   },
+  dividerText: {
+    type: String,
+    default: "or",
+  },
   isLoading: {
     type: Boolean,
     default: false,
+  },
+  variant: {
+    type: String,
+    default: "", // ""| forgot
   },
 });
 
 defineEmits(["google-login"]);
 </script>
-
 <style scoped lang="scss">
 .auth-layout {
   min-height: 100vh;
@@ -104,23 +123,33 @@ defineEmits(["google-login"]);
   &__title {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #181d27;
+    color: #000;
     text-align: left;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
     line-height: 1.3;
 
     @media (max-width: 639px) {
       font-size: 1.375rem;
     }
+
+    &--forgot {
+      margin-bottom: 0.625rem;
+    }
   }
 
   &__subtitle {
-    font-size: 1rem;
-    color: #717680;
-    font-weight: 600;
+    font-size: 0.875rem;
+    color: #4b5563;
     text-align: left;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
     line-height: 1.5;
+
+    &--forgot {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #717680;
+      margin-bottom: 1.25rem;
+    }
   }
 
   &__google-btn {
@@ -138,12 +167,10 @@ defineEmits(["google-login"]);
 
   &__divider-line {
     position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
+    inset: 0;
     height: 1px;
+    margin: auto 0;
     background-color: #d1d5db;
-    transform: translateY(-50%);
   }
 
   &__divider-text {

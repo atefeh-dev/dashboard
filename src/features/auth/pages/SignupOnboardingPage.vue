@@ -3,7 +3,8 @@
     title="Get Started with doclast"
     subtitle="We are very happy to see you here, please tell us a little more about yourself so that we can help you better together from now on."
     :showGoogleButton="false"
-    :showDivider="false"
+    :showDivider="true"
+    dividerText=""
     :isLoading="isLoading"
   >
     <!-- Form Content -->

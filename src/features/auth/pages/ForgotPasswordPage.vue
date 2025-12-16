@@ -5,6 +5,7 @@
     :showGoogleButton="false"
     :showDivider="false"
     :isLoading="authStore.isLoading"
+    variant="forgot"
   >
     <!-- Form Content -->
     <form @submit.prevent="onSubmit" class="auth-form">
@@ -26,9 +27,9 @@
       </div>
 
       <!-- Success Alert -->
-      <div v-if="success" class="auth-form__alert auth-form__alert--success">
+      <!-- <div v-if="success" class="auth-form__alert auth-form__alert--success">
         Reset code sent! Redirecting...
-      </div>
+      </div> -->
 
       <!-- Error Alert -->
       <div v-if="authStore.error" class="auth-form__alert">
