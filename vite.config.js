@@ -12,6 +12,7 @@ export default defineConfig({
     tailwindcss(),
     svgLoader(), // correct SVG loader for Vite + Vue 3
   ],
+  base: "/",
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
