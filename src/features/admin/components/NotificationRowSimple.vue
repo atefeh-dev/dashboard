@@ -84,9 +84,8 @@ const options = ["None", "In-app", "Email"];
     background-color: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
-    padding: 0.125rem;
-    gap: 0.125rem;
     flex-shrink: 0;
+    box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
 
     @media (max-width: 639px) {
       width: 100%;

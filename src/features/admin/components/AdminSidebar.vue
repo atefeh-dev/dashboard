@@ -154,7 +154,7 @@ const handleClick = (sectionId) => {
 }
 
 .admin-sidebar__nav-badge {
-  min-width: 30px;
+  padding: 0.125rem 0.5rem;
   height: 22px;
   font-size: 0.75rem;
   border-radius: 9999px;
@@ -167,6 +167,8 @@ const handleClick = (sectionId) => {
   &--special {
     background-color: #f9f5ff;
     border-color: #e9d7fe;
+    gap: 0.125rem;
+    padding: 0.125rem 0.375rem 0.125rem 0.5rem;
   }
 }
 </style>
