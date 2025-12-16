@@ -7,88 +7,57 @@
     :isLoading="isLoading"
   >
     <!-- Form Content -->
-    <form @submit="onSubmit" class="auth-form">
-      <!-- First Name -->
+    <form @submit.prevent="onSubmit" class="auth-form">
       <div class="auth-form__field">
-        <label for="firstName" class="auth-form__label">First name</label>
-        <Field v-slot="{ field, meta }" name="firstName">
-          <AppInput
-            v-bind="field"
-            id="firstName"
-            type="text"
-            :error="!meta.valid && meta.touched"
-          />
+        <label class="auth-form__label">First name</label>
+
+        <Field name="firstName" v-slot="{ field, meta }">
+          <AppInput v-bind="field" :error="meta.touched && meta.invalid" />
         </Field>
+
         <ErrorMessage name="firstName" class="auth-form__error" />
       </div>
 
-      <!-- Last Name -->
       <div class="auth-form__field">
-        <label for="lastName" class="auth-form__label">Last name</label>
-        <Field v-slot="{ field, meta }" name="lastName">
-          <AppInput
-            v-bind="field"
-            id="lastName"
-            type="text"
-            :error="!meta.valid && meta.touched"
-          />
+        <label class="auth-form__label">Last name</label>
+
+        <Field name="lastName" v-slot="{ field, meta }">
+          <AppInput v-bind="field" :error="meta.touched && meta.invalid" />
         </Field>
+
         <ErrorMessage name="lastName" class="auth-form__error" />
       </div>
 
-      <!-- Password -->
       <div class="auth-form__field">
-        <label for="password" class="auth-form__label">Choose a password</label>
-        <div class="auth-form__password-wrapper">
-          <Field v-slot="{ field, meta }" name="password">
-            <AppInput
-              v-bind="field"
-              id="password"
-              :type="showPassword ? 'text' : 'password'"
-              :password="true"
-              :error="!meta.valid && meta.touched"
-            />
-          </Field>
-        </div>
+        <label class="auth-form__label">Password</label>
+
+        <Field name="password" v-slot="{ field, meta }">
+          <AppInput
+            v-bind="field"
+            :type="showPassword ? 'text' : 'password'"
+            :password="true"
+            :error="meta.touched && meta.invalid"
+          />
+        </Field>
+
         <ErrorMessage name="password" class="auth-form__error" />
       </div>
 
-      <!-- Workspace Name -->
       <div class="auth-form__field">
-        <label for="workspace" class="auth-form__label"
-          >Name your workspace</label
-        >
-        <Field v-slot="{ field, meta }" name="workspaceName">
+        <label class="auth-form__label">Workspace name</label>
+
+        <Field name="workspaceName" v-slot="{ field, meta }">
           <AppInput
             v-bind="field"
-            id="workspace"
-            type="text"
             placeholder='for example "Personal"'
-            :error="!meta.valid && meta.touched"
+            :error="meta.touched && meta.invalid"
           />
         </Field>
+
         <ErrorMessage name="workspaceName" class="auth-form__error" />
       </div>
 
-      <!-- Error Alert -->
-      <div v-if="generalError" class="auth-form__alert">
-        {{ generalError }}
-      </div>
-
-      <!-- Submit Button -->
-      <AppButton
-        type="submit"
-        variant="primary"
-        :disabled="isLoading"
-        :loading="isLoading"
-        class="auth-form__submit"
-      >
-        <span v-if="!isLoading">Continue</span>
-        <span v-else class="auth-form__loading">
-          <Loader2 class="auth-form__loading-icon" />
-          Creating your account...
-        </span>
-      </AppButton>
+      <AppButton type="submit" class="auth-form__submit"> Continue </AppButton>
     </form>
 
     <!-- Footer -->

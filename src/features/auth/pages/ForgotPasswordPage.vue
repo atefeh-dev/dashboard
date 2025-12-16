@@ -7,19 +7,21 @@
     :isLoading="authStore.isLoading"
   >
     <!-- Form Content -->
-    <form @submit="onSubmit" class="auth-form">
+    <form @submit.prevent="onSubmit" class="auth-form">
       <!-- Email -->
       <div class="auth-form__field">
         <label for="email" class="auth-form__label">Email</label>
-        <Field v-slot="{ field, meta }" name="email">
+
+        <Field name="email" v-slot="{ field, meta }">
           <AppInput
             v-bind="field"
             id="email"
             type="email"
             placeholder="you@example.com"
-            :error="!meta.valid && meta.touched"
+            :error="meta.touched && meta.invalid"
           />
         </Field>
+
         <ErrorMessage name="email" class="auth-form__error" />
       </div>
 
@@ -69,6 +71,7 @@ import { useRouter } from "vue-router";
 import { useForm, Field, ErrorMessage } from "vee-validate";
 import * as yup from "yup";
 import { Loader2 } from "lucide-vue-next";
+
 import AppButton from "@/components/ui/AppButton.vue";
 import AppInput from "@/components/ui/AppInput.vue";
 import AuthLayout from "../layouts/AuthLayout.vue";
@@ -78,7 +81,7 @@ const authStore = useAuthStore();
 const router = useRouter();
 const success = ref(false);
 
-// Validation schema
+/* Validation */
 const schema = yup.object({
   email: yup
     .string()
@@ -86,21 +89,20 @@ const schema = yup.object({
     .email("Please enter a valid email"),
 });
 
-// Setup form with VeeValidate
+/* Form */
 const { handleSubmit } = useForm({
   validationSchema: schema,
 });
 
-// Submit handler
+/* Submit */
 const onSubmit = handleSubmit(async (values) => {
   const result = await authStore.sendPasswordReset(values.email);
 
-  if (result.success) {
+  if (result?.success) {
     success.value = true;
-    // Store email for next step
+
     localStorage.setItem("reset_email", values.email);
 
-    // Redirect to reset password verification page
     setTimeout(() => {
       router.push({
         name: "ResetPassword",

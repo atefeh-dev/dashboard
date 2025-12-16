@@ -5,41 +5,41 @@
     @google-login="handleGoogleLogin"
   >
     <!-- Form Content -->
-    <form @submit="onSubmit" class="auth-form">
+    <form @submit.prevent="onSubmit" class="auth-form">
       <!-- Email -->
       <div class="auth-form__field">
         <label for="email" class="auth-form__label">Email</label>
-        <Field v-slot="{ field, meta }" name="email" v-model="formValues.email">
+
+        <Field name="email" v-slot="{ field, meta }">
           <AppInput
             v-bind="field"
             id="email"
             type="email"
             placeholder="you@example.com"
-            :error="!meta.valid && meta.touched"
+            :error="meta.touched && !meta.valid"
           />
         </Field>
+
         <ErrorMessage name="email" class="auth-form__error" />
       </div>
 
       <!-- Password -->
       <div class="auth-form__field">
         <label for="password" class="auth-form__label">Password</label>
+
         <div class="auth-form__password-wrapper">
-          <Field
-            v-slot="{ field, meta }"
-            name="password"
-            v-model="formValues.password"
-          >
+          <Field name="password" v-slot="{ field, meta }">
             <AppInput
               v-bind="field"
               id="password"
               :type="showPassword ? 'text' : 'password'"
               placeholder="••••••••"
               :password="true"
-              :error="!meta.valid && meta.touched"
+              :error="meta.touched && !meta.valid"
             />
           </Field>
         </div>
+
         <ErrorMessage name="password" class="auth-form__error" />
       </div>
 
@@ -85,10 +85,11 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from "vue";
+import { ref, computed } from "vue";
 import { useForm, Field, ErrorMessage } from "vee-validate";
 import * as yup from "yup";
-import { Eye, EyeOff, Loader2 } from "lucide-vue-next";
+import { Loader2 } from "lucide-vue-next";
+
 import AppButton from "@/components/ui/AppButton.vue";
 import AppInput from "@/components/ui/AppInput.vue";
 import AuthLayout from "../layouts/AuthLayout.vue";
@@ -98,7 +99,7 @@ const authStore = useAuthStore();
 const isDev = computed(() => import.meta.env.MODE === "development");
 const showPassword = ref(false);
 
-// Validation schema
+/* Validation */
 const schema = yup.object({
   email: yup
     .string()
@@ -110,19 +111,16 @@ const schema = yup.object({
     .min(5, "Password must be at least 5 characters"),
 });
 
-// Form values
-const formValues = reactive({
-  email: isDev.value ? "admin@admin.com" : "",
-  password: isDev.value ? "admin" : "",
-});
-
-// Setup form with VeeValidate
+/* Form */
 const { handleSubmit } = useForm({
   validationSchema: schema,
-  initialValues: formValues,
+  initialValues: {
+    email: isDev.value ? "admin@admin.com" : "",
+    password: isDev.value ? "admin" : "",
+  },
 });
 
-// Submit handler
+/* Submit */
 const onSubmit = handleSubmit(async (values) => {
   await authStore.login(values.email, values.password);
 });

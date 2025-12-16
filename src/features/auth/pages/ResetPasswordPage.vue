@@ -7,101 +7,40 @@
     :isLoading="isLoading"
   >
     <!-- Form Content -->
-    <form @submit="onSubmit" class="auth-form">
-      <!-- Verification Code Inputs -->
+    <form @submit.prevent="onSubmit" class="auth-form">
+      <!-- Password -->
       <div class="auth-form__field">
-        <label class="auth-form__label">Verification code</label>
-        <div class="auth-form__code-inputs">
-          <input
-            v-for="(digit, index) in code"
-            :key="index"
-            :ref="(el) => (codeInputs[index] = el)"
-            v-model="code[index]"
-            type="text"
-            inputmode="numeric"
-            maxlength="1"
-            class="auth-form__code-input"
-            :class="{ 'auth-form__code-input--error': errors.code }"
-            @input="handleCodeInput(index, $event)"
-            @keydown="handleCodeKeydown(index, $event)"
-            @paste="handlePaste"
-          />
-        </div>
-        <p v-if="errors.code" class="auth-form__error">{{ errors.code }}</p>
-      </div>
+        <label class="auth-form__label">New password</label>
 
-      <!-- New Password -->
-      <div class="auth-form__field">
-        <label for="password" class="auth-form__label">New password</label>
-        <div class="auth-form__password-wrapper">
-          <Field v-slot="{ field, meta }" name="password">
-            <AppInput
-              v-bind="field"
-              id="password"
-              :type="showPassword ? 'text' : 'password'"
-              placeholder="Enter your new password"
-              :password="true"
-              :error="!meta.valid && meta.touched"
-            />
-          </Field>
-          <!-- <button
-            type="button"
-            class="auth-form__password-toggle"
-            @click="showPassword = !showPassword"
-          >
-            <Eye v-if="!showPassword" class="auth-form__password-icon" />
-            <EyeOff v-else class="auth-form__password-icon" />
-          </button> -->
-        </div>
+        <Field name="password" v-slot="{ field, meta }">
+          <AppInput
+            v-bind="field"
+            :type="showPassword ? 'text' : 'password'"
+            :password="true"
+            :error="meta.touched && meta.invalid"
+          />
+        </Field>
+
         <ErrorMessage name="password" class="auth-form__error" />
       </div>
 
-      <!-- Confirm Password -->
+      <!-- Confirm -->
       <div class="auth-form__field">
-        <label for="confirmPassword" class="auth-form__label"
-          >Confirm password</label
-        >
-        <div class="auth-form__password-wrapper">
-          <Field v-slot="{ field, meta }" name="confirmPassword">
-            <AppInput
-              v-bind="field"
-              id="confirmPassword"
-              :type="showConfirmPassword ? 'text' : 'password'"
-              placeholder="Confirm your new password"
-              :password="true"
-              :error="!meta.valid && meta.touched"
-            />
-          </Field>
-          <!-- <button
-            type="button"
-            class="auth-form__password-toggle"
-            @click="showConfirmPassword = !showConfirmPassword"
-          >
-            <Eye v-if="!showConfirmPassword" class="auth-form__password-icon" />
-            <EyeOff v-else class="auth-form__password-icon" />
-          </button> -->
-        </div>
+        <label class="auth-form__label">Confirm password</label>
+
+        <Field name="confirmPassword" v-slot="{ field, meta }">
+          <AppInput
+            v-bind="field"
+            :type="showConfirmPassword ? 'text' : 'password'"
+            :password="true"
+            :error="meta.touched && meta.invalid"
+          />
+        </Field>
+
         <ErrorMessage name="confirmPassword" class="auth-form__error" />
       </div>
 
-      <!-- Error Alert -->
-      <div v-if="generalError" class="auth-form__alert">
-        {{ generalError }}
-      </div>
-
-      <!-- Success Alert -->
-      <div v-if="success" class="auth-form__alert auth-form__alert--success">
-        Password reset successful! Redirecting to login...
-      </div>
-
-      <!-- Submit Button -->
-      <AppButton
-        type="submit"
-        variant="primary"
-        :disabled="isLoading"
-        :loading="isLoading"
-        class="auth-form__submit"
-      >
+      <AppButton type="submit" class="auth-form__submit">
         Reset Password
       </AppButton>
     </form>

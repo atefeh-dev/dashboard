@@ -6,37 +6,28 @@
     @google-login="handleGoogleLogin"
   >
     <!-- Form Content -->
-    <form @submit="onSubmit" class="auth-form">
-      <!-- Email -->
+    <form @submit.prevent="onSubmit" class="auth-form">
       <div class="auth-form__field">
         <label for="email" class="auth-form__label">Email</label>
-        <Field v-slot="{ field, meta }" name="email">
+
+        <Field name="email" v-slot="{ field, meta }">
           <AppInput
             v-bind="field"
             id="email"
             type="email"
             placeholder="you@example.com"
-            :error="!meta.valid && meta.touched"
+            :error="meta.touched && meta.invalid"
           />
         </Field>
+
         <ErrorMessage name="email" class="auth-form__error" />
       </div>
 
-      <!-- Error Alert -->
       <div v-if="generalError" class="auth-form__alert">
         {{ generalError }}
       </div>
 
-      <!-- Submit Button -->
-      <AppButton
-        type="submit"
-        variant="primary"
-        :disabled="isLoading"
-        :loading="isLoading"
-        class="auth-form__submit"
-      >
-        Continue
-      </AppButton>
+      <AppButton type="submit" class="auth-form__submit"> Continue </AppButton>
     </form>
 
     <!-- Footer -->
