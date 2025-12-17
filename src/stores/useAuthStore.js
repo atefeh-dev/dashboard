@@ -1,12 +1,10 @@
 // stores/useAuthStore.js
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
 import AvatarImage from "../assets/images/av.png";
+import router from "../router"; // Import router directly instead of useRouter
 
 export const useAuthStore = defineStore("auth", () => {
-  const router = useRouter();
-
   // State - DON'T read localStorage on initialization
   const user = ref(null);
   const token = ref(null); // Initialize as null, load later
@@ -84,7 +82,7 @@ export const useAuthStore = defineStore("auth", () => {
         const redirectPath =
           mockUser.user.role === "admin" ? "/admin/overview" : "/overview";
 
-        await router.push(redirectPath);
+        router.push(redirectPath);
 
         return { success: true };
       }
@@ -114,7 +112,7 @@ export const useAuthStore = defineStore("auth", () => {
       const redirectPath =
         data.user.role === "admin" ? "/admin/overview" : "/overview";
 
-      await router.push(redirectPath);
+      router.push(redirectPath);
 
       return { success: true };
     } catch (err) {
