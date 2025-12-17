@@ -7,9 +7,9 @@ import AvatarImage from "../assets/images/av.png";
 export const useAuthStore = defineStore("auth", () => {
   const router = useRouter();
 
-  // State
+  // State - DON'T read localStorage on initialization
   const user = ref(null);
-  const token = ref(localStorage.getItem("auth_token") || null);
+  const token = ref(null); // Initialize as null, load later
   const isLoading = ref(false);
   const error = ref(null);
 
@@ -27,7 +27,7 @@ export const useAuthStore = defineStore("auth", () => {
         email: "admin@admin.com",
         role: "admin",
         name: "Olivia Rhye",
-        avatar: AvatarImage, // ← Avatar comes from store
+        avatar: AvatarImage,
       },
     },
     "user@user.com": {
@@ -38,7 +38,7 @@ export const useAuthStore = defineStore("auth", () => {
         email: "user@user.com",
         role: "user",
         name: "Olivia Rhye",
-        avatar: AvatarImage, // ← Avatar comes from store
+        avatar: AvatarImage,
       },
     },
   };
@@ -64,7 +64,10 @@ export const useAuthStore = defineStore("auth", () => {
 
         user.value = mockUser.user;
         token.value = mockToken;
+
+        // Save to localStorage
         localStorage.setItem("auth_token", mockToken);
+        localStorage.setItem("auth_user", JSON.stringify(mockUser.user));
 
         // Role-based redirect
         const redirectPath =
@@ -93,6 +96,7 @@ export const useAuthStore = defineStore("auth", () => {
       user.value = data.user;
       token.value = data.token;
       localStorage.setItem("auth_token", data.token);
+      localStorage.setItem("auth_user", JSON.stringify(data.user));
 
       // Role-based redirect
       const redirectPath =
@@ -103,6 +107,7 @@ export const useAuthStore = defineStore("auth", () => {
       return { success: true };
     } catch (err) {
       error.value = err.message || "Login failed";
+      console.error("Login error:", err);
       return { success: false, error: error.value };
     } finally {
       isLoading.value = false;
@@ -185,43 +190,46 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
+  // Initialize auth by loading from localStorage
   async function initAuth() {
-    if (!token.value) {
-      return;
-    }
-
     try {
-      // DEVELOPMENT MODE: Mock user from token
-      if (import.meta.env.MODE === "development") {
-        // Try to restore user from localStorage
-        const storedUser = localStorage.getItem("auth_user");
-        if (storedUser) {
-          user.value = JSON.parse(storedUser);
-          return;
-        }
+      // Load token from localStorage
+      const storedToken = localStorage.getItem("auth_token");
+      const storedUser = localStorage.getItem("auth_user");
 
-        // If no stored user, assume admin for development
-        user.value = mockUsers["admin@admin.com"].user;
-        localStorage.setItem("auth_user", JSON.stringify(user.value));
+      if (!storedToken || !storedUser) {
+        console.log("No stored auth data found");
         return;
       }
 
-      // PRODUCTION MODE: Fetch from API
+      // DEVELOPMENT MODE: Use stored data
+      if (import.meta.env.MODE === "development") {
+        token.value = storedToken;
+        user.value = JSON.parse(storedUser);
+        console.log("Auth restored from localStorage:", user.value);
+        return;
+      }
+
+      // PRODUCTION MODE: Validate token with API
       const response = await fetch("/api/auth/me", {
         headers: {
-          Authorization: `Bearer ${token.value}`,
+          Authorization: `Bearer ${storedToken}`,
         },
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch user");
+        throw new Error("Token validation failed");
       }
 
       const data = await response.json();
+      token.value = storedToken;
       user.value = data.user;
-      localStorage.setItem("auth_user", JSON.stringify(user.value));
+      localStorage.setItem("auth_user", JSON.stringify(data.user));
+
+      console.log("Auth validated with API:", user.value);
     } catch (err) {
       console.error("Auth initialization failed:", err);
+      // Clear invalid auth data
       logout();
     }
   }

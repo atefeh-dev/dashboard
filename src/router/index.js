@@ -12,15 +12,12 @@ import ResetPasswordPage from "@/features/auth/pages/ResetPasswordPage.vue";
 // User pages (clean URLs - no prefix)
 import OverviewPage from "@/features/overview/pages/OverviewPage.vue";
 import DocumentsPage from "@/features/documents/pages/DocumentsPage.vue";
-// import NotificationsPage from "@/features/notifications/pages/NotificationsPage.vue";
 
 // Admin pages (with /admin prefix)
 import AdminNotificationsPage from "@/features/admin/pages/NotificationsPage.vue";
 
 const routes = [
-  // ========================================
   // ROOT REDIRECT
-  // ========================================
   {
     path: "/",
     redirect: () => {
@@ -30,9 +27,7 @@ const routes = [
     },
   },
 
-  // ========================================
   // AUTH ROUTES (Public)
-  // ========================================
   {
     path: "/login",
     name: "Login",
@@ -91,9 +86,7 @@ const routes = [
     },
   },
 
-  // ========================================
   // USER ROUTES (Clean URLs - No Prefix)
-  // ========================================
   {
     path: "/overview",
     name: "Overview",
@@ -106,22 +99,8 @@ const routes = [
     component: DocumentsPage,
     meta: { requiresAuth: true, userOnly: true },
   },
-  // {
-  //   path: "/notifications",
-  //   name: "Notifications",
-  //   component: NotificationsPage,
-  //   meta: { requiresAuth: true, userOnly: true },
-  // },
-  // {
-  //   path: "/templates",
-  //   name: "Templates",
-  //   component: TemplatesPage,
-  //   meta: { requiresAuth: true, userOnly: true },
-  // },
 
-  // ========================================
   // ADMIN ROUTES (With /admin Prefix)
-  // ========================================
   {
     path: "/admin",
     meta: { requiresAuth: true, requiresAdmin: true },
@@ -133,25 +112,22 @@ const routes = [
       {
         path: "overview",
         name: "AdminOverview",
-        component: OverviewPage, // Reuse same component
+        component: OverviewPage,
       },
       {
         path: "documents",
         name: "AdminDocuments",
-        component: DocumentsPage, // Reuse same component
+        component: DocumentsPage,
       },
       {
         path: "notifications",
         name: "AdminNotifications",
         component: AdminNotificationsPage,
       },
-      // Add more admin-specific routes here
     ],
   },
 
-  // ========================================
   // CATCH ALL
-  // ========================================
   {
     path: "/:catchAll(.*)",
     redirect: "/login",
@@ -163,15 +139,18 @@ const router = createRouter({
   routes,
 });
 
-// ========================================
-// NAVIGATION GUARD (Single Source of Truth)
-// ========================================
+// Track if auth has been initialized
+let authInitialized = false;
+
+// NAVIGATION GUARD
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
-  // Initialize auth if needed
-  if (!authStore.user && authStore.token) {
+  // Initialize auth ONCE on first navigation
+  if (!authInitialized) {
+    console.log("Initializing auth...");
     await authStore.initAuth();
+    authInitialized = true;
   }
 
   const requiresAuth = to.meta.requiresAuth;
@@ -181,9 +160,14 @@ router.beforeEach(async (to, from, next) => {
   const isAuthenticated = authStore.isAuthenticated;
   const isAdmin = authStore.isAdmin;
 
-  // ========================================
+  console.log("Navigation Guard:", {
+    to: to.path,
+    isAuthenticated,
+    isAdmin,
+    requiresAuth,
+  });
+
   // 1. HANDLE PUBLIC AUTH ROUTES
-  // ========================================
   if (requiresAuth === false) {
     // Redirect authenticated users away from auth pages
     if (redirectIfAuth && isAuthenticated) {
@@ -219,9 +203,7 @@ router.beforeEach(async (to, from, next) => {
     return next();
   }
 
-  // ========================================
   // 2. HANDLE PROTECTED ROUTES
-  // ========================================
 
   // Check authentication
   if (requiresAuth && !isAuthenticated) {
@@ -238,7 +220,7 @@ router.beforeEach(async (to, from, next) => {
   // User-only routes (clean URLs) - prevent admin from accessing
   if (userOnly && isAdmin) {
     console.warn("Admins should use /admin routes");
-    return next("/admin" + to.path); // Redirect to admin version
+    return next("/admin" + to.path);
   }
 
   next();

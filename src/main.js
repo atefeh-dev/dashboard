@@ -6,6 +6,7 @@ import App from "./App.vue";
 import "./assets/styles/base.css";
 import "./assets/styles/components.scss";
 
+// Configure vee-validate
 configure({
   validateOnInput: false,
   validateOnChange: false,
@@ -13,15 +14,16 @@ configure({
   validateOnBlur: true,
 });
 
+// Create app and pinia
 const app = createApp(App);
 const pinia = createPinia();
 
+// Use plugins
 app.use(pinia);
 app.use(router);
 
-// Initialize auth state from localStorage
-import { useAuthStore } from "./stores/useAuthStore";
-const authStore = useAuthStore(pinia);
-authStore.initAuth();
-
+// Mount the app
 app.mount("#app");
+
+// REMOVED: Don't manually call initAuth here
+// The router guard will handle it automatically on first navigation
