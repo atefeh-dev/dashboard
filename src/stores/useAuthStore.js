@@ -43,14 +43,25 @@ export const useAuthStore = defineStore("auth", () => {
     },
   };
 
+  // Check if we should use mock auth
+  // Use mock if: in development OR no API URL is configured
+  function shouldUseMockAuth() {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const useMock = import.meta.env.VITE_USE_MOCK_AUTH;
+
+    // Use mock if explicitly enabled, or if no API URL is set
+    return useMock === "true" || !apiUrl || apiUrl === "";
+  }
+
   // Actions
   async function login(email, password) {
     isLoading.value = true;
     error.value = null;
 
     try {
-      // DEVELOPMENT MODE: Use mock auth
-      if (import.meta.env.MODE === "development") {
+      // Use mock auth if configured
+      if (shouldUseMockAuth()) {
+        console.log("Using mock authentication");
         await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
 
         const mockUser = mockUsers[email];
@@ -79,7 +90,8 @@ export const useAuthStore = defineStore("auth", () => {
       }
 
       // PRODUCTION MODE: Use real API
-      const response = await fetch("/api/auth/login", {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -123,15 +135,16 @@ export const useAuthStore = defineStore("auth", () => {
     error.value = null;
 
     try {
-      // DEVELOPMENT MODE: Mock password reset
-      if (import.meta.env.MODE === "development") {
+      // Use mock auth if configured
+      if (shouldUseMockAuth()) {
         await new Promise((resolve) => setTimeout(resolve, 500));
         console.log("Mock: Password reset code sent to", email);
         return { success: true };
       }
 
       // PRODUCTION MODE: Real API
-      const response = await fetch("/api/auth/forgot-password", {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/api/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -156,8 +169,8 @@ export const useAuthStore = defineStore("auth", () => {
     error.value = null;
 
     try {
-      // DEVELOPMENT MODE: Mock password reset
-      if (import.meta.env.MODE === "development") {
+      // Use mock auth if configured
+      if (shouldUseMockAuth()) {
         await new Promise((resolve) => setTimeout(resolve, 500));
 
         // Simple validation
@@ -170,7 +183,8 @@ export const useAuthStore = defineStore("auth", () => {
       }
 
       // PRODUCTION MODE: Real API
-      const response = await fetch("/api/auth/reset-password", {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/api/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, code, newPassword }),
@@ -202,8 +216,8 @@ export const useAuthStore = defineStore("auth", () => {
         return;
       }
 
-      // DEVELOPMENT MODE: Use stored data
-      if (import.meta.env.MODE === "development") {
+      // Use mock auth if configured
+      if (shouldUseMockAuth()) {
         token.value = storedToken;
         user.value = JSON.parse(storedUser);
         console.log("Auth restored from localStorage:", user.value);
@@ -211,7 +225,8 @@ export const useAuthStore = defineStore("auth", () => {
       }
 
       // PRODUCTION MODE: Validate token with API
-      const response = await fetch("/api/auth/me", {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/api/auth/me`, {
         headers: {
           Authorization: `Bearer ${storedToken}`,
         },
