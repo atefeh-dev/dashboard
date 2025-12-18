@@ -1,54 +1,52 @@
 <template>
   <nav class="navbar">
     <div class="navbar__container">
-      <!-- Left: Mobile Menu + Breadcrumb -->
+      <!-- Left Section -->
       <div class="navbar__left">
-        <!-- Mobile Menu Button -->
-        <button
-          class="navbar__mobile-toggle"
-          @click="$emit('toggleSidebar')"
-          aria-label="Toggle sidebar"
-        >
-          <Menu class="navbar__mobile-icon" />
-        </button>
+        <slot name="left">
+          <!-- Default: Mobile toggle + Breadcrumb -->
+          <button
+            v-if="!hideToggle"
+            class="navbar__mobile-toggle"
+            @click="$emit('toggleSidebar')"
+            aria-label="Toggle sidebar"
+          >
+            <Menu class="navbar__mobile-icon" />
+          </button>
 
-        <!-- Dynamic Breadcrumb -->
-        <div class="navbar__breadcrumb">
-          <OverviewIcon class="navbar__breadcrumb-icon" />
-
-          <template v-for="(item, index) in breadcrumbs" :key="index">
-            <ChevronRightIcon
-              class="navbar__breadcrumb-separator"
-              :class="{
-                'navbar__breadcrumb-separator--last':
-                  index === breadcrumbs.length - 1,
-              }"
-            />
-            <span
-              class="navbar__breadcrumb-item"
-              :class="{
-                'navbar__breadcrumb-item--current':
-                  index === breadcrumbs.length - 1,
-              }"
-            >
-              {{ item }}
-            </span>
-          </template>
-        </div>
+          <div v-if="breadcrumbs.length > 0" class="navbar__breadcrumb">
+            <OverviewIcon class="navbar__breadcrumb-icon" />
+            <template v-for="(item, index) in breadcrumbs" :key="index">
+              <ChevronRightIcon class="navbar__breadcrumb-separator" />
+              <span
+                class="navbar__breadcrumb-item"
+                :class="{
+                  'navbar__breadcrumb-item--current':
+                    index === breadcrumbs.length - 1,
+                }"
+              >
+                {{ item }}
+              </span>
+            </template>
+          </div>
+        </slot>
       </div>
 
-      <!-- Right: Search -->
+      <!-- Right Section -->
       <div class="navbar__right">
-        <div class="navbar__search">
-          <SearchIcon class="navbar__search-icon" />
-          <input
-            type="text"
-            :placeholder="searchPlaceholder"
-            class="navbar__search-input"
-            :value="modelValue"
-            @input="$emit('update:modelValue', $event.target.value)"
-          />
-        </div>
+        <slot name="right">
+          <!-- Default: Search -->
+          <div class="navbar__search">
+            <SearchIcon class="navbar__search-icon" />
+            <input
+              type="text"
+              :placeholder="searchPlaceholder"
+              class="navbar__search-input"
+              :value="modelValue"
+              @input="$emit('update:modelValue', $event.target.value)"
+            />
+          </div>
+        </slot>
       </div>
     </div>
   </nav>
@@ -63,8 +61,7 @@ import SearchIcon from "../../assets/icons/common/search.svg";
 defineProps({
   breadcrumbs: {
     type: Array,
-    required: true,
-    validator: (value) => value.length > 0,
+    default: () => [],
   },
   searchPlaceholder: {
     type: String,
@@ -74,6 +71,10 @@ defineProps({
     type: String,
     default: "",
   },
+  hideToggle: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 defineEmits(["toggleSidebar", "update:modelValue"]);
@@ -82,17 +83,19 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
 <style scoped lang="scss">
 .navbar {
   width: 100%;
-  background-color: transparent;
+  background-color: #ffffff;
   border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 20;
 
   &__container {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 1rem;
-    padding-bottom: 1.3125rem;
-    max-width: 80rem;
+    padding: 1rem 1.5rem;
+    max-width: 100%;
     margin: 0 auto;
   }
 
@@ -101,7 +104,7 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    flex-shrink: 0;
+    flex: 1;
     min-width: 0;
   }
 
@@ -116,6 +119,7 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     border-radius: 0.5rem;
     cursor: pointer;
     transition: background-color 0.2s;
+    flex-shrink: 0;
 
     @media (min-width: 1024px) {
       display: none;
@@ -142,7 +146,7 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     align-items: center;
     font-size: 0.875rem;
     font-weight: 500;
-    gap: 0.25rem;
+    gap: 0.375rem;
     min-width: 0;
     overflow: hidden;
 
@@ -152,47 +156,44 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
   }
 
   &__breadcrumb-icon {
-    width: 20px;
-    height: 20px;
+    width: 1.25rem;
+    height: 1.25rem;
     color: #9ca3af;
     flex-shrink: 0;
   }
 
   &__breadcrumb-item {
-    color: #717680;
+    color: #6b7280;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 
     &--current {
-      color: #414651;
+      color: #111827;
+      font-weight: 600;
     }
   }
 
   &__breadcrumb-separator {
     color: #d1d5db;
     flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-
-    &--last {
-      color: #d1d5db;
-      opacity: 0.5;
-    }
+    width: 1rem;
+    height: 1rem;
   }
 
   // Right section
   &__right {
-    flex: 1;
     display: flex;
-    justify-content: flex-end;
-    max-width: 320px;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
   }
 
   // Search
   &__search {
     position: relative;
     width: 100%;
+    max-width: 20rem;
   }
 
   &__search-icon {
@@ -200,8 +201,8 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
     left: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
+    width: 1.25rem;
+    height: 1.25rem;
     color: #9ca3af;
     pointer-events: none;
   }
@@ -209,15 +210,15 @@ defineEmits(["toggleSidebar", "update:modelValue"]);
   &__search-input {
     width: 100%;
     padding: 0.5rem 1rem 0.5rem 2.5rem;
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 400;
-    color: #717680;
+    color: #111827;
     background-color: #ffffff;
     border: 1px solid #d5d7da;
     border-radius: 0.5rem;
     outline: none;
     transition: all 0.2s;
-    box-shadow: 0 0.0625rem 0.125rem rgba(10, 13, 18, 0.05);
+    box-shadow: 0 1px 2px rgba(10, 13, 18, 0.05);
 
     &::placeholder {
       color: #9ca3af;

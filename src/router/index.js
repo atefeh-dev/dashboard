@@ -12,6 +12,7 @@ import ResetPasswordPage from "@/features/auth/pages/ResetPasswordPage.vue";
 // User pages (clean URLs - no prefix)
 import OverviewPage from "@/features/overview/pages/OverviewPage.vue";
 import DocumentsPage from "@/features/documents/pages/DocumentsPage.vue";
+import CreateDocumentPage from "@/features/documents/pages/CreateDocumentPage.vue";
 
 // Admin pages (with /admin prefix)
 import AdminNotificationsPage from "@/features/admin/pages/NotificationsPage.vue";
@@ -99,6 +100,12 @@ const routes = [
     component: DocumentsPage,
     meta: { requiresAuth: true, userOnly: true },
   },
+  {
+    path: "/documents/create",
+    name: "CreateDocument",
+    component: CreateDocumentPage,
+    meta: { requiresAuth: true, userOnly: true },
+  },
 
   // ADMIN ROUTES (With /admin Prefix)
   {
@@ -118,6 +125,11 @@ const routes = [
         path: "documents",
         name: "AdminDocuments",
         component: DocumentsPage,
+      },
+      {
+        path: "documents/create",
+        name: "AdminCreateDocument",
+        component: CreateDocumentPage,
       },
       {
         path: "notifications",
@@ -169,13 +181,11 @@ router.beforeEach(async (to, from, next) => {
 
   // 1. HANDLE PUBLIC AUTH ROUTES
   if (requiresAuth === false) {
-    // Redirect authenticated users away from auth pages
     if (redirectIfAuth && isAuthenticated) {
       console.log("Authenticated user accessing auth page, redirecting...");
       return next(isAdmin ? "/admin/overview" : "/overview");
     }
 
-    // Check for required session data for signup flow
     if (to.meta.requiresSessionData) {
       const required = Array.isArray(to.meta.requiresSessionData)
         ? to.meta.requiresSessionData
@@ -189,7 +199,6 @@ router.beforeEach(async (to, from, next) => {
       }
     }
 
-    // Check for reset password email requirement
     if (to.meta.requiresResetEmail) {
       const hasEmail = to.query.email || localStorage.getItem("reset_email");
       if (!hasEmail) {
@@ -204,20 +213,16 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // 2. HANDLE PROTECTED ROUTES
-
-  // Check authentication
   if (requiresAuth && !isAuthenticated) {
     console.warn("Access denied: Authentication required");
     return next("/login");
   }
 
-  // Admin-only routes (/admin/*)
   if (requiresAdmin && !isAdmin) {
     console.warn("Access denied: Admin privileges required");
     return next("/overview");
   }
 
-  // User-only routes (clean URLs) - prevent admin from accessing
   if (userOnly && isAdmin) {
     console.warn("Admins should use /admin routes");
     return next("/admin" + to.path);

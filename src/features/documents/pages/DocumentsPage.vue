@@ -21,11 +21,13 @@
       <div class="documents__stats">
         <StatsGrid :stats="store.stats" />
       </div>
+
       <!-- Google Drive Info Card -->
       <GoogleDriveInfoCard
         v-if="!hasNoDocuments"
         @connect="() => console.log('Connect to Google Drive')"
       />
+
       <!-- Documents Section -->
       <div
         :class="[
@@ -41,8 +43,10 @@
           @create="onCreate"
           @import="onImport"
         />
+
         <!-- Show Empty State only when no documents -->
         <DocumentsEmptyState v-if="hasNoDocuments" @create="onCreate" />
+
         <!-- Show Table when documents exist -->
         <DocumentsTable v-else />
       </div>
@@ -52,6 +56,7 @@
 
 <script setup>
 import { computed } from "vue";
+import { useRouter } from "vue-router";
 import MainLayout from "@/components/layout/MainLayout.vue";
 import GoogleDriveInfoCard from "../components/GoogleDriveInfoCard.vue";
 import Navbar from "@/components/layout/Navbar.vue";
@@ -61,6 +66,7 @@ import StatsGrid from "@/components/common/StatsGrid.vue";
 import DocumentsHeader from "../components/DocumentsHeader.vue";
 import { useDocumentsStore } from "@/stores/useDocumentsStore";
 
+const router = useRouter();
 const store = useDocumentsStore();
 store.setActiveNav("Documents");
 
@@ -70,20 +76,8 @@ const hasNoDocuments = computed(() => {
 });
 
 function onCreate() {
-  store.addDocument({
-    name: "New Document",
-    domain: "document.pdf",
-    status: "Active",
-    categories: ["Draft"],
-    rating: "0%",
-    direction: "up",
-    date: new Date().toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }),
-    tags: 0,
-  });
+  // Navigate to create document page
+  router.push("/documents/create");
 }
 
 function onImport() {
@@ -111,9 +105,7 @@ function onImport() {
     margin-right: 0.5rem;
   }
 }
-</style>
 
-<style scoped lang="scss">
 .documents__card--no-overflow {
   overflow: visible;
 }
