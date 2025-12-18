@@ -1,112 +1,140 @@
 <template>
-  <MainLayout
-    :sidebar-open="store.sidebarOpen"
-    :active-nav="store.activeNav"
-    @close-sidebar="store.toggleSidebar"
-    @navigate="store.setActiveNav"
+  <CreateDocumentLayout
+    :current-step-index="currentStepIndex"
+    :completed-steps="completedSteps"
+    :steps="steps"
+    :document-title="documentForm.name || 'New Document'"
+    :document-status="documentForm.status"
+    @go-to-step="goToStep"
+    @save-and-exit="saveAndExit"
   >
-    <!-- Navbar -->
-    <template #navbar>
-      <Navbar
-        :breadcrumbs="['Workspace Name', 'Documents']"
-        :model-value="store.search"
-        @update:model-value="store.setSearch"
-        @toggle-sidebar="store.toggleSidebar"
-      />
-    </template>
+    <!-- Step 1: Details -->
+    <DetailsStep
+      v-if="currentStep === 'details'"
+      :form="documentForm"
+      :selected-template="selectedTemplate"
+      @continue="completeStep"
+      @discard="discard"
+      @select-template="selectTemplate"
+    />
 
-    <!-- Main Content -->
-    <div class="documents">
-      <!-- Stats Cards -->
-      <div class="documents__stats">
-        <StatsGrid :stats="store.stats" />
-      </div>
+    <!-- Step 2: Input Forms -->
+    <InputFormsStep
+      v-if="currentStep === 'input'"
+      @continue="completeStep"
+      @back="previousStep"
+    />
 
-      <!-- Google Drive Info Card -->
-      <GoogleDriveInfoCard
-        v-if="!hasNoDocuments"
-        @connect="() => console.log('Connect to Google Drive')"
-      />
+    <!-- Step 3: Review -->
+    <ReviewStep
+      v-if="currentStep === 'review'"
+      @continue="completeStep"
+      @back="previousStep"
+    />
 
-      <!-- Documents Section -->
-      <div
-        :class="[
-          'documents__card',
-          { 'documents__card--no-overflow': hasNoDocuments },
-        ]"
-      >
-        <!-- Header - Always show -->
-        <DocumentsHeader
-          v-if="!hasNoDocuments"
-          title="Your documents are important, we're keep an eye on them here"
-          subtitle="Keep track of every document you're working on"
-          @create="onCreate"
-          @import="onImport"
-        />
+    <!-- Step 4: Preview -->
+    <PreviewStep
+      v-if="currentStep === 'preview'"
+      @continue="completeStep"
+      @back="previousStep"
+    />
 
-        <!-- Show Empty State only when no documents -->
-        <DocumentsEmptyState v-if="hasNoDocuments" @create="onCreate" />
-
-        <!-- Show Table when documents exist -->
-        <DocumentsTable v-else />
-      </div>
-    </div>
-  </MainLayout>
+    <!-- Step 5: Document -->
+    <DocumentStep
+      v-if="currentStep === 'document'"
+      @finish="createDocument"
+      @back="previousStep"
+    />
+  </CreateDocumentLayout>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import MainLayout from "@/components/layout/MainLayout.vue";
-import GoogleDriveInfoCard from "../components/GoogleDriveInfoCard.vue";
-import Navbar from "@/components/layout/Navbar.vue";
-import DocumentsEmptyState from "../components/DocumentsEmptyState.vue";
-import DocumentsTable from "../components/DocumentsTable.vue";
-import StatsGrid from "@/components/common/StatsGrid.vue";
-import DocumentsHeader from "../components/DocumentsHeader.vue";
-import { useDocumentsStore } from "@/stores/useDocumentsStore";
+import CreateDocumentLayout from "@/features/documents/layout/CreateDocumentLayout.vue";
+import DetailsStep from "@/features/documents/components/steps/DetailsStep.vue";
+import InputFormsStep from "@/features/documents/components/steps/InputFormsStep.vue";
+import ReviewStep from "@/features/documents/components/steps/ReviewStep.vue";
+import PreviewStep from "@/features/documents/components/steps/PreviewStep.vue";
+import DocumentStep from "@/features/documents/components/steps/DocumentStep.vue";
 
 const router = useRouter();
-const store = useDocumentsStore();
-store.setActiveNav("Documents");
 
-// Check if documents are actually empty
-const hasNoDocuments = computed(() => {
-  return store.allData.documents.length === 0;
+// Step configuration
+const steps = [
+  { id: "details", title: "Details", subtitle: "Template and information" },
+  { id: "input", title: "Input forms", subtitle: "Based on template needs" },
+  { id: "review", title: "Review", subtitle: "Overview inputs and edit" },
+  { id: "preview", title: "Preview", subtitle: "See data in action" },
+  { id: "document", title: "Document", subtitle: "Save or send for action" },
+];
+
+const currentStepIndex = ref(0);
+const completedSteps = ref([]);
+
+const currentStep = computed(() => steps[currentStepIndex.value].id);
+
+// Form data
+const selectedTemplate = ref(null);
+const documentForm = ref({
+  name: "",
+  filename: "",
+  description: "",
+  status: "draft",
 });
 
-function onCreate() {
-  // Navigate to create document page
-  router.push("/documents/create");
+// Step navigation
+function goToStep(index) {
+  // Allow navigation to completed steps or current step
+  if (index <= currentStepIndex.value || completedSteps.value.includes(index)) {
+    currentStepIndex.value = index;
+  }
 }
 
-function onImport() {
-  console.log("Import / Export clicked");
+function completeStep() {
+  // Mark current step as completed (if not already)
+  if (!completedSteps.value.includes(currentStepIndex.value)) {
+    completedSteps.value.push(currentStepIndex.value);
+  }
+
+  // Move to next step
+  if (currentStepIndex.value < steps.length - 1) {
+    currentStepIndex.value++;
+  } else {
+    // All steps completed, create document
+    createDocument();
+  }
+}
+
+function previousStep() {
+  if (currentStepIndex.value > 0) {
+    currentStepIndex.value--;
+  }
+}
+
+function selectTemplate(template) {
+  selectedTemplate.value = template;
+}
+
+// Actions
+function saveAndExit() {
+  router.push("/documents");
+}
+
+function discard() {
+  if (confirm("Are you sure you want to discard this document?")) {
+    router.push("/documents");
+  }
+}
+
+function createDocument() {
+  console.log("Creating document:", documentForm.value);
+  // Add to documents store
+  // useDocumentsStore().addDocument(documentForm.value);
+  router.push("/documents");
 }
 </script>
 
-<style scoped lang="scss">
-.documents {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-
-  // Documents Card
-  &__card {
-    background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    overflow: hidden;
-  }
-
-  &__action-icon {
-    width: 1rem;
-    height: 1rem;
-    margin-right: 0.5rem;
-  }
-}
-
-.documents__card--no-overflow {
-  overflow: visible;
-}
+<style scoped>
+/* No styles needed - all in CreateDocumentLayout */
 </style>
