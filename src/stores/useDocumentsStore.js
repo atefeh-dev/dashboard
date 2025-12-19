@@ -9,6 +9,10 @@ export const useDocumentsStore = defineStore("documents", () => {
   const search = ref("");
   const activeTab = ref("companies");
 
+  // Draft management
+  const currentDraft = ref(null);
+  const lastSavedAt = ref(null);
+
   // All data in one place
   const allData = ref({
     companies: [
@@ -819,6 +823,8 @@ export const useDocumentsStore = defineStore("documents", () => {
         tags: 2,
       },
     ],
+    // Drafts array for storing work in progress
+    drafts: [],
   });
 
   // Stats - dynamic based on actual data
@@ -834,12 +840,13 @@ export const useDocumentsStore = defineStore("documents", () => {
         },
       ];
     } else if (activeNav.value === "Documents") {
+      const draftCount = allData.value.drafts?.length || 0;
       return [
         {
           label: "# of total documents",
           value: allData.value.documents.length,
         },
-        { label: "# of drafts", value: 0 },
+        { label: "# of drafts", value: draftCount },
         { label: "# of pending documents", value: 0 },
         {
           label: "# of available templates",
@@ -921,6 +928,123 @@ export const useDocumentsStore = defineStore("documents", () => {
     allData.value.documents.unshift(doc);
   }
 
+  // ========================================
+  // DRAFT MANAGEMENT FUNCTIONS
+  // ========================================
+
+  function createDraft() {
+    const draft = {
+      id: `draft-${Date.now()}`,
+      name: "Untitled Document",
+      status: "draft",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      currentStep: 0,
+      completedSteps: [],
+      formData: {
+        name: "",
+        filename: "",
+        description: "",
+        status: "draft",
+      },
+      selectedTemplate: null,
+      stepData: {
+        details: {},
+        input: {},
+        review: {},
+        preview: {},
+      },
+    };
+
+    allData.value.drafts.unshift(draft);
+    currentDraft.value = draft;
+    lastSavedAt.value = new Date().toISOString();
+
+    console.log("✅ Draft created:", draft.id);
+    return draft;
+  }
+
+  function loadDraft(draftId) {
+    const draft = allData.value.drafts.find((d) => d.id === draftId);
+    if (draft) {
+      currentDraft.value = draft;
+      lastSavedAt.value = draft.updatedAt;
+      console.log("✅ Draft loaded:", draftId);
+    } else {
+      console.warn("⚠️ Draft not found:", draftId);
+    }
+    return draft;
+  }
+
+  function saveDraft(updates) {
+    if (!currentDraft.value) {
+      console.log("No current draft, creating new one...");
+      return createDraft();
+    }
+
+    // Update the draft
+    Object.assign(currentDraft.value, {
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    });
+
+    // Update in drafts array
+    const index = allData.value.drafts.findIndex(
+      (d) => d.id === currentDraft.value.id
+    );
+    if (index !== -1) {
+      allData.value.drafts[index] = { ...currentDraft.value };
+    }
+
+    lastSavedAt.value = new Date().toISOString();
+    console.log("💾 Draft saved:", currentDraft.value.id);
+
+    return currentDraft.value;
+  }
+
+  function deleteDraft(draftId) {
+    const index = allData.value.drafts.findIndex((d) => d.id === draftId);
+    if (index !== -1) {
+      allData.value.drafts.splice(index, 1);
+      console.log("🗑️ Draft deleted:", draftId);
+    }
+    if (currentDraft.value?.id === draftId) {
+      currentDraft.value = null;
+      lastSavedAt.value = null;
+    }
+  }
+
+  function clearCurrentDraft() {
+    currentDraft.value = null;
+    lastSavedAt.value = null;
+  }
+
+  function convertDraftToDocument(draftId) {
+    const draft = allData.value.drafts.find((d) => d.id === draftId);
+    if (!draft) return null;
+
+    const document = {
+      name: draft.formData.name || "Untitled Document",
+      domain: draft.formData.filename || "document.pdf",
+      status: "Active",
+      categories: ["Document"],
+      rating: "0%",
+      direction: "up",
+      date: new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }),
+      tags: 0,
+    };
+
+    addDocument(document);
+    deleteDraft(draftId);
+
+    console.log("✅ Draft converted to document:", document.name);
+    return document;
+  }
+
   return {
     activeNav,
     sidebarOpen,
@@ -934,6 +1058,8 @@ export const useDocumentsStore = defineStore("documents", () => {
     filtered,
     paginated,
     totalPages,
+    currentDraft,
+    lastSavedAt,
     setActiveNav,
     setActiveTab,
     toggleSidebar,
@@ -941,5 +1067,12 @@ export const useDocumentsStore = defineStore("documents", () => {
     setSearch,
     removeDocument,
     addDocument,
+    // Draft functions
+    createDraft,
+    loadDraft,
+    saveDraft,
+    deleteDraft,
+    clearCurrentDraft,
+    convertDraftToDocument,
   };
 });

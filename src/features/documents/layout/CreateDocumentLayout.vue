@@ -3,10 +3,10 @@
     <!-- Navbar (Shared) -->
     <Navbar>
       <template #left>
-        <button class="navbar-custom__back-btn" @click="goBack">
+        <AppButton variant="ghost" @click="goBack">
           <ChevronLeft class="navbar-custom__back-icon" />
           Back to documents
-        </button>
+        </AppButton>
 
         <div class="navbar-custom__breadcrumb">
           <span class="navbar-custom__breadcrumb-item">Workspace name</span>
@@ -36,7 +36,21 @@
           <Settings class="navbar-custom__icon" />
         </button>
 
-        <span class="navbar-custom__autosave"> Auto saved 2 minutes ago </span>
+        <span
+          v-if="lastSaveTime"
+          class="navbar-custom__autosave"
+          :class="{ 'navbar-custom__autosave--recent': isRecentSave }"
+        >
+          <span class="navbar-custom__autosave-icon">✓</span>
+          Auto saved {{ lastSaveTime }}
+        </span>
+        <span
+          v-else
+          class="navbar-custom__autosave navbar-custom__autosave--unsaved"
+        >
+          <span class="navbar-custom__autosave-icon">•</span>
+          Unsaved changes
+        </span>
 
         <AppButton variant="primary" size="md" @click="saveAndExit">
           <Download class="navbar-custom__btn-icon" />
@@ -99,6 +113,7 @@ import {
   Download,
 } from "lucide-vue-next";
 import { useRouter } from "vue-router";
+import { computed, onMounted, onUnmounted } from "vue";
 import Navbar from "@/components/layout/Navbar.vue";
 import AppButton from "@/components/ui/AppButton.vue";
 
@@ -123,18 +138,28 @@ const props = defineProps({
     type: String,
     default: "Draft",
   },
+  lastSaveTime: {
+    type: String,
+    default: null,
+  },
 });
 
-const emit = defineEmits(["goToStep", "saveAndExit"]);
+const emit = defineEmits(["goToStep", "saveAndExit", "goBack"]);
 
 const router = useRouter();
+
+// Check if save was recent (within 10 seconds)
+const isRecentSave = computed(() => {
+  if (!props.lastSaveTime) return false;
+  return props.lastSaveTime === "just now";
+});
 
 function goToStep(index) {
   emit("goToStep", index);
 }
 
 function goBack() {
-  router.push("/documents");
+  emit("goBack");
 }
 
 function saveAndExit() {
@@ -241,18 +266,68 @@ function saveAndExit() {
 
   &__autosave {
     display: none;
+    align-items: center;
+    gap: 0.375rem;
     font-size: 0.875rem;
-    color: #9ca3af;
+    color: #10b981;
+    transition: color 0.2s;
 
     @media (min-width: 1024px) {
-      display: block;
+      display: flex;
     }
+
+    &--recent {
+      .navbar-custom__autosave-icon {
+        animation: checkmark-pop 0.3s ease-out;
+      }
+    }
+
+    &--unsaved {
+      color: #f59e0b;
+
+      .navbar-custom__autosave-icon {
+        animation: pulse 2s ease-in-out infinite;
+      }
+    }
+  }
+
+  &__autosave-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: bold;
   }
 
   &__btn-icon {
     width: 1rem;
     height: 1rem;
     margin-right: 0.5rem;
+  }
+}
+
+// Animations
+@keyframes checkmark-pop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
 
