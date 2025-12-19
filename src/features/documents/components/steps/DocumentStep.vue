@@ -26,5 +26,5 @@ defineEmits(["finish", "back"]);
 </script>
 
 <style scoped lang="scss">
-@import "./stepStyles.scss";
+@use "./stepStyles.scss";
 </style>
