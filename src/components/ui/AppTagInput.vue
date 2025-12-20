@@ -1,8 +1,8 @@
 <template>
   <div class="tag-input" :class="{ 'tag-input--focused': isFocused }">
-    <!-- SENIOR UX: Show first 2 tags + "+N more" badge -->
+    <!-- SENIOR UX: Show first N tags + "+N more" badge -->
     <div v-if="tags.length > 0" class="tag-input__tags">
-      <!-- First 2 visible tags -->
+      <!-- First N visible tags -->
       <span
         v-for="(tag, index) in visibleTags"
         :key="index"
@@ -19,7 +19,7 @@
         />
       </span>
 
-      <!-- "+N more" badge (shows when >2 tags) -->
+      <!-- "+N more" badge (shows when >maxVisible tags) -->
       <button
         v-if="hiddenTags.length > 0"
         class="tag-input__more"
@@ -45,7 +45,7 @@
     />
 
     <!-- Popover: All tags (appears when clicking "+N more") -->
-    <div v-if="showPopover" class="tag-input__popover">
+    <div v-if="showPopover" class="tag-input__popover" @click.stop>
       <div class="tag-input__popover-header">
         <span class="tag-input__popover-title"
           >All tags ({{ tags.length }})</span
@@ -95,7 +95,7 @@ const props = defineProps({
   },
   maxVisible: {
     type: Number,
-    default: 2, // Show only 2 tags, rest in popover
+    default: 2, // Show only 2 tags by default (GitHub style)
   },
 });
 
@@ -123,6 +123,9 @@ function handleBlur() {
   // Delay to allow click on popover
   setTimeout(() => {
     isFocused.value = false;
+    if (!showPopover.value) {
+      // Close popover if focus lost
+    }
   }, 200);
 }
 
@@ -171,15 +174,17 @@ defineExpose({
 .tag-input {
   position: relative;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   border: 1px solid #d5d7da;
   border-radius: 0.5rem;
   background-color: #ffffff;
+
+  // CRITICAL: Fixed height
   min-height: 2.75rem;
-  max-height: 2.75rem; // Fixed height - ALWAYS
+  max-height: 2.75rem;
+
   transition: all 0.2s;
   cursor: text;
 
@@ -194,9 +199,9 @@ defineExpose({
 
   &__tags {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
     align-items: center;
+    gap: 0.375rem;
+    flex-shrink: 0; // Don't shrink tags
   }
 
   &__tag {
@@ -254,6 +259,7 @@ defineExpose({
     cursor: pointer;
     transition: all 0.15s;
     white-space: nowrap;
+    flex-shrink: 0;
 
     &:hover {
       background-color: #e5e7eb;
