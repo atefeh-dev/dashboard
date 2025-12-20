@@ -1,11 +1,14 @@
 import { ref, computed, onMounted, onUnmounted } from "vue";
 
 /**
- * Composable for managing autosave functionality and time display
- * Can be used as an alternative to the store-based approach
+ * Autosave composable - EXACT FIGMA MATCH
+ * Shows: "2 seconds ago", "2 minutes ago" (updates every 1 second)
  */
 export function useAutosave(saveCallback, options = {}) {
-  const { debounceMs = 2000, updateIntervalMs = 10000 } = options;
+  const {
+    debounceMs = 2000,
+    updateIntervalMs = 1000, // Update every 1 second for accurate time
+  } = options;
 
   const lastSavedAt = ref(null);
   const isSaving = ref(false);
@@ -13,7 +16,7 @@ export function useAutosave(saveCallback, options = {}) {
   let autosaveTimer = null;
   let timeUpdateInterval = null;
 
-  // Computed time since last save
+  // Computed time since last save - EXACT FIGMA FORMAT
   const timeSinceLastSave = computed(() => {
     if (!lastSavedAt.value) return null;
 
@@ -25,14 +28,17 @@ export function useAutosave(saveCallback, options = {}) {
     const diffHours = Math.floor(diffMinutes / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffSeconds < 10) {
-      return "just now";
+    // FIGMA FORMAT: Always show time units (never "just now")
+    if (diffSeconds < 1) {
+      return "a moment ago";
+    } else if (diffSeconds === 1) {
+      return "1 second ago";
     } else if (diffSeconds < 60) {
-      return `${diffSeconds} seconds ago`;
+      return `${diffSeconds} seconds ago`; // "2 seconds ago", "45 seconds ago"
     } else if (diffMinutes === 1) {
       return "1 minute ago";
     } else if (diffMinutes < 60) {
-      return `${diffMinutes} minutes ago`;
+      return `${diffMinutes} minutes ago`; // "2 minutes ago", "45 minutes ago"
     } else if (diffHours === 1) {
       return "1 hour ago";
     } else if (diffHours < 24) {
@@ -80,9 +86,9 @@ export function useAutosave(saveCallback, options = {}) {
 
   // Initialize
   onMounted(() => {
-    // Update time display periodically
+    // Update time display every 1 second for accurate "X seconds ago"
     timeUpdateInterval = setInterval(() => {
-      // Trigger reactivity by accessing the ref
+      // Trigger reactivity
       if (lastSavedAt.value) {
         lastSavedAt.value = lastSavedAt.value;
       }

@@ -58,80 +58,89 @@
       </div>
 
       <!-- Templates Table -->
+      <!-- Templates Table -->
       <div class="table-card">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Author</th>
-              <th>Last update</th>
-              <th>Tag</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="template in templatesStore.filteredTemplates"
-              :key="template.id"
-              :class="{
-                'data-table__row--selected':
-                  selectedTemplate?.id === template.id,
-              }"
-            >
-              <td>
-                <div class="template-name">
-                  <FileText class="template-name__icon" />
-                  <span>{{ template.name }}</span>
-                </div>
-              </td>
-              <td class="data-table__muted">{{ template.author }}</td>
-              <td class="data-table__muted">{{ template.lastUpdate }}</td>
-              <td>
-                <div class="badge-group">
-                  <span
-                    v-for="(tag, idx) in template.tags.slice(0, 3)"
-                    :key="idx"
-                    class="badge"
-                  >
-                    {{ tag }}
-                  </span>
-                  <span
-                    v-if="template.tags.length > 3"
-                    class="badge badge--more"
-                  >
-                    +{{ template.tags.length - 3 }}
-                  </span>
-                </div>
-              </td>
-              <td>
-                <AppButton
-                  variant="primary"
-                  size="sm"
-                  @click="handleSelectTemplate(template)"
-                >
-                  Use
-                </AppButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="data-table">
+          <div class="data-table__wrapper">
+            <table class="data-table__table">
+              <thead class="data-table__head">
+                <tr class="data-table__row data-table__row--header">
+                  <th class="data-table__header">Name</th>
+                  <th class="data-table__header">Author</th>
+                  <th class="data-table__header">Last update</th>
+                  <th class="data-table__header">Tag</th>
+                  <th class="data-table__header">Action</th>
+                </tr>
+              </thead>
 
-        <!-- Empty State -->
-        <div
-          v-if="templatesStore.filteredTemplates.length === 0"
-          class="empty-state"
-        >
-          <FileText class="empty-state__icon" />
-          <p class="empty-state__text">
-            No templates found matching your filters
-          </p>
-          <AppButton
-            variant="ghost"
-            size="sm"
-            @click="templatesStore.resetFilters"
-          >
-            Clear filters
-          </AppButton>
+              <tbody>
+                <tr
+                  v-for="template in templatesStore.filteredTemplates"
+                  :key="template.id"
+                  class="data-table__row"
+                  :class="{
+                    'data-table__row--selected':
+                      selectedTemplate?.id === template.id,
+                  }"
+                >
+                  <td class="data-table__cell">
+                    <div class="template-name">
+                      <FileText class="template-name__icon" />
+                      <span class="data-table__name">
+                        {{ template.name }}
+                      </span>
+                    </div>
+                  </td>
+
+                  <td class="data-table__cell data-table__domain">
+                    {{ template.author }}
+                  </td>
+
+                  <td class="data-table__cell data-table__date">
+                    {{ template.lastUpdate }}
+                  </td>
+
+                  <td class="data-table__cell">
+                    <div class="data-table__categories">
+                      <span
+                        v-for="(tag, idx) in template.tags.slice(0, 3)"
+                        :key="idx"
+                        class="data-table__tag"
+                      >
+                        {{ tag }}
+                      </span>
+
+                      <span
+                        v-if="template.tags.length > 3"
+                        class="data-table__badge"
+                      >
+                        +{{ template.tags.length - 3 }}
+                      </span>
+                    </div>
+                  </td>
+
+                  <td class="data-table__cell">
+                    <AppButton
+                      variant="primary"
+                      size="sm"
+                      @click="handleSelectTemplate(template)"
+                    >
+                      Use
+                    </AppButton>
+                  </td>
+                </tr>
+
+                <tr
+                  v-if="templatesStore.filteredTemplates.length === 0"
+                  class="data-table__row"
+                >
+                  <td class="data-table__empty" colspan="5">
+                    No templates found matching your filters
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
@@ -270,6 +279,9 @@ function handleSelectTemplate(template) {
 
 <style scoped lang="scss">
 @use "./stepStyles.scss";
+
+@use "../../../../assets/styles/table-mixins" as *;
+@include table-base-styles("data-table");
 
 // Additional styles for empty state
 .empty-state {

@@ -1,65 +1,92 @@
 <template>
   <div class="create-document-layout">
-    <!-- Navbar (Shared) -->
-    <Navbar>
-      <template #left>
-        <AppButton variant="ghost" @click="goBack">
-          <ChevronLeft class="navbar-custom__back-icon" />
-          Back to documents
-        </AppButton>
+    <!-- FIXED: Navbar stays at top (like Figma, Notion, Linear) -->
+    <div class="navbar-container">
+      <Navbar>
+        <template #left>
+          <AppButton variant="ghost" @click="goBack">
+            <ChevronLeft class="navbar-custom__back-icon" />
+            Back to documents
+          </AppButton>
 
-        <div class="navbar-custom__breadcrumb">
-          <span class="navbar-custom__breadcrumb-item">Workspace name</span>
-          <ChevronRight class="navbar-custom__breadcrumb-separator" />
-          <span class="navbar-custom__breadcrumb-item">Documents</span>
-          <ChevronRight class="navbar-custom__breadcrumb-separator" />
-          <span
-            class="navbar-custom__breadcrumb-item navbar-custom__breadcrumb-item--active"
-          >
-            {{ documentTitle || "Document title" }}
-          </span>
-          <ChevronRight class="navbar-custom__breadcrumb-separator" />
-          <span
-            class="navbar-custom__breadcrumb-item navbar-custom__breadcrumb-item--status"
-          >
-            {{ documentStatus }}
-          </span>
-        </div>
-      </template>
+          <div class="navbar-custom__breadcrumb">
+            <span class="navbar-custom__breadcrumb-item">Workspace name</span>
+            <ChevronRight class="navbar-custom__breadcrumb-separator" />
+            <span class="navbar-custom__breadcrumb-item">Documents</span>
+            <ChevronRight class="navbar-custom__breadcrumb-separator" />
+            <span
+              class="navbar-custom__breadcrumb-item navbar-custom__breadcrumb-item--active"
+            >
+              {{ documentTitle || "Document title" }}
+            </span>
+            <ChevronRight class="navbar-custom__breadcrumb-separator" />
+            <span
+              class="navbar-custom__breadcrumb-item navbar-custom__breadcrumb-item--status"
+            >
+              {{ documentStatus }}
+            </span>
+          </div>
+        </template>
 
-      <template #right>
-        <button class="navbar-custom__icon-btn" aria-label="History">
-          <Clock class="navbar-custom__icon" />
-        </button>
+        <template #right>
+          <button class="navbar-custom__icon-btn" aria-label="History">
+            <Clock class="navbar-custom__icon" />
+          </button>
 
-        <button class="navbar-custom__icon-btn" aria-label="Settings">
-          <Settings class="navbar-custom__icon" />
-        </button>
+          <button class="navbar-custom__icon-btn" aria-label="Settings">
+            <Settings class="navbar-custom__icon" />
+          </button>
 
-        <span
-          v-if="lastSaveTime"
-          class="navbar-custom__autosave"
-          :class="{ 'navbar-custom__autosave--recent': isRecentSave }"
-        >
-          <span class="navbar-custom__autosave-icon">✓</span>
-          Auto saved {{ lastSaveTime }}
-        </span>
-        <span
-          v-else
-          class="navbar-custom__autosave navbar-custom__autosave--unsaved"
-        >
-          <span class="navbar-custom__autosave-icon">•</span>
-          Unsaved changes
-        </span>
+          <!-- Autosave indicator -->
+          <div class="navbar-custom__autosave" v-if="lastSaveTime">
+            <svg
+              class="navbar-custom__autosave-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="2"
+                fill="none"
+              />
+              <path
+                v-if="!isSaving"
+                d="M8 12l2 2 4-4"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle
+                v-else
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-dasharray="60"
+                stroke-dashoffset="15"
+                fill="none"
+                class="navbar-custom__autosave-spinner"
+              />
+            </svg>
+            <span class="navbar-custom__autosave-text">
+              Auto saved {{ lastSaveTime }}
+            </span>
+          </div>
 
-        <AppButton variant="primary" size="md" @click="saveAndExit">
-          <Download class="navbar-custom__btn-icon" />
-          Save & exit
-        </AppButton>
-      </template>
-    </Navbar>
+          <AppButton variant="primary" size="md" @click="saveAndExit">
+            <Download class="navbar-custom__btn-icon" />
+            Save & exit
+          </AppButton>
+        </template>
+      </Navbar>
+    </div>
 
-    <!-- Steps / Progress (Shared & Sticky) -->
+    <!-- FIXED: Steps also stay at top (below navbar) -->
     <div class="steps-wrapper">
       <div class="steps">
         <button
@@ -84,7 +111,6 @@
             <span class="steps__subtitle">{{ step.subtitle }}</span>
           </div>
 
-          <!-- Progress border (visible when completed or active) -->
           <div
             class="steps__progress-border"
             :class="{
@@ -97,7 +123,7 @@
       </div>
     </div>
 
-    <!-- Step Content (Dynamic) -->
+    <!-- Content area (scrolls under fixed headers) -->
     <div class="create-document-layout__content">
       <slot />
     </div>
@@ -113,7 +139,6 @@ import {
   Download,
 } from "lucide-vue-next";
 import { useRouter } from "vue-router";
-import { computed, onMounted, onUnmounted } from "vue";
 import Navbar from "@/components/layout/Navbar.vue";
 import AppButton from "@/components/ui/AppButton.vue";
 
@@ -142,17 +167,15 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  isSaving: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["goToStep", "saveAndExit", "goBack"]);
 
 const router = useRouter();
-
-// Check if save was recent (within 10 seconds)
-const isRecentSave = computed(() => {
-  if (!props.lastSaveTime) return false;
-  return props.lastSaveTime === "just now";
-});
 
 function goToStep(index) {
   emit("goToStep", index);
@@ -171,37 +194,37 @@ function saveAndExit() {
 .create-document-layout {
   min-height: 100vh;
   background-color: #f9fafb;
+  padding-top: 130px; // Space for fixed navbar + steps (64px + 66px)
+
+  @media (max-width: 768px) {
+    padding-top: 120px; // Slightly less on mobile
+  }
 
   &__content {
     max-width: 56rem;
     margin: 0 auto;
     padding: 2rem 1.5rem;
-    padding-top: calc(2rem + 80px); // Account for sticky steps
+
+    @media (max-width: 768px) {
+      padding: 1.5rem 1rem;
+    }
   }
 }
 
-// Navbar custom styles
+// SENIOR UX: Fixed navbar (always visible at top)
+.navbar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100; // Above everything except modals
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+// Navbar styles
 .navbar-custom {
-  &__back-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    background: transparent;
-    border: none;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 400;
-    color: #6b7280;
-    cursor: pointer;
-    transition: background-color 0.15s;
-    white-space: nowrap;
-
-    &:hover {
-      background-color: #f3f4f6;
-    }
-  }
-
   &__back-icon {
     width: 1rem;
     height: 1rem;
@@ -267,36 +290,31 @@ function saveAndExit() {
   &__autosave {
     display: none;
     align-items: center;
-    gap: 0.375rem;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
     font-size: 0.875rem;
-    color: #10b981;
-    transition: color 0.2s;
+    color: #6b7280;
+    font-weight: 400;
 
     @media (min-width: 1024px) {
       display: flex;
     }
-
-    &--recent {
-      .navbar-custom__autosave-icon {
-        animation: checkmark-pop 0.3s ease-out;
-      }
-    }
-
-    &--unsaved {
-      color: #f59e0b;
-
-      .navbar-custom__autosave-icon {
-        animation: pulse 2s ease-in-out infinite;
-      }
-    }
   }
 
   &__autosave-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    font-weight: bold;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #9ca3af;
+    flex-shrink: 0;
+  }
+
+  &__autosave-spinner {
+    animation: spin 1s linear infinite;
+  }
+
+  &__autosave-text {
+    color: #6b7280;
+    white-space: nowrap;
   }
 
   &__btn-icon {
@@ -306,50 +324,42 @@ function saveAndExit() {
   }
 }
 
-// Animations
-@keyframes checkmark-pop {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-// Steps Wrapper (Sticky Container)
+// SENIOR UX: Fixed steps (always visible below navbar)
 .steps-wrapper {
-  position: sticky;
-  top: 0;
-  z-index: 30;
+  position: fixed;
+  top: 64px; // Below navbar
+  left: 0;
+  right: 0;
+  z-index: 90; // Below navbar, above content
   background-color: #ffffff;
   border-bottom: 1px solid #e5e7eb;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-// Steps
-.steps {
-  display: flex;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 
   &::-webkit-scrollbar {
-    display: none;
+    height: 4px;
   }
+
+  &::-webkit-scrollbar-track {
+    background: #f3f4f6;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 2px;
+  }
+}
+
+.steps {
+  display: flex;
+  min-width: max-content;
 
   &__item {
     position: relative;
@@ -362,11 +372,14 @@ function saveAndExit() {
     transition: background-color 0.2s;
     text-align: left;
 
+    @media (max-width: 768px) {
+      padding: 0.875rem 1rem;
+    }
+
     &:hover:not(&--upcoming) {
       background-color: #f9fafb;
     }
 
-    // Completed step (green text)
     &--completed {
       .steps__title {
         color: #10b981;
@@ -378,7 +391,6 @@ function saveAndExit() {
       }
     }
 
-    // Active step (purple text)
     &--active {
       .steps__title {
         color: #6366f1;
@@ -390,7 +402,6 @@ function saveAndExit() {
       }
     }
 
-    // Upcoming step (grayed out, not clickable)
     &--upcoming {
       cursor: not-allowed;
       opacity: 0.5;
@@ -416,15 +427,24 @@ function saveAndExit() {
     font-weight: 600;
     color: #111827;
     transition: color 0.2s;
+    white-space: nowrap;
+
+    @media (max-width: 768px) {
+      font-size: 0.8125rem;
+    }
   }
 
   &__subtitle {
     font-size: 0.75rem;
     color: #6b7280;
     transition: color 0.2s;
+    white-space: nowrap;
+
+    @media (max-width: 768px) {
+      font-size: 0.6875rem;
+    }
   }
 
-  // Progress Border (Bottom indicator)
   &__progress-border {
     position: absolute;
     bottom: 0;
@@ -434,35 +454,9 @@ function saveAndExit() {
     background-color: transparent;
     transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-    // Completed: Purple border
-    &--completed {
-      background-color: #6366f1;
-    }
-
-    // Active: Purple border (same as completed for visual consistency)
+    &--completed,
     &--active {
       background-color: #6366f1;
-    }
-  }
-}
-
-// Responsive adjustments
-@media (max-width: 768px) {
-  .create-document-layout__content {
-    padding-top: calc(1.5rem + 70px);
-  }
-
-  .steps {
-    &__item {
-      padding: 0.875rem 1rem;
-    }
-
-    &__title {
-      font-size: 0.8125rem;
-    }
-
-    &__subtitle {
-      font-size: 0.6875rem;
     }
   }
 }
