@@ -10,7 +10,7 @@
     @save-and-exit="saveAndExit"
     @go-back="handleGoBack"
   >
-    <!-- Step 1: Details -->
+    <!-- Step 1: Details (No Sidebar) -->
     <DetailsStep
       v-if="currentStep === 'details'"
       :form="documentForm"
@@ -21,36 +21,44 @@
       @update:form="updateFormData"
     />
 
-    <!-- Step 2: Input Forms -->
+    <!-- Step 2: Input Forms (With Sidebar) -->
     <InputFormsStep
       v-if="currentStep === 'input'"
+      :document-info="sidebarData"
+      :step-title="steps[1].title"
+      :step-description="steps[1].subtitle"
+      :form-fields="inputFormFields"
       :step-data="stepData.input"
       @continue="completeStep"
       @back="previousStep"
       @update:data="updateStepData('input', $event)"
     />
 
-    <!-- Step 3: Review -->
+    <!-- Step 3: Review (With Sidebar) -->
     <ReviewStep
       v-if="currentStep === 'review'"
-      :step-data="stepData.review"
+      :document-info="sidebarData"
+      :step-data="allStepData"
+      :review-sections="reviewSections"
       @continue="completeStep"
       @back="previousStep"
-      @update:data="updateStepData('review', $event)"
+      @update:data="updateReviewData"
     />
 
-    <!-- Step 4: Preview -->
+    <!-- Step 4: Preview (With Sidebar) -->
     <PreviewStep
       v-if="currentStep === 'preview'"
+      :document-info="sidebarData"
       :step-data="stepData.preview"
       @continue="completeStep"
       @back="previousStep"
       @update:data="updateStepData('preview', $event)"
     />
 
-    <!-- Step 5: Document -->
+    <!-- Step 5: Document (With Sidebar) -->
     <DocumentStep
       v-if="currentStep === 'document'"
+      :document-info="sidebarData"
       @finish="createDocument"
       @back="previousStep"
     />
@@ -61,6 +69,7 @@
 import { ref, computed, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useDocumentsStore } from "@/stores/useDocumentsStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { useAutosave } from "@/composables/useAutosave";
 import CreateDocumentLayout from "@/features/documents/layout/CreateDocumentLayout.vue";
 import DetailsStep from "@/features/documents/components/steps/DetailsStep.vue";
@@ -72,6 +81,7 @@ import DocumentStep from "@/features/documents/components/steps/DocumentStep.vue
 const router = useRouter();
 const route = useRoute();
 const documentsStore = useDocumentsStore();
+const authStore = useAuthStore();
 
 // Step configuration
 const steps = [
@@ -103,22 +113,194 @@ const stepData = ref({
 });
 
 // ========================================
-// AUTOSAVE SETUP USING COMPOSABLE
+// SIDEBAR DATA (for steps 2-5)
 // ========================================
 
-// Use the autosave composable
+const sidebarData = computed(() => ({
+  title: documentForm.value.name || "Document title",
+  lastEdit: timeSinceLastSave.value || "(not saved yet)",
+  status: documentForm.value.status || "Draft",
+  statusVariant: getStatusVariant(documentForm.value.status),
+  authorName: authStore.user?.name || "{User Name}",
+  authorAvatar: authStore.user?.avatar || "/src/assets/images/av.png",
+  templateName: selectedTemplate.value?.name || "Non-Disclosure Agreement",
+  templateAuthor: selectedTemplate.value?.author || "doclast",
+  templateUpdateDate: selectedTemplate.value?.lastUpdate || "December 5, 2025",
+  templateTags: selectedTemplate.value?.tags || ["Tag 1", "Tag 2", "Tag 3"],
+  checklistItems: checklistItems.value,
+}));
+
+// Dynamic checklist based on STEP completion (not field completion)
+const checklistItems = computed(() => {
+  return steps.map((step, index) => ({
+    title: step.title,
+    subtitle: step.subtitle,
+    completed: completedSteps.value.includes(index),
+    active: currentStepIndex.value === index,
+  }));
+});
+
+// ========================================
+// FORM FIELDS CONFIGURATION (Step 2)
+// ========================================
+
+const inputFormFields = [
+  {
+    name: "yourName",
+    label: "Name of your document",
+    type: "text",
+    placeholder: "For example Accelerator Contract 2025",
+    required: true,
+    hint: "This is a hint text to help user.",
+  },
+  {
+    name: "yourEmail",
+    label: "Your email address",
+    type: "email",
+    placeholder: "john.doe@example.com",
+    required: true,
+    hint: "We'll send confirmation to this email",
+  },
+  {
+    name: "companyName",
+    label: "Company name",
+    type: "text",
+    placeholder: "Acme Corporation",
+    required: false,
+  },
+  {
+    name: "role",
+    label: "Your role",
+    type: "select",
+    required: true,
+    options: [
+      { value: "", label: "Select your role" },
+      { value: "ceo", label: "CEO" },
+      { value: "manager", label: "Manager" },
+      { value: "employee", label: "Employee" },
+    ],
+  },
+  {
+    name: "additionalInfo",
+    label: "Description",
+    type: "textarea",
+    placeholder: "Provide some details about what this document for ...",
+    rows: 5,
+    required: false,
+  },
+];
+
+// ========================================
+// REVIEW SECTIONS CONFIGURATION (Step 3)
+// ========================================
+
+const reviewSections = [
+  {
+    key: "details",
+    title: "Document Details",
+    subtitle: "Template and information",
+    fields: [
+      {
+        name: "name",
+        label: "Name of your document",
+        type: "text",
+        placeholder: "For example Accelerator Contract 2025",
+        required: true,
+      },
+      {
+        name: "filename",
+        label: "File name to save",
+        type: "text-prefix",
+        prefix: "doclast-",
+        placeholder: "accelerator-contract-2025",
+        required: true,
+      },
+      {
+        name: "description",
+        label: "Description",
+        type: "textarea",
+        placeholder: "Provide some details about what this document for ...",
+        rows: 4,
+      },
+      {
+        name: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { value: "draft", label: "Draft" },
+          { value: "active", label: "Active" },
+          { value: "archived", label: "Archived" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "input",
+    title: "Your details",
+    subtitle: "Please provide your name and email",
+    fields: [
+      {
+        name: "yourName",
+        label: "Name of your document",
+        type: "text",
+        placeholder: "For example Accelerator Contract 2025",
+        required: true,
+      },
+      {
+        name: "yourEmail",
+        label: "Your email address",
+        type: "email",
+        placeholder: "john.doe@example.com",
+        required: true,
+      },
+      {
+        name: "companyName",
+        label: "Company name",
+        type: "text",
+        placeholder: "Acme Corporation",
+        required: false,
+      },
+      {
+        name: "role",
+        label: "Your role",
+        type: "select",
+        options: [
+          { value: "ceo", label: "CEO" },
+          { value: "manager", label: "Manager" },
+          { value: "employee", label: "Employee" },
+        ],
+      },
+      {
+        name: "additionalInfo",
+        label: "Description",
+        type: "textarea",
+        placeholder: "Provide some details about what this document for ...",
+        rows: 4,
+      },
+    ],
+  },
+];
+
+// All step data for review
+const allStepData = computed(() => ({
+  details: documentForm.value,
+  input: stepData.value.input,
+}));
+
+// ========================================
+// AUTOSAVE SETUP
+// ========================================
+
 const { timeSinceLastSave, scheduleAutosave, forceSave } = useAutosave(
   async () => {
-    // This function is called when autosave triggers
     saveDraftToStore();
   },
   {
-    debounceMs: 2000, // Save 2 seconds after user stops typing
-    updateIntervalMs: 10000, // Update "X minutes ago" every 10 seconds
+    debounceMs: 2000,
+    updateIntervalMs: 10000,
   }
 );
 
-// Save draft to store
 function saveDraftToStore() {
   documentsStore.saveDraft({
     currentStep: currentStepIndex.value,
@@ -134,11 +316,9 @@ function saveDraftToStore() {
 // INITIALIZATION
 // ========================================
 
-// Initialize or load draft on mount
 const draftId = route.query.draftId;
 
 if (draftId) {
-  // Load existing draft
   const draft = documentsStore.loadDraft(draftId);
   if (draft) {
     currentStepIndex.value = draft.currentStep;
@@ -148,19 +328,17 @@ if (draftId) {
     stepData.value = { ...draft.stepData };
   }
 } else {
-  // Create new draft
   documentsStore.createDraft();
 }
 
 // ========================================
-// WATCH FOR CHANGES (TRIGGERS AUTOSAVE)
+// WATCH FOR CHANGES
 // ========================================
 
-// Watch for changes and trigger autosave
 watch(
   [documentForm, stepData, currentStepIndex, completedSteps],
   () => {
-    scheduleAutosave(); // This debounces the save
+    scheduleAutosave();
   },
   { deep: true }
 );
@@ -169,14 +347,26 @@ watch(
 // FORM DATA UPDATES
 // ========================================
 
-// Update form data from DetailsStep
 function updateFormData(updates) {
   documentForm.value = { ...documentForm.value, ...updates };
 }
 
-// Update step-specific data
 function updateStepData(step, data) {
   stepData.value[step] = { ...stepData.value[step], ...data };
+}
+
+function updateReviewData(data) {
+  // Update document form from details section
+  if (data.details) {
+    documentForm.value = { ...documentForm.value, ...data.details };
+  }
+
+  // Update step data from other sections
+  Object.keys(data).forEach((key) => {
+    if (key !== "details") {
+      stepData.value[key] = { ...stepData.value[key], ...data[key] };
+    }
+  });
 }
 
 // ========================================
@@ -184,27 +374,22 @@ function updateStepData(step, data) {
 // ========================================
 
 function goToStep(index) {
-  // Allow navigation to completed steps or current step
   if (index <= currentStepIndex.value || completedSteps.value.includes(index)) {
     currentStepIndex.value = index;
-    forceSave(); // Save immediately when navigating
+    forceSave();
   }
 }
 
 function completeStep() {
-  // Mark current step as completed
   if (!completedSteps.value.includes(currentStepIndex.value)) {
     completedSteps.value.push(currentStepIndex.value);
   }
 
-  // Save before moving forward
   forceSave();
 
-  // Move to next step
   if (currentStepIndex.value < steps.length - 1) {
     currentStepIndex.value++;
   } else {
-    // All steps completed
     createDocument();
   }
 }
@@ -212,7 +397,7 @@ function completeStep() {
 function previousStep() {
   if (currentStepIndex.value > 0) {
     currentStepIndex.value--;
-    forceSave(); // Save when going back
+    forceSave();
   }
 }
 
@@ -222,46 +407,48 @@ function previousStep() {
 
 function selectTemplate(template) {
   selectedTemplate.value = template;
-  forceSave(); // Save template selection immediately
+  forceSave();
 }
 
 // ========================================
-// ACTION BUTTONS (FIXED!)
+// UTILITY FUNCTIONS
 // ========================================
 
-// Handle "Back to documents" button
-function handleGoBack() {
-  // Save before leaving
-  forceSave();
+function getStatusVariant(status) {
+  const variants = {
+    draft: "default",
+    active: "success",
+    archived: "secondary",
+  };
+  return variants[status] || "default";
+}
 
-  // Show confirmation
+// ========================================
+// ACTION BUTTONS
+// ========================================
+
+function handleGoBack() {
+  forceSave();
   const confirmed = confirm(
     "Your progress has been saved as a draft. Return to documents?"
   );
-
   if (confirmed) {
     router.push("/documents");
   }
 }
 
-// Handle "Save & Exit" button
 function saveAndExit() {
-  forceSave(); // Save immediately
-
-  // Small delay to ensure save completes
+  forceSave();
   setTimeout(() => {
     router.push("/documents");
   }, 100);
 }
 
-// Handle "Discard" button
 function discard() {
   const confirmed = confirm(
     "Are you sure you want to discard this document? All progress will be lost."
   );
-
   if (confirmed) {
-    // Delete the current draft
     if (documentsStore.currentDraft) {
       documentsStore.deleteDraft(documentsStore.currentDraft.id);
     }
@@ -269,20 +456,15 @@ function discard() {
   }
 }
 
-// Handle "Finish" button - Convert draft to final document
 function createDocument() {
   console.log("Creating document:", documentForm.value);
-
-  // Convert draft to final document
   if (documentsStore.currentDraft) {
     documentsStore.convertDraftToDocument(documentsStore.currentDraft.id);
   }
-
-  // Navigate back to documents
   router.push("/documents");
 }
 </script>
 
 <style scoped>
-/* No styles needed - all in CreateDocumentLayout */
+/* No styles needed */
 </style>
