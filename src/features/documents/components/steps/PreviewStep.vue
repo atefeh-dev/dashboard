@@ -51,7 +51,7 @@
           <RichTextEditor
             v-model="editorContent"
             :editable="true"
-            :placeholder="'Start typing your document...'"
+            :placeholder="editorPlaceholder"
             @bold-art="handleBoldArt"
           />
         </div>
@@ -73,12 +73,21 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { ChevronLeft, ChevronRight, AlertCircle } from "lucide-vue-next";
 import StepLayoutWithSidebar from "../../layout/StepLayoutWithSidebar.vue";
 import AppButton from "@/components/ui/AppButton.vue";
 import RichTextEditor from "@/components/ui/RichTextEditor.vue";
+import { useTemplatesStore } from "@/stores/useTemplatesStore";
 
+/* ======================
+   STORE
+====================== */
+const store = useTemplatesStore();
+
+/* ======================
+   PROPS
+====================== */
 const props = defineProps({
   documentInfo: {
     type: Object,
@@ -88,46 +97,58 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  selectedTemplate: {
-    type: Object,
-    default: null,
-  },
 });
 
+/* ======================
+   EMITS
+====================== */
 const emit = defineEmits(["continue", "back", "update:data"]);
 
-// Export tabs
-const selectedExport = ref("export1");
-const exportTabs = [
-  { value: "export1", label: "Export 1" },
-  { value: "export2", label: "Export 2" },
-];
+/* ======================
+   FIND TEMPLATE BY NAME
+====================== */
+const templateFromStore = computed(() => {
+  if (!props.documentInfo?.templateName) return null;
 
-// Editor content - use template content if available
-const editorContent = ref(props.selectedTemplate?.content || "");
+  return store.templates.find(
+    (t) => t.name === props.documentInfo.templateName
+  );
+});
 
-// Watch for template changes
+/* ======================
+   PLACEHOLDER
+====================== */
+const editorPlaceholder = computed(() => {
+  return templateFromStore.value?.content || "Start typing your document...";
+});
+
+/* ======================
+   EDITOR CONTENT
+====================== */
+const editorContent = ref("");
+
 watch(
-  () => props.selectedTemplate,
-  (newTemplate) => {
-    if (newTemplate?.content) {
-      editorContent.value = newTemplate.content;
+  templateFromStore,
+  (template) => {
+    if (template?.content) {
+      editorContent.value = template.content;
     }
   },
   { immediate: true }
 );
 
-// Watch editor content and emit updates
+/* ======================
+   EMIT CONTENT CHANGES
+====================== */
 watch(editorContent, (newContent) => {
-  emit("update:data", {
-    content: newContent,
-  });
+  emit("update:data", { content: newContent });
 });
 
-// Handle Bold Art action
+/* ======================
+   ACTIONS
+====================== */
 function handleBoldArt() {
-  console.log("Bold Art clicked - trigger AI feature");
-  // Implement AI feature here
+  console.log("Bold Art clicked");
 }
 </script>
 
