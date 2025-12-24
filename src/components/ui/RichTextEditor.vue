@@ -37,45 +37,44 @@
       <!-- Text Formatting -->
       <button
         :class="[
-          'editor-toolbar__btn',
-          `editor-toolbar__btn has-tooltip`,
+          'editor-toolbar__btn has-tooltip',
           { 'editor-toolbar__btn--active': editor.isActive('bold') },
         ]"
         @click="editor.chain().focus().toggleBold().run()"
-        data-tooltip="`Bold (${isMac ? '⌘' : 'Ctrl'}+B)`"
+        :data-tooltip="`Bold (${isMac ? '⌘' : 'Ctrl'}+B)`"
       >
         <Bold class="editor-toolbar__icon" />
       </button>
 
       <button
         :class="[
-          'editor-toolbar__btn',
+          'editor-toolbar__btn has-tooltip',
           { 'editor-toolbar__btn--active': editor.isActive('italic') },
         ]"
         @click="editor.chain().focus().toggleItalic().run()"
-        :title="`Italic (${isMac ? '⌘' : 'Ctrl'}+I)`"
+        :data-tooltip="`Italic (${isMac ? '⌘' : 'Ctrl'}+I)`"
       >
         <Italic class="editor-toolbar__icon" />
       </button>
 
       <button
         :class="[
-          'editor-toolbar__btn',
+          'editor-toolbar__btn has-tooltip',
           { 'editor-toolbar__btn--active': editor.isActive('underline') },
         ]"
         @click="editor.chain().focus().toggleUnderline().run()"
-        :title="`Underline (${isMac ? '⌘' : 'Ctrl'}+U)`"
+        :data-tooltip="`Underline (${isMac ? '⌘' : 'Ctrl'}+U)`"
       >
         <UnderlineIcon class="editor-toolbar__icon" />
       </button>
 
       <button
         :class="[
-          'editor-toolbar__btn',
+          'editor-toolbar__btn has-tooltip',
           { 'editor-toolbar__btn--active': editor.isActive('strike') },
         ]"
         @click="editor.chain().focus().toggleStrike().run()"
-        :title="`Strikethrough (${isMac ? '⌘' : 'Ctrl'}+Shift+X)`"
+        :data-tooltip="`Strikethrough (${isMac ? '⌘' : 'Ctrl'}+Shift+X)`"
       >
         <Strikethrough class="editor-toolbar__icon" />
       </button>
@@ -85,9 +84,9 @@
       <!-- Text Color -->
       <div class="popover-wrapper">
         <button
-          class="editor-toolbar__btn editor-toolbar__btn--color"
+          class="editor-toolbar__btn editor-toolbar__btn--color has-tooltip"
           @click="toggleColorPicker"
-          title="Text Color"
+          data-tooltip="Text Color"
         >
           <Circle
             class="editor-toolbar__icon"
@@ -186,7 +185,7 @@
       <!-- Alignment -->
       <button
         :class="[
-          'editor-toolbar__btn',
+          'editor-toolbar__btn has-tooltip',
           {
             'editor-toolbar__btn--active': editor.isActive({
               textAlign: 'left',
@@ -194,14 +193,14 @@
           },
         ]"
         @click="editor.chain().focus().setTextAlign('left').run()"
-        :title="`Align Left (${isMac ? '⌘' : 'Ctrl'}+Shift+L)`"
+        :data-tooltip="`Align Left (${isMac ? '⌘' : 'Ctrl'}+Shift+L)`"
       >
         <AlignLeft class="editor-toolbar__icon" />
       </button>
 
       <button
         :class="[
-          'editor-toolbar__btn',
+          'editor-toolbar__btn has-tooltip',
           {
             'editor-toolbar__btn--active': editor.isActive({
               textAlign: 'center',
@@ -209,14 +208,14 @@
           },
         ]"
         @click="editor.chain().focus().setTextAlign('center').run()"
-        :title="`Align Center (${isMac ? '⌘' : 'Ctrl'}+Shift+E)`"
+        :data-tooltip="`Align Center (${isMac ? '⌘' : 'Ctrl'}+Shift+E)`"
       >
         <AlignCenter class="editor-toolbar__icon" />
       </button>
 
       <button
         :class="[
-          'editor-toolbar__btn',
+          'editor-toolbar__btn has-tooltip',
           {
             'editor-toolbar__btn--active': editor.isActive({
               textAlign: 'right',
@@ -224,14 +223,14 @@
           },
         ]"
         @click="editor.chain().focus().setTextAlign('right').run()"
-        :title="`Align Right (${isMac ? '⌘' : 'Ctrl'}+Shift+R)`"
+        :data-tooltip="`Align Right (${isMac ? '⌘' : 'Ctrl'}+Shift+R)`"
       >
         <AlignRight class="editor-toolbar__icon" />
       </button>
 
       <button
         :class="[
-          'editor-toolbar__btn',
+          'editor-toolbar__btn has-tooltip',
           {
             'editor-toolbar__btn--active': editor.isActive({
               textAlign: 'justify',
@@ -239,7 +238,7 @@
           },
         ]"
         @click="editor.chain().focus().setTextAlign('justify').run()"
-        :title="`Justify (${isMac ? '⌘' : 'Ctrl'}+Shift+J)`"
+        :data-tooltip="`Justify (${isMac ? '⌘' : 'Ctrl'}+Shift+J)`"
       >
         <AlignJustify class="editor-toolbar__icon" />
       </button>
@@ -249,22 +248,22 @@
       <!-- Lists -->
       <button
         :class="[
-          'editor-toolbar__btn',
+          'editor-toolbar__btn has-tooltip',
           { 'editor-toolbar__btn--active': editor.isActive('bulletList') },
         ]"
         @click="editor.chain().focus().toggleBulletList().run()"
-        :title="`Bullet List (${isMac ? '⌘' : 'Ctrl'}+Shift+8)`"
+        :data-tooltip="`Bullet List (${isMac ? '⌘' : 'Ctrl'}+Shift+8)`"
       >
         <List class="editor-toolbar__icon" />
       </button>
 
       <button
         :class="[
-          'editor-toolbar__btn',
+          'editor-toolbar__btn has-tooltip',
           { 'editor-toolbar__btn--active': editor.isActive('orderedList') },
         ]"
         @click="editor.chain().focus().toggleOrderedList().run()"
-        :title="`Numbered List (${isMac ? '⌘' : 'Ctrl'}+Shift+7)`"
+        :data-tooltip="`Numbered List (${isMac ? '⌘' : 'Ctrl'}+Shift+7)`"
       >
         <ListOrdered class="editor-toolbar__icon" />
       </button>
@@ -275,11 +274,11 @@
       <div class="popover-wrapper" ref="linkButtonRef">
         <button
           :class="[
-            'editor-toolbar__btn',
+            'editor-toolbar__btn has-tooltip',
             { 'editor-toolbar__btn--active': editor.isActive('link') },
           ]"
           @click="toggleLinkPopover"
-          :title="`Insert Link (${isMac ? '⌘' : 'Ctrl'}+K)`"
+          :data-tooltip="`Insert Link (${isMac ? '⌘' : 'Ctrl'}+K)`"
         >
           <Link2 class="editor-toolbar__icon" />
         </button>
@@ -329,9 +328,9 @@
       <!-- Image -->
       <div class="popover-wrapper" ref="imageButtonRef">
         <button
-          class="editor-toolbar__btn"
+          class="editor-toolbar__btn has-tooltip"
           @click="toggleImagePopover"
-          title="Insert Image"
+          data-tooltip="Insert Image"
         >
           <ImageIcon class="editor-toolbar__icon" />
         </button>
@@ -396,7 +395,10 @@
       <div class="editor-toolbar__divider"></div>
 
       <!-- More Options (3 dots) -->
-      <button class="editor-toolbar__btn" title="More Options">
+      <button
+        class="editor-toolbar__btn has-tooltip"
+        data-tooltip="More Options"
+      >
         <MoreVertical class="editor-toolbar__icon" />
       </button>
     </div>
@@ -412,33 +414,33 @@
     >
       <button
         :class="[
-          'bubble-menu__btn',
+          'bubble-menu__btn has-tooltip',
           { 'bubble-menu__btn--active': editor.isActive('bold') },
         ]"
         @click="editor.chain().focus().toggleBold().run()"
-        :title="`Bold (${isMac ? '⌘' : 'Ctrl'}+B)`"
+        :data-tooltip="`Bold (${isMac ? '⌘' : 'Ctrl'}+B)`"
       >
         <Bold class="bubble-menu__icon" />
       </button>
 
       <button
         :class="[
-          'bubble-menu__btn',
+          'bubble-menu__btn has-tooltip',
           { 'bubble-menu__btn--active': editor.isActive('italic') },
         ]"
         @click="editor.chain().focus().toggleItalic().run()"
-        :title="`Italic (${isMac ? '⌘' : 'Ctrl'}+I)`"
+        :data-tooltip="`Italic (${isMac ? '⌘' : 'Ctrl'}+I)`"
       >
         <Italic class="bubble-menu__icon" />
       </button>
 
       <button
         :class="[
-          'bubble-menu__btn',
+          'bubble-menu__btn has-tooltip',
           { 'bubble-menu__btn--active': editor.isActive('underline') },
         ]"
         @click="editor.chain().focus().toggleUnderline().run()"
-        :title="`Underline (${isMac ? '⌘' : 'Ctrl'}+U)`"
+        :data-tooltip="`Underline (${isMac ? '⌘' : 'Ctrl'}+U)`"
       >
         <UnderlineIcon class="bubble-menu__icon" />
       </button>
@@ -447,7 +449,7 @@
 
       <button
         :class="[
-          'bubble-menu__btn',
+          'bubble-menu__btn has-tooltip',
           {
             'bubble-menu__btn--active': editor.isActive({
               textAlign: 'left',
@@ -455,14 +457,14 @@
           },
         ]"
         @click="editor.chain().focus().setTextAlign('left').run()"
-        :title="`Align Left (${isMac ? '⌘' : 'Ctrl'}+Shift+L)`"
+        :data-tooltip="`Align Left (${isMac ? '⌘' : 'Ctrl'}+Shift+L)`"
       >
         <AlignLeft class="bubble-menu__icon" />
       </button>
 
       <button
         :class="[
-          'bubble-menu__btn',
+          'bubble-menu__btn has-tooltip',
           {
             'bubble-menu__btn--active': editor.isActive({
               textAlign: 'center',
@@ -470,14 +472,14 @@
           },
         ]"
         @click="editor.chain().focus().setTextAlign('center').run()"
-        :title="`Align Center (${isMac ? '⌘' : 'Ctrl'}+Shift+E)`"
+        :data-tooltip="`Align Center (${isMac ? '⌘' : 'Ctrl'}+Shift+E)`"
       >
         <AlignCenter class="bubble-menu__icon" />
       </button>
 
       <button
         :class="[
-          'bubble-menu__btn',
+          'bubble-menu__btn has-tooltip',
           {
             'bubble-menu__btn--active': editor.isActive({
               textAlign: 'right',
@@ -485,7 +487,7 @@
           },
         ]"
         @click="editor.chain().focus().setTextAlign('right').run()"
-        :title="`Align Right (${isMac ? '⌘' : 'Ctrl'}+Shift+R)`"
+        :data-tooltip="`Align Right (${isMac ? '⌘' : 'Ctrl'}+Shift+R)`"
       >
         <AlignRight class="bubble-menu__icon" />
       </button>
@@ -494,11 +496,11 @@
 
       <button
         :class="[
-          'bubble-menu__btn',
+          'bubble-menu__btn has-tooltip',
           { 'bubble-menu__btn--active': editor.isActive('link') },
         ]"
         @click="toggleLinkPopover"
-        :title="`Insert Link (${isMac ? '⌘' : 'Ctrl'}+K)`"
+        :data-tooltip="`Insert Link (${isMac ? '⌘' : 'Ctrl'}+K)`"
       >
         <Link2 class="bubble-menu__icon" />
       </button>
@@ -535,6 +537,7 @@ import ImageExtension from "@tiptap/extension-image";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import { FontFamily } from "@tiptap/extension-font-family";
+import Placeholder from "@tiptap/extension-placeholder";
 
 const props = defineProps({
   modelValue: {
@@ -551,7 +554,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:modelValue", "bold-art"]);
+const emit = defineEmits(["update:modelValue"]);
 
 // Refs for positioning
 const linkButtonRef = ref(null);
@@ -643,6 +646,9 @@ const editor = useEditor({
     FontFamily.configure({ types: ["textStyle"] }),
     FontSize,
     TextAlign.configure({ types: ["heading", "paragraph"] }),
+    Placeholder.configure({
+      placeholder: props.placeholder,
+    }),
     LinkExtension.configure({
       openOnClick: false,
       HTMLAttributes: {
@@ -650,15 +656,20 @@ const editor = useEditor({
       },
     }),
     ImageExtension.configure({
-      inline: false, // Changed to block-level for better deletion
+      inline: false,
       allowBase64: true,
       HTMLAttributes: {
         class: "editor-image",
       },
     }),
   ],
-  content: props.modelValue,
+  content: props.modelValue || "",
   editable: props.editable,
+  editorProps: {
+    attributes: {
+      class: "editor-prose",
+    },
+  },
   onUpdate: ({ editor }) => {
     emit("update:modelValue", editor.getHTML());
   },
@@ -667,7 +678,7 @@ const editor = useEditor({
   },
 });
 
-// Update bubble menu position - FIXED
+// Update bubble menu position
 function updateBubbleMenu(editorInstance) {
   const { from, to } = editorInstance.state.selection;
   const hasSelection = from !== to;
@@ -681,12 +692,11 @@ function updateBubbleMenu(editorInstance) {
   const start = view.coordsAtPos(from);
   const end = view.coordsAtPos(to);
 
-  // Calculate center position of selection
   const centerX = (start.left + end.left) / 2;
-  const topY = start.top - 60; // 60px above selection
+  const topY = start.top - 60;
 
   bubbleMenuStyle.value = {
-    position: "fixed", // Changed from absolute to fixed
+    position: "fixed",
     left: `${centerX}px`,
     top: `${topY}px`,
     transform: "translateX(-50%)",
@@ -701,12 +711,10 @@ onMounted(() => {
   const handleClickOutside = (e) => {
     const target = e.target;
 
-    // Close bubble menu
     if (!target.closest(".bubble-menu") && !target.closest(".ProseMirror")) {
       showBubbleMenu.value = false;
     }
 
-    // Close color picker
     if (!target.closest(".popover-wrapper") && showColorPicker.value) {
       const colorButton = target.closest(".editor-toolbar__btn--color");
       if (!colorButton) {
@@ -714,20 +722,18 @@ onMounted(() => {
       }
     }
 
-    // Close link popover
     if (
       showLinkPopover.value &&
       !target.closest(".popover-dropdown") &&
-      !target.closest('[title="Insert Link"]')
+      !target.closest('[data-tooltip*="Link"]')
     ) {
       showLinkPopover.value = false;
     }
 
-    // Close image popover
     if (
       showImagePopover.value &&
       !target.closest(".popover-dropdown") &&
-      !target.closest('[title="Insert Image"]')
+      !target.closest('[data-tooltip*="Image"]')
     ) {
       showImagePopover.value = false;
     }
@@ -735,7 +741,19 @@ onMounted(() => {
 
   document.addEventListener("click", handleClickOutside);
 
-  // Cleanup
+  // Ensure editor content is loaded
+  if (editor.value && props.modelValue) {
+    setTimeout(() => {
+      if (editor.value) {
+        const currentContent = editor.value.getHTML();
+        if (!currentContent || currentContent === "<p></p>") {
+          editor.value.commands.setContent(props.modelValue, false);
+          console.log("✅ Editor content loaded on mount");
+        }
+      }
+    }, 100);
+  }
+
   onBeforeUnmount(() => {
     document.removeEventListener("click", handleClickOutside);
   });
@@ -744,9 +762,16 @@ onMounted(() => {
 // Watch for external content changes
 watch(
   () => props.modelValue,
-  (value) => {
-    if (editor.value && value !== editor.value.getHTML()) {
-      editor.value.commands.setContent(value, false);
+  (newValue) => {
+    const currentValue = editor.value?.getHTML();
+
+    if (editor.value && newValue !== currentValue) {
+      const { from, to } = editor.value.state.selection;
+      editor.value.commands.setContent(newValue || "", false);
+
+      if (currentValue) {
+        editor.value.commands.setTextSelection({ from, to });
+      }
     }
   }
 );
@@ -806,7 +831,6 @@ function toggleImagePopover() {
   imageUrl.value = "";
 }
 
-// BEST FIX: Properly exits link without adding space
 function insertLink() {
   if (!linkUrl.value) return;
 
@@ -818,7 +842,6 @@ function insertLink() {
     return;
   }
 
-  // Apply link and move cursor to the end
   editor.value
     .chain()
     .focus()
@@ -826,7 +849,6 @@ function insertLink() {
     .setTextSelection(to)
     .run();
 
-  // Remove link mark from "stored marks" so next character won't be linked
   setTimeout(() => {
     const { state } = editor.value;
     const linkMark = state.schema.marks.link;
@@ -844,7 +866,6 @@ function removeLink() {
   showLinkPopover.value = false;
 }
 
-// Image from URL
 function insertImageFromUrl() {
   if (!imageUrl.value) return;
 
@@ -858,31 +879,25 @@ function insertImageFromUrl() {
   }
 }
 
-// FIXED: Image upload from device
 function handleImageUpload(event) {
   const file = event.target.files?.[0];
   if (!file) return;
 
-  // Check if it's an image
   if (!file.type.startsWith("image/")) {
     alert("Please select an image file");
     return;
   }
 
-  // Check file size (max 5MB)
   if (file.size > 5 * 1024 * 1024) {
     alert("Image size should be less than 5MB");
     return;
   }
 
-  // Convert to base64
   const reader = new FileReader();
   reader.onload = (e) => {
     const base64 = e.target.result;
     editor.value.chain().focus().setImage({ src: base64 }).run();
     showImagePopover.value = false;
-
-    // Reset file input
     event.target.value = "";
   };
   reader.readAsDataURL(file);
@@ -906,6 +921,7 @@ onBeforeUnmount(() => {
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: editorFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
 
   @keyframes editorFadeIn {
     from {
@@ -960,24 +976,19 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
-.has-tooltip::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: calc(100% + 12px); /* ⬆ higher than before */
-  left: 50%;
-  transform: translateX(-50%) translateY(6px);
-  background: #000000;
-  color: #ffffff;
-  padding: 6px 8px; /* ✅ top/bottom 6px, left/right 8px */
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.2s ease;
-  z-index: 9999;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
+.has-tooltip {
+  &::after {
+    content: attr(data-tooltip);
+    background: #000000;
+    color: #ffffff;
+    padding: 6px 8px;
+    // smooth animations
+  }
+
+  &:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px);
+  }
 }
 
 /* Tooltip arrow */
@@ -1783,6 +1794,12 @@ onBeforeUnmount(() => {
     font-size: 15px;
     line-height: 1.7;
     color: #111827;
+    transform: none !important;
+    animation: none !important;
+    user-select: text;
+    cursor: text;
+    line-height: 1.75; /* smoother selection */
+    letter-spacing: 0.01em; /* optional but helps */
 
     p {
       margin-bottom: 1em;
@@ -1952,10 +1969,10 @@ onBeforeUnmount(() => {
       font-size: 1.25em;
     }
 
-    ::selection {
-      background: linear-gradient(135deg, #b3d4fc 0%, #a5c9f5 100%);
-      color: #1e293b;
-    }
+    // ::selection {
+    //   background: linear-gradient(135deg, #b3d4fc 0%, #a5c9f5 100%);
+    //   color: #1e293b;
+    // }
 
     &.is-editor-empty:first-child::before {
       content: attr(data-placeholder);
@@ -1965,5 +1982,15 @@ onBeforeUnmount(() => {
       height: 0;
     }
   }
+}
+/* Text selection highlight */
+:deep(.ProseMirror ::selection) {
+  background: #7f56d9;
+  color: #ffffff;
+}
+
+:deep(.ProseMirror ::-moz-selection) {
+  background: #7f56d9;
+  color: #ffffff;
 }
 </style>
