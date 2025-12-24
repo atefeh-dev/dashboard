@@ -17,54 +17,38 @@
         <h2 class="section__heading">
           Preview your generated document content
         </h2>
+
         <p class="section__description">
           You can see your answers in action with template and generated
           content.
         </p>
 
-        <!-- Export Tabs -->
-        <div class="export-tabs">
-          <button
-            v-for="tab in exportTabs"
-            :key="tab.value"
-            :class="[
-              'export-tabs__tab',
-              { 'export-tabs__tab--active': selectedExport === tab.value },
-            ]"
-            @click="selectedExport = tab.value"
-          >
-            {{ tab.label }}
-          </button>
-        </div>
-
-        <!-- Warning Message -->
+        <!-- Warning -->
         <div class="warning-banner">
           <AlertCircle class="warning-banner__icon" />
           <p class="warning-banner__text">
             You can edit and style the generated content but you can't save your
-            new changed content
+            changes.
           </p>
         </div>
 
-        <!-- Rich Text Editor Component -->
+        <!-- Editor -->
         <div class="editor-wrapper">
           <RichTextEditor
             v-model="editorContent"
             :editable="true"
-            :placeholder="editorPlaceholder"
-            @bold-art="handleBoldArt"
+            placeholder="Start typing your document..."
           />
         </div>
 
-        <!-- Navigation Buttons -->
+        <!-- Actions -->
         <div class="form-actions">
-          <AppButton variant="ghost" size="md" @click="$emit('back')">
-            <ChevronLeft class="form-actions__icon" />
-            Back
+          <AppButton variant="ghost" @click="handleBack">
+            <ChevronLeft /> Back
           </AppButton>
-          <AppButton variant="primary" size="md" @click="$emit('continue')">
-            Continue
-            <ChevronRight class="form-actions__icon" />
+
+          <AppButton variant="primary" @click="handleContinue">
+            Continue <ChevronRight />
           </AppButton>
         </div>
       </section>
@@ -73,21 +57,14 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { ChevronLeft, ChevronRight, AlertCircle } from "lucide-vue-next";
 import StepLayoutWithSidebar from "../../layout/StepLayoutWithSidebar.vue";
 import AppButton from "@/components/ui/AppButton.vue";
 import RichTextEditor from "@/components/ui/RichTextEditor.vue";
 import { useTemplatesStore } from "@/stores/useTemplatesStore";
 
-/* ======================
-   STORE
-====================== */
-const store = useTemplatesStore();
-
-/* ======================
-   PROPS
-====================== */
+// Props
 const props = defineProps({
   documentInfo: {
     type: Object,
@@ -99,118 +76,95 @@ const props = defineProps({
   },
 });
 
-/* ======================
-   EMITS
-====================== */
+// Emits
 const emit = defineEmits(["continue", "back", "update:data"]);
 
-/* ======================
-   FIND TEMPLATE BY NAME
-====================== */
-const templateFromStore = computed(() => {
-  if (!props.documentInfo?.templateName) return null;
+// Store
+const templatesStore = useTemplatesStore();
 
-  return store.templates.find(
+// State
+const editorContent = ref("");
+const hasInitialized = ref(false);
+
+// Find template by name
+const templateFromStore = computed(() => {
+  if (!props.documentInfo?.templateName) {
+    console.warn("No template name in documentInfo");
+    return null;
+  }
+
+  const template = templatesStore.templates.find(
     (t) => t.name === props.documentInfo.templateName
   );
+
+  if (!template) {
+    console.error("Template not found:", props.documentInfo.templateName);
+  }
+
+  return template;
 });
 
-/* ======================
-   PLACEHOLDER
-====================== */
-const editorPlaceholder = computed(() => {
-  return templateFromStore.value?.content || "Start typing your document...";
-});
-
-/* ======================
-   EDITOR CONTENT
-====================== */
-const editorContent = ref("");
-
+// Initialize editor with template content
 watch(
   templateFromStore,
   (template) => {
-    if (template?.content) {
-      editorContent.value = template.content;
-    }
+    if (!template?.content || hasInitialized.value) return;
+
+    editorContent.value = template.content;
+    hasInitialized.value = true;
+    console.log("✅ Editor initialized with template content");
   },
   { immediate: true }
 );
 
-/* ======================
-   EMIT CONTENT CHANGES
-====================== */
-watch(editorContent, (newContent) => {
-  emit("update:data", { content: newContent });
+// Emit content changes
+watch(editorContent, (value) => {
+  emit("update:data", { content: value });
 });
 
-/* ======================
-   ACTIONS
-====================== */
-function handleBoldArt() {
-  console.log("Bold Art clicked");
+// Fallback: force initialization on mount if needed
+onMounted(() => {
+  if (!hasInitialized.value && templateFromStore.value?.content) {
+    editorContent.value = templateFromStore.value.content;
+    hasInitialized.value = true;
+  }
+});
+
+// Event handlers
+function handleBack() {
+  emit("back");
+}
+
+function handleContinue() {
+  emit("continue");
 }
 </script>
 
 <style scoped lang="scss">
 @use "./stepStyles.scss";
 
-// .preview-step {
-//   // Step-specific styles
-// }
-
-// ========================================
-// EXPORT TABS
-// ========================================
-
-.export-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-
-  &__tab {
-    padding: 8px 20px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #6b7280;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s ease;
-
-    &:hover {
-      background: #f9fafb;
-      border-color: #d1d5db;
-    }
-
-    &:active {
-      background: #f3f4f6;
-    }
-
-    &--active {
-      background: #eff6ff;
-      border-color: #3b82f6;
-      color: #3b82f6;
-      font-weight: 600;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
-    }
-  }
-}
-
-// ========================================
-// WARNING BANNER
-// ========================================
-
 .warning-banner {
   display: flex;
   align-items: flex-start;
   gap: 12px;
   padding: 14px 16px;
-  background: #fffbeb;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
   border: 1px solid #fcd34d;
+  border-left: 4px solid #f59e0b;
   border-radius: 8px;
   margin-bottom: 20px;
+  animation: warningSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  @keyframes warningSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   &__icon {
     width: 20px;
@@ -218,6 +172,17 @@ function handleBoldArt() {
     color: #f59e0b;
     flex-shrink: 0;
     margin-top: 1px;
+    animation: warningPulse 2s ease-in-out infinite;
+
+    @keyframes warningPulse {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
   }
 
   &__text {
@@ -228,11 +193,19 @@ function handleBoldArt() {
   }
 }
 
-// ========================================
-// EDITOR WRAPPER
-// ========================================
-
 .editor-wrapper {
   margin-bottom: 32px;
+  animation: editorFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s backwards;
+
+  @keyframes editorFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 </style>

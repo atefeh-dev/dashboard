@@ -416,11 +416,11 @@ function selectTemplate(template) {
 
 function getStatusVariant(status) {
   const variants = {
-    draft: "default",
+    draft: "ghost",
     active: "success",
     archived: "secondary",
   };
-  return variants[status] || "default";
+  return variants[status] || "ghost";
 }
 
 // ========================================

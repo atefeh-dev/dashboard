@@ -177,6 +177,7 @@ export const useTemplatesStore = defineStore("templates", () => {
     statusFilter.value = "verified";
     typeFilter.value = "all";
     selectedTags.value = [];
+    clearAllTags();
   }
 
   return {

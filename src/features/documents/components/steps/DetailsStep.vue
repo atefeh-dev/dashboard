@@ -237,10 +237,7 @@ function clearFilters() {
   templatesStore.setSearchQuery("");
   templatesStore.setStatusFilter("verified");
   templatesStore.setTypeFilter("all");
-  // Clear all tags
-  templatesStore.selectedTags.forEach((tag) => {
-    templatesStore.removeTag(tag);
-  });
+  templatesStore.clearAllTags();
 }
 </script>
 
