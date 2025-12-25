@@ -43,26 +43,17 @@
       <!-- Selected External Contacts Preview Cards -->
       <div v-if="selectedExternalContacts.length > 0" class="selected-contacts">
         <div
-          v-for="contact in selectedExternalContacts"
-          :key="contact.id"
-          class="selected-contacts__card"
+          v-if="selectedExternalContacts.length > 0"
+          class="email-recipients"
         >
-          <div class="selected-contacts__info">
-            <Check class="selected-contacts__check-icon" />
-            <div class="selected-contacts__details">
-              <p class="selected-contacts__name">{{ contact.name }}</p>
-              <span class="selected-contacts__added-label">
-                Added from contacts
-              </span>
-            </div>
-          </div>
-          <button
-            @click="removeExternalContact(contact.id)"
-            class="selected-contacts__remove-btn"
-            aria-label="Remove contact"
-          >
-            <X class="selected-contacts__remove-icon" />
-          </button>
+          <ContactSelectItem
+            v-for="contact in selectedExternalContacts"
+            :key="contact.id"
+            :contact="contact"
+            :checked="isRecipientSelected(contact.id)"
+            @toggle="toggleRecipient"
+            :isexternal="true"
+          />
         </div>
       </div>
 

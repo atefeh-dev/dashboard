@@ -13,16 +13,19 @@
         {{ contact.name }}
       </span>
       <span class="contact-item__role">
-        {{ contact.role }}
+        {{ !isexternal ? contact.role : "Added from contacts" }}
       </span>
     </label>
   </div>
 </template>
 
 <script setup>
+import { boolean } from "yup";
+
 defineProps({
   contact: { type: Object, required: true },
   checked: { type: Boolean, default: false },
+  isexternal: { type: boolean, default: false },
 });
 
 defineEmits(["toggle"]);
