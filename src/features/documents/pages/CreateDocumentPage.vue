@@ -6,11 +6,17 @@
     :document-title="documentForm.name || 'New Document'"
     :document-status="documentForm.status"
     :last-save-time="timeSinceLastSave"
+    :is-saving="isSaving"
+    :show-sidebar="showSidebarForCurrentStep"
+    :document-info="sidebarData"
+    :documents-sent="documentsSent"
     @go-to-step="goToStep"
     @save-and-exit="saveAndExit"
     @go-back="handleGoBack"
+    @complete="completeDocument"
+    @edit-info="handleEditInfo"
   >
-    <!-- Step 1: Details (No Sidebar) -->
+    <!-- Step 1: Details (No Sidebar - full width) -->
     <DetailsStep
       v-if="currentStep === 'details'"
       :form="documentForm"
@@ -24,7 +30,6 @@
     <!-- Step 2: Input Forms (With Sidebar) -->
     <InputFormsStep
       v-if="currentStep === 'input'"
-      :document-info="sidebarData"
       :step-title="steps[1].title"
       :step-description="steps[1].subtitle"
       :form-fields="inputFormFields"
@@ -37,7 +42,6 @@
     <!-- Step 3: Review (With Sidebar) -->
     <ReviewStep
       v-if="currentStep === 'review'"
-      :document-info="sidebarData"
       :step-data="allStepData"
       :review-sections="reviewSections"
       @continue="completeStep"
@@ -48,7 +52,6 @@
     <!-- Step 4: Preview (With Sidebar) -->
     <PreviewStep
       v-if="currentStep === 'preview'"
-      :document-info="sidebarData"
       :step-data="stepData.preview"
       @continue="completeStep"
       @back="previousStep"
@@ -58,18 +61,18 @@
     <!-- Step 5: Document (With Sidebar) -->
     <DocumentStep
       v-if="currentStep === 'document'"
-      :document-info="sidebarData"
-      @finish="createDocument"
+      @finish="handleSendDocuments"
       @back="previousStep"
     />
   </CreateDocumentLayout>
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useDocumentsStore } from "@/stores/useDocumentsStore";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useContactsStore } from "@/stores/useContactsStore";
 import { useAutosave } from "@/composables/useAutosave";
 import CreateDocumentLayout from "@/features/documents/layout/CreateDocumentLayout.vue";
 import DetailsStep from "@/features/documents/components/steps/DetailsStep.vue";
@@ -82,6 +85,7 @@ const router = useRouter();
 const route = useRoute();
 const documentsStore = useDocumentsStore();
 const authStore = useAuthStore();
+const contactsStore = useContactsStore();
 
 // Step configuration
 const steps = [
@@ -95,6 +99,10 @@ const steps = [
 const currentStepIndex = ref(0);
 const completedSteps = ref([]);
 const currentStep = computed(() => steps[currentStepIndex.value].id);
+const isSaving = ref(false);
+
+// NEW: Track if documents have been sent
+const documentsSent = ref(false);
 
 // Form data
 const selectedTemplate = ref(null);
@@ -113,15 +121,21 @@ const stepData = ref({
 });
 
 // ========================================
-// SIDEBAR DATA (for steps 2-5)
+// SIDEBAR CONFIGURATION
 // ========================================
 
+// Show sidebar for all steps except Details (step 0)
+const showSidebarForCurrentStep = computed(() => {
+  return currentStepIndex.value !== 0;
+});
+
+// Sidebar data (for steps 1-4)
 const sidebarData = computed(() => ({
   title: documentForm.value.name || "Document title",
   lastEdit: timeSinceLastSave.value || "(not saved yet)",
   status: documentForm.value.status || "Draft",
   statusVariant: getStatusVariant(documentForm.value.status),
-  authorName: authStore.user?.name || "{User Name}",
+  authorName: authStore.user?.name || "User Name",
   authorAvatar: authStore.user?.avatar || "/src/assets/images/av.png",
   templateName: selectedTemplate.value?.name || "Non-Disclosure Agreement",
   templateAuthor: selectedTemplate.value?.author || "doclast",
@@ -130,7 +144,7 @@ const sidebarData = computed(() => ({
   checklistItems: checklistItems.value,
 }));
 
-// Dynamic checklist based on STEP completion (not field completion)
+// Dynamic checklist based on STEP completion
 const checklistItems = computed(() => {
   return steps.map((step, index) => ({
     title: step.title,
@@ -293,7 +307,7 @@ const allStepData = computed(() => ({
 
 const { timeSinceLastSave, scheduleAutosave, forceSave } = useAutosave(
   async () => {
-    saveDraftToStore();
+    await saveDraftToStore();
   },
   {
     debounceMs: 2000,
@@ -301,15 +315,21 @@ const { timeSinceLastSave, scheduleAutosave, forceSave } = useAutosave(
   }
 );
 
-function saveDraftToStore() {
-  documentsStore.saveDraft({
-    currentStep: currentStepIndex.value,
-    completedSteps: completedSteps.value,
-    formData: documentForm.value,
-    selectedTemplate: selectedTemplate.value,
-    stepData: stepData.value,
-    name: documentForm.value.name || "Untitled Document",
-  });
+async function saveDraftToStore() {
+  isSaving.value = true;
+  try {
+    await documentsStore.saveDraft({
+      currentStep: currentStepIndex.value,
+      completedSteps: completedSteps.value,
+      formData: documentForm.value,
+      selectedTemplate: selectedTemplate.value,
+      stepData: stepData.value,
+      name: documentForm.value.name || "Untitled Document",
+      documentsSent: documentsSent.value,
+    });
+  } finally {
+    isSaving.value = false;
+  }
 }
 
 // ========================================
@@ -326,17 +346,27 @@ if (draftId) {
     documentForm.value = { ...draft.formData };
     selectedTemplate.value = draft.selectedTemplate;
     stepData.value = { ...draft.stepData };
+    documentsSent.value = draft.documentsSent || false;
   }
 } else {
   documentsStore.createDraft();
 }
+
+// Load contacts on mount
+onMounted(async () => {
+  try {
+    await contactsStore.fetchContacts();
+  } catch (error) {
+    console.error("Failed to load contacts:", error);
+  }
+});
 
 // ========================================
 // WATCH FOR CHANGES
 // ========================================
 
 watch(
-  [documentForm, stepData, currentStepIndex, completedSteps],
+  [documentForm, stepData, currentStepIndex, completedSteps, documentsSent],
   () => {
     scheduleAutosave();
   },
@@ -389,8 +419,6 @@ function completeStep() {
 
   if (currentStepIndex.value < steps.length - 1) {
     currentStepIndex.value++;
-  } else {
-    createDocument();
   }
 }
 
@@ -456,12 +484,76 @@ function discard() {
   }
 }
 
-function createDocument() {
-  console.log("Creating document:", documentForm.value);
-  if (documentsStore.currentDraft) {
-    documentsStore.convertDraftToDocument(documentsStore.currentDraft.id);
+function handleEditInfo() {
+  // Navigate back to details step
+  currentStepIndex.value = 0;
+  forceSave();
+}
+
+// ========================================
+// SEND DOCUMENTS (from DocumentStep)
+// ========================================
+
+async function handleSendDocuments(emailData) {
+  try {
+    isSaving.value = true;
+
+    // TODO: Replace with actual API call
+    // await documentsStore.sendDocuments(documentForm.value.id, emailData);
+
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    console.log("Sending documents to:", emailData);
+
+    // Mark documents as sent
+    documentsSent.value = true;
+
+    // Save the updated state
+    await forceSave();
+
+    // Show success message (you can use a toast notification here)
+    alert("Documents sent successfully! You can now complete the workflow.");
+  } catch (error) {
+    console.error("Failed to send documents:", error);
+    alert("Failed to send documents. Please try again.");
+  } finally {
+    isSaving.value = false;
   }
-  router.push("/documents");
+}
+
+// ========================================
+// COMPLETE DOCUMENT
+// ========================================
+
+async function completeDocument() {
+  if (!documentsSent.value) {
+    alert("Please send the documents first before completing.");
+    return;
+  }
+
+  try {
+    isSaving.value = true;
+
+    // Mark document as completed
+    documentForm.value.status = "completed";
+
+    if (documentsStore.currentDraft) {
+      await documentsStore.convertDraftToDocument(
+        documentsStore.currentDraft.id
+      );
+    }
+
+    router.push({
+      name: "documents",
+      query: { success: "Document completed successfully" },
+    });
+  } catch (error) {
+    console.error("Failed to complete document:", error);
+    alert("Failed to complete document. Please try again.");
+  } finally {
+    isSaving.value = false;
+  }
 }
 </script>
 

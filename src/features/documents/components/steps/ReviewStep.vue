@@ -1,130 +1,116 @@
 <template>
-  <StepLayoutWithSidebar
-    :document-title="documentInfo.title"
-    :last-edit="documentInfo.lastEdit"
-    :status="documentInfo.status"
-    :status-variant="documentInfo.statusVariant"
-    :author-name="documentInfo.authorName"
-    :author-avatar="documentInfo.authorAvatar"
-    :template-name="documentInfo.templateName"
-    :template-author="documentInfo.templateAuthor"
-    :template-update-date="documentInfo.templateUpdateDate"
-    :template-tags="documentInfo.templateTags"
-    :checklist-items="documentInfo.checklistItems"
-  >
-    <div class="review-step">
-      <section class="section">
-        <h2 class="section__heading">Review</h2>
-        <p class="section__description">
-          Please review your answers, you can edit them by press "Edit" or
-          continue to preview your document
-        </p>
+  <div class="review-step">
+    <section class="section">
+      <h2 class="section__heading">Review</h2>
+      <p class="section__description">
+        Please review your answers, you can edit them by press "Edit" or
+        continue to preview your document
+      </p>
 
-        <!-- Review Sections (Accordion Style) -->
-        <div class="review-sections">
-          <div
-            v-for="(section, sectionIndex) in reviewSections"
-            :key="sectionIndex"
-            class="review-card"
-          >
-            <!-- Card Header -->
-            <div class="review-card__header">
-              <div class="review-card__header-content">
-                <h3 class="review-card__title">{{ section.title }}</h3>
-                <p class="review-card__subtitle">{{ section.subtitle }}</p>
-              </div>
-              <button
-                class="review-card__edit-btn"
-                @click="toggleSection(sectionIndex)"
-              >
-                <Edit2 class="review-card__edit-icon" />
-                Edit
-              </button>
+      <!-- Review Sections (Accordion Style) -->
+      <div class="review-sections">
+        <div
+          v-for="(section, sectionIndex) in reviewSections"
+          :key="sectionIndex"
+          class="review-card"
+        >
+          <!-- Card Header -->
+          <div class="review-card__header">
+            <div class="review-card__header-content">
+              <h3 class="review-card__title">{{ section.title }}</h3>
+              <p class="review-card__subtitle">{{ section.subtitle }}</p>
             </div>
-
-            <!-- Card Body (Editable Fields) -->
-            <div
-              v-show="expandedSections.includes(sectionIndex)"
-              class="review-card__body"
+            <button
+              class="review-card__edit-btn"
+              @click="toggleSection(sectionIndex)"
             >
-              <div
-                v-for="(field, fieldIndex) in section.fields"
-                :key="fieldIndex"
-                class="review-field"
-              >
-                <label class="review-field__label">
-                  {{ field.label }}
-                  <span v-if="field.required" class="review-field__required"
-                    >*</span
-                  >
-                </label>
+              <Edit2 class="review-card__edit-icon" />
+              Edit
+            </button>
+          </div>
 
-                <!-- Text/Email Input -->
-                <AppInput
-                  v-if="field.type === 'text' || field.type === 'email'"
-                  v-model="localData[section.key][field.name]"
-                  :type="field.type"
-                  :placeholder="field.placeholder"
-                  @update:model-value="emitUpdate"
-                />
-
-                <!-- Input with Prefix -->
-                <AppInputWithPrefix
-                  v-else-if="field.type === 'text-prefix'"
-                  v-model="localData[section.key][field.name]"
-                  :prefix="field.prefix"
-                  :placeholder="field.placeholder"
-                  @update:model-value="emitUpdate"
-                />
-
-                <!-- Textarea -->
-                <AppTextarea
-                  v-else-if="field.type === 'textarea'"
-                  v-model="localData[section.key][field.name]"
-                  :placeholder="field.placeholder"
-                  :rows="field.rows || 4"
-                  @update:model-value="emitUpdate"
-                />
-
-                <!-- Select -->
-                <AppSelect
-                  v-else-if="field.type === 'select'"
-                  v-model="localData[section.key][field.name]"
-                  @update:model-value="emitUpdate"
+          <!-- Card Body (Editable Fields) -->
+          <div
+            v-show="expandedSections.includes(sectionIndex)"
+            class="review-card__body"
+          >
+            <div
+              v-for="(field, fieldIndex) in section.fields"
+              :key="fieldIndex"
+              class="review-field"
+            >
+              <label class="review-field__label">
+                {{ field.label }}
+                <span v-if="field.required" class="review-field__required"
+                  >*</span
                 >
-                  <option
-                    v-for="option in field.options"
-                    :key="option.value"
-                    :value="option.value"
-                  >
-                    {{ option.label }}
-                  </option>
-                </AppSelect>
-              </div>
+              </label>
+
+              <!-- Text/Email Input -->
+              <AppInput
+                v-if="field.type === 'text' || field.type === 'email'"
+                v-model="localData[section.key][field.name]"
+                :type="field.type"
+                :placeholder="field.placeholder"
+                @update:model-value="emitUpdate"
+              />
+
+              <!-- Input with Prefix -->
+              <AppInputWithPrefix
+                v-else-if="field.type === 'text-prefix'"
+                v-model="localData[section.key][field.name]"
+                :prefix="field.prefix"
+                :placeholder="field.placeholder"
+                @update:model-value="emitUpdate"
+              />
+
+              <!-- Textarea -->
+              <AppTextarea
+                v-else-if="field.type === 'textarea'"
+                v-model="localData[section.key][field.name]"
+                :placeholder="field.placeholder"
+                :rows="field.rows || 4"
+                @update:model-value="emitUpdate"
+              />
+
+              <!-- Select -->
+              <AppSelect
+                v-else-if="field.type === 'select'"
+                v-model="localData[section.key][field.name]"
+                @update:model-value="emitUpdate"
+              >
+                <option
+                  v-for="option in field.options"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </AppSelect>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Navigation Buttons -->
-        <div class="form-actions">
-          <AppButton variant="ghost" size="md" @click="$emit('back')">
-            <ChevronLeft class="form-actions__icon" />
-            Back
-          </AppButton>
-          <AppButton variant="primary" size="md" @click="$emit('continue')">
-            Continue
-            <ChevronRight class="form-actions__icon" />
-          </AppButton>
-        </div>
-      </section>
-    </div>
-  </StepLayoutWithSidebar>
+      <!-- Navigation Buttons -->
+      <div class="form-actions">
+        <AppButton variant="ghost" size="md" @click="$emit('back')">
+          <ChevronLeft class="form-actions__icon" />
+          Back
+        </AppButton>
+        <AppButton variant="primary" size="md" @click="$emit('continue')">
+          Continue
+          <ChevronRight class="form-actions__icon" />
+        </AppButton>
+      </div>
+    </section>
+  </div>
 </template>
 
 <script setup>
 import { ref, watch } from "vue";
 import { ChevronLeft, ChevronRight, Edit2 } from "lucide-vue-next";
-import StepLayoutWithSidebar from "../../layout/StepLayoutWithSidebar.vue";
+import StepLayoutWithSidebar from "../../layout/DocumentStepLayout.vue";
 import AppButton from "@/components/ui/AppButton.vue";
 import AppInput from "@/components/ui/AppInput.vue";
 import AppInputWithPrefix from "@/components/ui/AppInputWithPrefix.vue";
@@ -132,10 +118,6 @@ import AppTextarea from "@/components/ui/AppTextarea.vue";
 import AppSelect from "@/components/ui/AppSelect.vue";
 
 const props = defineProps({
-  documentInfo: {
-    type: Object,
-    required: true,
-  },
   stepData: {
     type: Object,
     required: true,

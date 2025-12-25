@@ -1,75 +1,54 @@
 <template>
-  <StepLayoutWithSidebar
-    :document-title="documentInfo.title"
-    :last-edit="documentInfo.lastEdit"
-    :status="documentInfo.status"
-    :status-variant="documentInfo.statusVariant"
-    :author-name="documentInfo.authorName"
-    :author-avatar="documentInfo.authorAvatar"
-    :template-name="documentInfo.templateName"
-    :template-author="documentInfo.templateAuthor"
-    :template-update-date="documentInfo.templateUpdateDate"
-    :template-tags="documentInfo.templateTags"
-    :checklist-items="documentInfo.checklistItems"
-  >
-    <div class="preview-step">
-      <section class="section">
-        <h2 class="section__heading">
-          Preview your generated document content
-        </h2>
+  <div class="preview-step">
+    <section class="section">
+      <h2 class="section__heading">Preview your generated document content</h2>
 
-        <p class="section__description">
-          You can see your answers in action with template and generated
-          content.
+      <p class="section__description">
+        You can see your answers in action with template and generated content.
+      </p>
+
+      <!-- Warning -->
+      <div class="warning-banner">
+        <AlertCircle class="warning-banner__icon" />
+        <p class="warning-banner__text">
+          You can edit and style the generated content but you can't save your
+          changes.
         </p>
+      </div>
 
-        <!-- Warning -->
-        <div class="warning-banner">
-          <AlertCircle class="warning-banner__icon" />
-          <p class="warning-banner__text">
-            You can edit and style the generated content but you can't save your
-            changes.
-          </p>
-        </div>
+      <!-- Editor -->
+      <div class="editor-wrapper">
+        <RichTextEditor
+          v-model="editorContent"
+          :editable="true"
+          placeholder="Start typing your document..."
+        />
+      </div>
 
-        <!-- Editor -->
-        <div class="editor-wrapper">
-          <RichTextEditor
-            v-model="editorContent"
-            :editable="true"
-            placeholder="Start typing your document..."
-          />
-        </div>
+      <!-- Actions -->
+      <div class="form-actions">
+        <AppButton variant="ghost" @click="handleBack">
+          <ChevronLeft /> Back
+        </AppButton>
 
-        <!-- Actions -->
-        <div class="form-actions">
-          <AppButton variant="ghost" @click="handleBack">
-            <ChevronLeft /> Back
-          </AppButton>
-
-          <AppButton variant="primary" @click="handleContinue">
-            Continue <ChevronRight />
-          </AppButton>
-        </div>
-      </section>
-    </div>
-  </StepLayoutWithSidebar>
+        <AppButton variant="primary" @click="handleContinue">
+          Continue <ChevronRight />
+        </AppButton>
+      </div>
+    </section>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import { ChevronLeft, ChevronRight, AlertCircle } from "lucide-vue-next";
-import StepLayoutWithSidebar from "../../layout/StepLayoutWithSidebar.vue";
+import StepLayoutWithSidebar from "../../layout/DocumentStepLayout.vue";
 import AppButton from "@/components/ui/AppButton.vue";
 import RichTextEditor from "@/components/ui/RichTextEditor.vue";
 import { useTemplatesStore } from "@/stores/useTemplatesStore";
 
 // Props
 const props = defineProps({
-  documentInfo: {
-    type: Object,
-    required: true,
-  },
   stepData: {
     type: Object,
     required: true,

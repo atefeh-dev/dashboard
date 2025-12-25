@@ -1,6 +1,6 @@
 <template>
   <div class="create-document-layout">
-    <!-- FIXED: Navbar stays at top (like Figma, Notion, Linear) -->
+    <!-- FIXED: Navbar stays at top -->
     <div class="navbar-container">
       <Navbar>
         <template #left>
@@ -20,11 +20,24 @@
               {{ documentTitle || "Document title" }}
             </span>
             <ChevronRight class="navbar-custom__breadcrumb-separator" />
+
+            <!-- Dynamic: Show status or Complete button (only after send) -->
             <span
+              v-if="!shouldShowCompleteButton"
               class="navbar-custom__breadcrumb-item navbar-custom__breadcrumb-item--status"
             >
               {{ documentStatus }}
             </span>
+            <AppButton
+              v-else
+              variant="success"
+              size="sm"
+              @click="completeDocument"
+              class="navbar-custom__complete-btn"
+            >
+              <CheckCircle class="navbar-custom__complete-icon" />
+              Complete
+            </AppButton>
           </div>
         </template>
 
@@ -86,7 +99,7 @@
       </Navbar>
     </div>
 
-    <!-- FIXED: Steps also stay at top (below navbar) -->
+    <!-- FIXED: Steps stay at top (below navbar) -->
     <div class="steps-wrapper">
       <div class="steps">
         <button
@@ -123,9 +136,15 @@
       </div>
     </div>
 
-    <!-- Content area (scrolls under fixed headers) -->
+    <!-- Content area with sidebar (scrolls under fixed headers) -->
     <div class="create-document-layout__content">
-      <slot />
+      <DocumentStepLayout
+        :show-sidebar="showSidebar"
+        :document-info="documentInfo"
+        @edit-info="$emit('edit-info')"
+      >
+        <slot />
+      </DocumentStepLayout>
     </div>
   </div>
 </template>
@@ -137,10 +156,14 @@ import {
   Clock,
   Settings,
   Download,
+  CheckCircle,
 } from "lucide-vue-next";
+import { computed } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/useAuthStore";
 import Navbar from "@/components/layout/Navbar.vue";
 import AppButton from "@/components/ui/AppButton.vue";
+import DocumentStepLayout from "@/features/documents/layout/DocumentStepLayout.vue";
 
 const props = defineProps({
   currentStepIndex: {
@@ -171,11 +194,50 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // Sidebar configuration
+  showSidebar: {
+    type: Boolean,
+    default: true,
+  },
+  documentInfo: {
+    type: Object,
+    default: () => ({}),
+  },
+  // NEW: Track if documents have been sent
+  documentsSent: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const emit = defineEmits(["goToStep", "saveAndExit", "goBack"]);
+const emit = defineEmits([
+  "goToStep",
+  "saveAndExit",
+  "goBack",
+  "complete",
+  "edit-info",
+]);
 
 const router = useRouter();
+const authStore = useAuthStore();
+
+// Check if user is authenticated
+const isAuthenticated = computed(() => {
+  return authStore.isAuthenticated || authStore.user !== null;
+});
+
+// Check if we're on the last step (Document step)
+const isLastStep = computed(() => {
+  return props.currentStepIndex === props.steps.length - 1;
+});
+
+// Show Complete button only if:
+// 1. User is on the last step
+// 2. User is authenticated
+// 3. Documents have been sent
+const shouldShowCompleteButton = computed(() => {
+  return isLastStep.value && isAuthenticated.value && props.documentsSent;
+});
 
 function goToStep(index) {
   emit("goToStep", index);
@@ -188,21 +250,23 @@ function goBack() {
 function saveAndExit() {
   emit("saveAndExit");
 }
+
+function completeDocument() {
+  emit("complete");
+}
 </script>
 
 <style scoped lang="scss">
 .create-document-layout {
   min-height: 100vh;
   background-color: #f9fafb;
-  padding-top: 130px; // Space for fixed navbar + steps (64px + 66px)
+  padding-top: 130px;
 
   @media (max-width: 768px) {
-    padding-top: 120px; // Slightly less on mobile
+    padding-top: 120px;
   }
 
   &__content {
-    max-width: 80rem;
-    margin: 0 auto;
     padding: 2rem 1.5rem;
 
     @media (max-width: 768px) {
@@ -211,13 +275,13 @@ function saveAndExit() {
   }
 }
 
-// SENIOR UX: Fixed navbar (always visible at top)
+// FIXED: Navbar
 .navbar-container {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100; // Above everything except modals
+  z-index: 100;
   background-color: #ffffff;
   border-bottom: 1px solid #e5e7eb;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -262,6 +326,34 @@ function saveAndExit() {
     height: 1rem;
     color: #d1d5db;
     flex-shrink: 0;
+  }
+
+  &__complete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #ffffff;
+    background-color: #10b981;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #059669;
+    }
+
+    &:active {
+      background-color: #047857;
+    }
+  }
+
+  &__complete-icon {
+    width: 1rem;
+    height: 1rem;
   }
 
   &__icon-btn {
@@ -330,13 +422,13 @@ function saveAndExit() {
   }
 }
 
-// SENIOR UX: Fixed steps (always visible below navbar)
+// FIXED: Steps
 .steps-wrapper {
   position: fixed;
-  top: 64px; // Below navbar
+  top: 64px;
   left: 0;
   right: 0;
-  z-index: 90; // Below navbar, above content
+  z-index: 90;
   background-color: #ffffff;
   border-bottom: 1px solid #e5e7eb;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
