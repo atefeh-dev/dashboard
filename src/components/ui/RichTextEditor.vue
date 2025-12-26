@@ -406,6 +406,71 @@
     <!-- Editor Content -->
     <EditorContent :editor="editor" class="editor-content" />
 
+    <!-- Image Alignment Menu (appears when image is selected) -->
+    <div
+      v-if="editor && showImageMenu"
+      :style="imageMenuStyle"
+      class="image-menu"
+    >
+      <button
+        :class="[
+          'image-menu__btn has-tooltip',
+          { 'image-menu__btn--active': currentImageAlign === 'left' },
+        ]"
+        @click="setImageAlignment('left')"
+        data-tooltip="Align Left"
+      >
+        <AlignLeft class="image-menu__icon" />
+      </button>
+
+      <button
+        :class="[
+          'image-menu__btn has-tooltip',
+          { 'image-menu__btn--active': currentImageAlign === 'center' },
+        ]"
+        @click="setImageAlignment('center')"
+        data-tooltip="Align Center"
+      >
+        <AlignCenter class="image-menu__icon" />
+      </button>
+
+      <button
+        :class="[
+          'image-menu__btn has-tooltip',
+          { 'image-menu__btn--active': currentImageAlign === 'right' },
+        ]"
+        @click="setImageAlignment('right')"
+        data-tooltip="Align Right"
+      >
+        <AlignRight class="image-menu__icon" />
+      </button>
+
+      <div class="image-menu__divider"></div>
+
+      <button
+        class="image-menu__btn image-menu__btn--danger has-tooltip"
+        @click="deleteImage"
+        data-tooltip="Delete Image"
+      >
+        <svg
+          class="image-menu__icon"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path
+            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+          ></path>
+        </svg>
+      </button>
+    </div>
+
     <!-- Bubble Menu (appears on text selection) -->
     <div
       v-if="editor && showBubbleMenu"
@@ -571,6 +636,11 @@ const imageUrl = ref("");
 const showBubbleMenu = ref(false);
 const bubbleMenuStyle = ref({});
 
+// Image menu state
+const showImageMenu = ref(false);
+const imageMenuStyle = ref({});
+const currentImageAlign = ref("left");
+
 // Detect Mac for keyboard shortcuts
 const isMac = computed(() => {
   return (
@@ -652,6 +722,7 @@ const ResizableImage = Node.create({
       width: { default: null },
       height: { default: null },
       style: { default: null },
+      align: { default: "left" },
     };
   },
 
@@ -666,19 +737,23 @@ const ResizableImage = Node.create({
           width: dom.getAttribute("width"),
           height: dom.getAttribute("height"),
           style: dom.getAttribute("style"),
+          align: dom.getAttribute("data-align") || "left",
         }),
       },
     ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ["img", HTMLAttributes];
+    const { align, ...attrs } = HTMLAttributes;
+    return ["img", { ...attrs, "data-align": align }];
   },
 
   addNodeView() {
     return ({ node, getPos, editor }) => {
       const container = document.createElement("div");
-      container.className = "image-resizer-container";
+      container.className = `image-resizer-container image-align-${
+        node.attrs.align || "left"
+      }`;
 
       const img = document.createElement("img");
       img.src = node.attrs.src;
@@ -774,10 +849,40 @@ const ResizableImage = Node.create({
         handle.addEventListener("mousedown", (e) => startResize(e, handle));
       });
 
-      // Click to select
-      img.addEventListener("click", () => {
+      // Click to select and show menu
+      img.addEventListener("click", (e) => {
+        e.stopPropagation();
         const pos = getPos();
         editor.chain().setNodeSelection(pos).run();
+
+        // Manually trigger image menu
+        setTimeout(() => {
+          const rect = img.getBoundingClientRect();
+          imageMenuStyle.value = {
+            position: "fixed",
+            left: `${rect.left}px`,
+            top: `${rect.top - 60}px`,
+            zIndex: 1000,
+          };
+          currentImageAlign.value = node.attrs.align || "left";
+          showImageMenu.value = true;
+          showBubbleMenu.value = false;
+        }, 10);
+      });
+
+      // Show menu on container hover
+      container.addEventListener("mouseenter", () => {
+        if (!editor.isEditable) return;
+        const rect = img.getBoundingClientRect();
+        imageMenuStyle.value = {
+          position: "fixed",
+          left: `${rect.left}px`,
+          top: `${rect.top - 60}px`,
+          zIndex: 1000,
+        };
+        currentImageAlign.value = node.attrs.align || "left";
+        showImageMenu.value = true;
+        showBubbleMenu.value = false;
       });
 
       return {
@@ -789,6 +894,11 @@ const ResizableImage = Node.create({
             img.style.width = updatedNode.attrs.width;
           if (updatedNode.attrs.height)
             img.style.height = updatedNode.attrs.height;
+
+          // Update alignment class
+          container.className = `image-resizer-container image-align-${
+            updatedNode.attrs.align || "left"
+          }`;
           return true;
         },
         destroy: () => {
@@ -806,7 +916,7 @@ const ResizableImage = Node.create({
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,
-            attrs,
+            attrs: { ...attrs, align: attrs.align || "left" },
           });
         },
     };
@@ -846,6 +956,7 @@ const editor = useEditor({
   },
   onSelectionUpdate: ({ editor }) => {
     updateBubbleMenu(editor);
+    updateImageMenu(editor);
   },
 });
 
@@ -877,6 +988,73 @@ function updateBubbleMenu(editorInstance) {
   showBubbleMenu.value = true;
 }
 
+// Update image menu position
+function updateImageMenu(editorInstance) {
+  const { selection } = editorInstance.state;
+  const node = editorInstance.state.doc.nodeAt(selection.from);
+
+  // Check if selected node is an image
+  if (node && node.type.name === "resizableImage") {
+    const { view } = editorInstance;
+    const coords = view.coordsAtPos(selection.from);
+
+    imageMenuStyle.value = {
+      position: "fixed",
+      left: `${coords.left}px`,
+      top: `${coords.top - 60}px`,
+      zIndex: 1000,
+    };
+
+    currentImageAlign.value = node.attrs.align || "left";
+    showImageMenu.value = true;
+    showBubbleMenu.value = false;
+  } else {
+    showImageMenu.value = false;
+  }
+}
+
+// Set image alignment
+function setImageAlignment(align) {
+  if (editor.value) {
+    const { selection } = editor.value.state;
+    const pos = selection.from;
+
+    editor.value
+      .chain()
+      .focus()
+      .updateAttributes("resizableImage", { align })
+      .run();
+
+    currentImageAlign.value = align;
+
+    // Keep menu open after alignment change
+    setTimeout(() => {
+      const node = editor.value.state.doc.nodeAt(pos);
+      if (node && node.type.name === "resizableImage") {
+        const container = document.querySelector(".image-resizer-container");
+        if (container) {
+          const rect = container.getBoundingClientRect();
+          imageMenuStyle.value = {
+            position: "fixed",
+            left: `${rect.left}px`,
+            top: `${rect.top - 60}px`,
+            zIndex: 1000,
+          };
+          showImageMenu.value = true;
+        }
+      }
+    }, 50);
+  }
+}
+
+// Delete selected image
+function deleteImage() {
+  if (editor.value) {
+    editor.value.chain().focus().deleteSelection().run();
+    showImageMenu.value = false;
+  }
+}
+
 // Hide bubble menu on click outside
 onMounted(() => {
   const handleClickOutside = (e) => {
@@ -884,6 +1062,15 @@ onMounted(() => {
 
     if (!target.closest(".bubble-menu") && !target.closest(".ProseMirror")) {
       showBubbleMenu.value = false;
+    }
+
+    // Don't close image menu if clicking inside it or on the image
+    if (
+      !target.closest(".image-menu") &&
+      !target.closest(".image-resizer-container") &&
+      !target.closest(".editor-image")
+    ) {
+      showImageMenu.value = false;
     }
 
     if (!target.closest(".popover-wrapper") && showColorPicker.value) {
@@ -912,6 +1099,26 @@ onMounted(() => {
 
   document.addEventListener("click", handleClickOutside);
 
+  // Update image menu position on scroll
+  const handleScroll = () => {
+    if (showImageMenu.value) {
+      const container = document.querySelector(
+        ".image-resizer-container.ProseMirror-selectednode"
+      );
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        imageMenuStyle.value = {
+          position: "fixed",
+          left: `${rect.left}px`,
+          top: `${rect.top - 60}px`,
+          zIndex: 1000,
+        };
+      }
+    }
+  };
+
+  window.addEventListener("scroll", handleScroll, true);
+
   // Ensure editor content is loaded
   if (editor.value && props.modelValue) {
     setTimeout(() => {
@@ -926,6 +1133,7 @@ onMounted(() => {
 
   onBeforeUnmount(() => {
     document.removeEventListener("click", handleClickOutside);
+    window.removeEventListener("scroll", handleScroll, true);
   });
 });
 
@@ -1919,12 +2127,126 @@ onBeforeUnmount(() => {
 }
 
 // ========================================
+// IMAGE MENU - Appears when image is selected
+// ========================================
+
+.image-menu {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  background: #000000;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  pointer-events: all;
+  animation: imageMenuFadeIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1000;
+
+  @keyframes imageMenuFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    &:hover::before {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.05);
+    }
+
+    &:active::before {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(0.95);
+    }
+
+    &--active {
+      background: #4539cc;
+      box-shadow: 0 2px 8px rgba(69, 57, 204, 0.4);
+
+      &::before {
+        background: transparent;
+      }
+
+      &:hover {
+        background: #5145d4;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(69, 57, 204, 0.5);
+      }
+
+      .image-menu__icon {
+        color: #ffffff;
+      }
+    }
+
+    &--danger {
+      &:hover::before {
+        background: rgba(239, 68, 68, 0.2);
+      }
+
+      &:hover .image-menu__icon {
+        color: #ef4444;
+      }
+    }
+  }
+
+  &__icon {
+    width: 18px;
+    height: 18px;
+    color: #ffffff;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+  }
+
+  &__divider {
+    width: 1px;
+    height: 24px;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(255, 255, 255, 0.15) 20%,
+      rgba(255, 255, 255, 0.15) 80%,
+      transparent 100%
+    );
+    margin: 0 6px;
+    transition: all 0.3s ease;
+  }
+}
+
+// ========================================
 // IMAGE RESIZER STYLES (NEW)
 // ========================================
 
 :deep(.image-resizer-container) {
   position: relative;
-  display: inline-block;
   max-width: 100%;
   margin: 1em 0;
 
@@ -1939,6 +2261,39 @@ onBeforeUnmount(() => {
 
     img {
       pointer-events: none;
+    }
+  }
+
+  // Alignment styles
+  &.image-align-left {
+    display: block;
+    margin-left: 0;
+    margin-right: auto;
+
+    img {
+      display: block;
+    }
+  }
+
+  &.image-align-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+
+    img {
+      display: block;
+      margin: 0 auto;
+    }
+  }
+
+  &.image-align-right {
+    display: block;
+    margin-left: auto;
+    margin-right: 0;
+
+    img {
+      display: block;
+      margin-left: auto;
     }
   }
 }
