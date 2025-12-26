@@ -351,7 +351,7 @@
             </button>
           </div>
           <div class="popover-form__hint">
-            💡 Tip: Click an image and press Delete or Backspace to remove it
+            💡 Drag corners to resize • Delete key to remove
           </div>
           <div class="popover-form">
             <!-- URL Input -->
@@ -528,12 +528,11 @@ import {
   Upload,
 } from "lucide-vue-next";
 import { useEditor, EditorContent } from "@tiptap/vue-3";
-import { Extension } from "@tiptap/core";
+import { Extension, Node } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import UnderlineExtension from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import LinkExtension from "@tiptap/extension-link";
-import ImageExtension from "@tiptap/extension-image";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import { FontFamily } from "@tiptap/extension-font-family";
@@ -636,6 +635,184 @@ const FontSize = Extension.create({
   },
 });
 
+// ==========================================
+// RESIZABLE IMAGE EXTENSION
+// ==========================================
+const ResizableImage = Node.create({
+  name: "resizableImage",
+  group: "block",
+  atom: true,
+  draggable: false,
+
+  addAttributes() {
+    return {
+      src: { default: null },
+      alt: { default: null },
+      title: { default: null },
+      width: { default: null },
+      height: { default: null },
+      style: { default: null },
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "img[src]",
+        getAttrs: (dom) => ({
+          src: dom.getAttribute("src"),
+          alt: dom.getAttribute("alt"),
+          title: dom.getAttribute("title"),
+          width: dom.getAttribute("width"),
+          height: dom.getAttribute("height"),
+          style: dom.getAttribute("style"),
+        }),
+      },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ["img", HTMLAttributes];
+  },
+
+  addNodeView() {
+    return ({ node, getPos, editor }) => {
+      const container = document.createElement("div");
+      container.className = "image-resizer-container";
+
+      const img = document.createElement("img");
+      img.src = node.attrs.src;
+      if (node.attrs.alt) img.alt = node.attrs.alt;
+      if (node.attrs.title) img.title = node.attrs.title;
+
+      if (node.attrs.width) img.style.width = node.attrs.width;
+      if (node.attrs.height) img.style.height = node.attrs.height;
+
+      img.className = "editor-image";
+      img.draggable = false;
+
+      const resizeHandles = document.createElement("div");
+      resizeHandles.className = "resize-handles";
+      resizeHandles.innerHTML = `
+        <div class="resize-handle resize-handle-nw"></div>
+        <div class="resize-handle resize-handle-ne"></div>
+        <div class="resize-handle resize-handle-sw"></div>
+        <div class="resize-handle resize-handle-se"></div>
+      `;
+
+      container.appendChild(img);
+      container.appendChild(resizeHandles);
+
+      let isResizing = false;
+      let startX, startY, startWidth, startHeight;
+      let aspectRatio;
+
+      const startResize = (e, handle) => {
+        if (!editor.isEditable) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        isResizing = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = img.offsetWidth;
+        startHeight = img.offsetHeight;
+        aspectRatio = startWidth / startHeight;
+
+        document.addEventListener("mousemove", resize);
+        document.addEventListener("mouseup", stopResize);
+        container.classList.add("resizing");
+      };
+
+      const resize = (e) => {
+        if (!isResizing) return;
+
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        let newWidth = startWidth + deltaX;
+        let newHeight = startHeight + deltaY;
+
+        // Maintain aspect ratio
+        if (e.shiftKey) {
+          newHeight = newWidth / aspectRatio;
+        } else {
+          // Default: maintain aspect ratio
+          newHeight = newWidth / aspectRatio;
+        }
+
+        // Min/max constraints
+        newWidth = Math.max(100, Math.min(newWidth, 1200));
+        newHeight = newWidth / aspectRatio;
+
+        img.style.width = `${newWidth}px`;
+        img.style.height = `${newHeight}px`;
+      };
+
+      const stopResize = () => {
+        if (!isResizing) return;
+        isResizing = false;
+
+        document.removeEventListener("mousemove", resize);
+        document.removeEventListener("mouseup", stopResize);
+        container.classList.remove("resizing");
+
+        // Update node attributes
+        const pos = getPos();
+        editor
+          .chain()
+          .setNodeSelection(pos)
+          .updateAttributes("resizableImage", {
+            width: img.style.width,
+            height: img.style.height,
+          })
+          .run();
+      };
+
+      // Attach resize handlers
+      resizeHandles.querySelectorAll(".resize-handle").forEach((handle) => {
+        handle.addEventListener("mousedown", (e) => startResize(e, handle));
+      });
+
+      // Click to select
+      img.addEventListener("click", () => {
+        const pos = getPos();
+        editor.chain().setNodeSelection(pos).run();
+      });
+
+      return {
+        dom: container,
+        update: (updatedNode) => {
+          if (updatedNode.type.name !== "resizableImage") return false;
+          img.src = updatedNode.attrs.src;
+          if (updatedNode.attrs.width)
+            img.style.width = updatedNode.attrs.width;
+          if (updatedNode.attrs.height)
+            img.style.height = updatedNode.attrs.height;
+          return true;
+        },
+        destroy: () => {
+          document.removeEventListener("mousemove", resize);
+          document.removeEventListener("mouseup", stopResize);
+        },
+      };
+    };
+  },
+
+  addCommands() {
+    return {
+      setImage:
+        (attrs) =>
+        ({ commands }) => {
+          return commands.insertContent({
+            type: this.name,
+            attrs,
+          });
+        },
+    };
+  },
+});
+
 // Tiptap Editor
 const editor = useEditor({
   extensions: [
@@ -655,13 +832,7 @@ const editor = useEditor({
         class: "editor-link",
       },
     }),
-    ImageExtension.configure({
-      inline: false,
-      allowBase64: true,
-      HTMLAttributes: {
-        class: "editor-image",
-      },
-    }),
+    ResizableImage,
   ],
   content: props.modelValue || "",
   editable: props.editable,
@@ -748,7 +919,6 @@ onMounted(() => {
         const currentContent = editor.value.getHTML();
         if (!currentContent || currentContent === "<p></p>") {
           editor.value.commands.setContent(props.modelValue, false);
-          console.log("✅ Editor content loaded on mount");
         }
       }
     }, 100);
@@ -1749,6 +1919,85 @@ onBeforeUnmount(() => {
 }
 
 // ========================================
+// IMAGE RESIZER STYLES (NEW)
+// ========================================
+
+:deep(.image-resizer-container) {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  margin: 1em 0;
+
+  &:hover .resize-handles {
+    opacity: 1;
+  }
+
+  &.resizing {
+    .resize-handles {
+      opacity: 1;
+    }
+
+    img {
+      pointer-events: none;
+    }
+  }
+}
+
+:deep(.resize-handles) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+:deep(.resize-handle) {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #3b82f6;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  pointer-events: all;
+  cursor: nwse-resize;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.3);
+    background: #2563eb;
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+  }
+
+  &.resize-handle-nw {
+    top: -6px;
+    left: -6px;
+    cursor: nwse-resize;
+  }
+
+  &.resize-handle-ne {
+    top: -6px;
+    right: -6px;
+    cursor: nesw-resize;
+  }
+
+  &.resize-handle-sw {
+    bottom: -6px;
+    left: -6px;
+    cursor: nesw-resize;
+  }
+
+  &.resize-handle-se {
+    bottom: -6px;
+    right: -6px;
+    cursor: nwse-resize;
+  }
+}
+
+// ========================================
 // EDITOR CONTENT
 // ========================================
 
@@ -1798,8 +2047,8 @@ onBeforeUnmount(() => {
     animation: none !important;
     user-select: text;
     cursor: text;
-    line-height: 1.75; /* smoother selection */
-    letter-spacing: 0.01em; /* optional but helps */
+    line-height: 1.75;
+    letter-spacing: 0.01em;
 
     p {
       margin-bottom: 1em;
@@ -1868,7 +2117,6 @@ onBeforeUnmount(() => {
       max-width: 100%;
       height: auto;
       border-radius: 8px;
-      margin: 1em 0;
       display: block;
       cursor: pointer;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1884,63 +2132,6 @@ onBeforeUnmount(() => {
         border-color: #3b82f6;
         box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
         outline: none;
-        position: relative;
-        transform: scale(1.02);
-
-        &::after {
-          content: "🗑️ Press Delete or Backspace";
-          position: absolute;
-          top: -40px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-          color: white;
-          padding: 8px 16px;
-          border-radius: 8px;
-          font-size: 12px;
-          white-space: nowrap;
-          pointer-events: none;
-          font-weight: 600;
-          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-          animation: tooltipFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-
-          @keyframes tooltipFadeIn {
-            from {
-              opacity: 0;
-              transform: translateX(-50%) translateY(8px) scale(0.9);
-            }
-            to {
-              opacity: 1;
-              transform: translateX(-50%) translateY(0) scale(1);
-            }
-          }
-        }
-
-        &::before {
-          content: "";
-          position: absolute;
-          top: -8px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 0;
-          height: 0;
-          border-left: 6px solid transparent;
-          border-right: 6px solid transparent;
-          border-top: 6px solid #1f2937;
-          animation: arrowFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s
-            backwards;
-
-          @keyframes arrowFadeIn {
-            from {
-              opacity: 0;
-              transform: translateX(-50%) translateY(4px);
-            }
-            to {
-              opacity: 1;
-              transform: translateX(-50%) translateY(0);
-            }
-          }
-        }
       }
     }
 
@@ -1969,11 +2160,6 @@ onBeforeUnmount(() => {
       font-size: 1.25em;
     }
 
-    // ::selection {
-    //   background: linear-gradient(135deg, #b3d4fc 0%, #a5c9f5 100%);
-    //   color: #1e293b;
-    // }
-
     &.is-editor-empty:first-child::before {
       content: attr(data-placeholder);
       float: left;
@@ -1983,6 +2169,7 @@ onBeforeUnmount(() => {
     }
   }
 }
+
 /* Text selection highlight */
 :deep(.ProseMirror ::selection) {
   background: #7f56d9;
