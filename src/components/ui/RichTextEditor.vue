@@ -775,12 +775,19 @@ const ResizableImage = Node.create({
         <div class="resize-handle resize-handle-se"></div>
       `;
 
+      // Size indicator
+      const sizeIndicator = document.createElement("div");
+      sizeIndicator.className = "size-indicator";
+      sizeIndicator.style.display = "none";
+
       container.appendChild(img);
       container.appendChild(resizeHandles);
+      container.appendChild(sizeIndicator);
 
       let isResizing = false;
       let startX, startY, startWidth, startHeight;
       let aspectRatio;
+      let currentHandle = null;
 
       const startResize = (e, handle) => {
         if (!editor.isEditable) return;
@@ -788,6 +795,7 @@ const ResizableImage = Node.create({
         e.stopPropagation();
 
         isResizing = true;
+        currentHandle = handle.className;
         startX = e.clientX;
         startY = e.clientY;
         startWidth = img.offsetWidth;
@@ -802,17 +810,26 @@ const ResizableImage = Node.create({
       const resize = (e) => {
         if (!isResizing) return;
 
-        const deltaX = e.clientX - startX;
-        const deltaY = e.clientY - startY;
+        let deltaX = e.clientX - startX;
+        let deltaY = e.clientY - startY;
+        let newWidth, newHeight;
 
-        let newWidth = startWidth + deltaX;
-        let newHeight = startHeight + deltaY;
-
-        // Maintain aspect ratio
-        if (e.shiftKey) {
+        // Handle different resize directions
+        if (currentHandle.includes("nw")) {
+          // Northwest - resize from top-left
+          newWidth = startWidth - deltaX;
           newHeight = newWidth / aspectRatio;
-        } else {
-          // Default: maintain aspect ratio
+        } else if (currentHandle.includes("ne")) {
+          // Northeast - resize from top-right
+          newWidth = startWidth + deltaX;
+          newHeight = newWidth / aspectRatio;
+        } else if (currentHandle.includes("sw")) {
+          // Southwest - resize from bottom-left
+          newWidth = startWidth - deltaX;
+          newHeight = newWidth / aspectRatio;
+        } else if (currentHandle.includes("se")) {
+          // Southeast - resize from bottom-right (original behavior)
+          newWidth = startWidth + deltaX;
           newHeight = newWidth / aspectRatio;
         }
 
@@ -822,6 +839,12 @@ const ResizableImage = Node.create({
 
         img.style.width = `${newWidth}px`;
         img.style.height = `${newHeight}px`;
+
+        // Update size indicator
+        sizeIndicator.textContent = `${Math.round(newWidth)} × ${Math.round(
+          newHeight
+        )}`;
+        sizeIndicator.style.display = "block";
       };
 
       const stopResize = () => {
@@ -831,6 +854,11 @@ const ResizableImage = Node.create({
         document.removeEventListener("mousemove", resize);
         document.removeEventListener("mouseup", stopResize);
         container.classList.remove("resizing");
+
+        // Hide size indicator
+        setTimeout(() => {
+          sizeIndicator.style.display = "none";
+        }, 500);
 
         // Update node attributes
         const pos = getPos();
@@ -2249,6 +2277,7 @@ onBeforeUnmount(() => {
   position: relative;
   max-width: 100%;
   margin: 1em 0;
+  transition: opacity 0.2s ease;
 
   &:hover .resize-handles {
     opacity: 1;
@@ -2261,6 +2290,13 @@ onBeforeUnmount(() => {
 
     img {
       pointer-events: none;
+      opacity: 0.9;
+    }
+
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
     }
   }
 
@@ -2309,6 +2345,35 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 
+:deep(.size-indicator) {
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: sizeIndicatorFadeIn 0.2s ease;
+
+  @keyframes sizeIndicatorFadeIn {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+}
+
 :deep(.resize-handle) {
   position: absolute;
   width: 12px;
@@ -2318,8 +2383,8 @@ onBeforeUnmount(() => {
   border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   pointer-events: all;
-  cursor: nwse-resize;
   transition: all 0.2s ease;
+  z-index: 10;
 
   &:hover {
     transform: scale(1.3);
@@ -2327,28 +2392,33 @@ onBeforeUnmount(() => {
     box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
   }
 
+  &:active {
+    transform: scale(1.4);
+    background: #1d4ed8;
+  }
+
   &.resize-handle-nw {
     top: -6px;
     left: -6px;
-    cursor: nwse-resize;
+    cursor: nw-resize;
   }
 
   &.resize-handle-ne {
     top: -6px;
     right: -6px;
-    cursor: nesw-resize;
+    cursor: ne-resize;
   }
 
   &.resize-handle-sw {
     bottom: -6px;
     left: -6px;
-    cursor: nesw-resize;
+    cursor: sw-resize;
   }
 
   &.resize-handle-se {
     bottom: -6px;
     right: -6px;
-    cursor: nwse-resize;
+    cursor: se-resize;
   }
 }
 
@@ -2474,8 +2544,9 @@ onBeforeUnmount(() => {
       border-radius: 8px;
       display: block;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       border: 3px solid transparent;
+      will-change: transform;
 
       &:hover {
         border-color: #3b82f6;
