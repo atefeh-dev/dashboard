@@ -6,7 +6,8 @@ export const useTemplatesStore = defineStore("templates", () => {
   const searchQuery = ref("");
   const statusFilter = ref("verified");
   const typeFilter = ref("all");
-  const selectedTags = ref(["nda", "non-disclosure"]); // Initial tags from Figma
+  // const selectedTags = ref(["nda", "non-disclosure"]); // Initial tags from Figma
+  const selectedTags = ref([]); // Initial tags from Figma
 
   // Mock templates data with content
   const templates = ref([
