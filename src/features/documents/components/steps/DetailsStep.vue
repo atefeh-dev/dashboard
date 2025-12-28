@@ -1,231 +1,176 @@
 <template>
   <div class="details-step">
-    <!-- Template Selector Section -->
-    <section class="section">
-      <h2 class="section__heading">Select a template</h2>
-      <p class="section__description">
-        Choose from our library of pre-built and verified templates to create
-        your document
-      </p>
+    <ErrorBoundary
+      fallback-title="Template Selection Error"
+      fallback-message="Something went wrong with template selection. Your document details have been saved."
+      @error="handleFormError"
+      @recover="handleRecover"
+    >
+      <!-- Template Selector Section -->
+      <section class="section">
+        <h2 class="section__heading">Select a template</h2>
+        <p class="section__description">
+          Choose from our library of pre-built and verified templates to create
+          your document
+        </p>
 
-      <!-- Search -->
-      <div class="search-box">
-        <Search class="search-box__icon" />
-        <AppInput
-          :model-value="templatesStore.searchQuery"
-          type="text"
-          placeholder="Or try typing a keyword, for example NDA"
-          class="search-box__input-field"
-          @update:model-value="templatesStore.setSearchQuery"
-        />
-        <kbd class="search-box__kbd">⌘K</kbd>
-      </div>
-
-      <!-- Filters -->
-      <div class="filters">
-        <div class="filters__group">
-          <label class="filters__label">Status</label>
-          <AppSelect
-            :model-value="templatesStore.statusFilter"
-            @update:model-value="templatesStore.setStatusFilter"
-          >
-            <option value="verified">Verified</option>
-            <option value="all">All</option>
-          </AppSelect>
-        </div>
-
-        <div class="filters__group">
-          <label class="filters__label">Type</label>
-          <AppSelect
-            :model-value="templatesStore.typeFilter"
-            @update:model-value="templatesStore.setTypeFilter"
-          >
-            <option value="all">All</option>
-            <option value="agreement">Agreement</option>
-            <option value="contract">Contract</option>
-          </AppSelect>
-        </div>
-
-        <div class="filters__group">
-          <label class="filters__label">Tag</label>
-          <AppTagInput
-            :tags="templatesStore.selectedTags"
-            :max-visible="2"
-            placeholder="Type tag and press Enter..."
-            @add-tag="templatesStore.addTag"
-            @remove-tag="templatesStore.removeTag"
+        <!-- Search -->
+        <div class="search-box">
+          <Search class="search-box__icon" />
+          <AppInput
+            :model-value="templatesStore.searchQuery"
+            type="text"
+            placeholder="Or try typing a keyword, for example NDA"
+            class="search-box__input-field"
+            @update:model-value="templatesStore.setSearchQuery"
           />
+          <kbd class="search-box__kbd">⌘K</kbd>
         </div>
-      </div>
 
-      <!-- Template Table -->
-      <TemplateTable
-        :templates="templatesStore.filteredTemplates"
-        :selected-template="currentSelectedTemplate"
-        @select="handleSelectTemplate"
-        @clear-filters="clearFilters"
-      />
+        <!-- Filters -->
+        <div class="filters">
+          <div class="filters__group">
+            <label class="filters__label">Status</label>
+            <AppSelect
+              :model-value="templatesStore.statusFilter"
+              @update:model-value="templatesStore.setStatusFilter"
+            >
+              <option value="verified">Verified</option>
+              <option value="all">All</option>
+            </AppSelect>
+          </div>
 
-      <!-- Template Selection Error -->
-      <transition name="fade">
-        <div v-if="templateErrorMessage" class="error-message">
-          {{ templateErrorMessage }}
+          <div class="filters__group">
+            <label class="filters__label">Type</label>
+            <AppSelect
+              :model-value="templatesStore.typeFilter"
+              @update:model-value="templatesStore.setTypeFilter"
+            >
+              <option value="all">All</option>
+              <option value="agreement">Agreement</option>
+              <option value="contract">Contract</option>
+            </AppSelect>
+          </div>
+
+          <div class="filters__group">
+            <label class="filters__label">Tag</label>
+            <AppTagInput
+              :tags="templatesStore.selectedTags"
+              :max-visible="2"
+              placeholder="Type tag and press Enter..."
+              @add-tag="templatesStore.addTag"
+              @remove-tag="templatesStore.removeTag"
+            />
+          </div>
         </div>
-      </transition>
-    </section>
 
-    <!-- Document Details Form -->
-    <section class="section">
-      <h2 class="section__heading">Give your document some details</h2>
+        <!-- Template Table -->
+        <TemplateTable
+          :templates="templatesStore.filteredTemplates"
+          :selected-template="currentSelectedTemplate"
+          @select="handleSelectTemplate"
+          @clear-filters="clearFilters"
+        />
 
-      <Form
-        :validation-schema="validationSchema"
-        :initial-values="initialFormValues"
-        @submit="handleSubmit"
-        v-slot="{ meta: formMeta, errors: formErrors, values: formValues }"
-      >
-        <div class="form-card">
-          <!-- Selected Template (Hidden Field for Validation) -->
-          <Field name="templateId" v-slot="{ field, errors: templateErrors }">
-            <input type="hidden" v-bind="field" />
+        <!-- Template Selection Error -->
+        <transition name="fade">
+          <div v-if="templateErrorMessage" class="error-message">
+            {{ templateErrorMessage }}
+          </div>
+        </transition>
+      </section>
 
-            <div class="selected-template">
-              <div class="selected-template__label-col">
-                <label class="selected-template__label"
-                  >Selected template</label
+      <!-- Document Details Form -->
+      <section class="section">
+        <h2 class="section__heading">Give your document some details</h2>
+
+        <Form
+          :validation-schema="validationSchema"
+          @submit="handleSubmit"
+          v-slot="{ meta: formMeta, errors: formErrors, values: formValues }"
+        >
+          <div class="form-card">
+            <!-- Selected Template (Hidden Field for Validation) -->
+            <Field name="templateId" v-slot="{ field, errors: templateErrors }">
+              <input type="hidden" v-bind="field" />
+
+              <div class="selected-template">
+                <div class="selected-template__label-col">
+                  <label class="selected-template__label"
+                    >Selected template</label
+                  >
+                  <p class="selected-template__hint">
+                    You can't change template after creating.
+                  </p>
+                </div>
+
+                <div
+                  class="selected-template__card"
+                  :class="{
+                    'has-error': templateErrors.length && formMeta.touched,
+                  }"
                 >
-                <p class="selected-template__hint">
-                  You can't change template after creating.
-                </p>
-              </div>
-
-              <div
-                class="selected-template__card"
-                :class="{
-                  'has-error': templateErrors.length && formMeta.touched,
-                }"
-              >
-                <div class="selected-template__info">
-                  <FileText class="selected-template__icon" />
-                  <div class="selected-template__text">
-                    <div class="selected-template__name">
-                      {{
-                        currentSelectedTemplate?.name || "No template selected"
-                      }}
-                    </div>
-                    <div class="selected-template__meta">
-                      By
-                      <span class="selected-template__author">{{
-                        currentSelectedTemplate?.author || "—"
-                      }}</span>
-                      <span
-                        v-if="currentSelectedTemplate?.verified"
-                        class="selected-template__separator"
-                        >•</span
-                      >
-                      <span
-                        v-if="currentSelectedTemplate?.verified"
-                        class="verified"
-                      >
-                        <Check class="verified__icon" />
-                        Verified
-                      </span>
+                  <div class="selected-template__info">
+                    <FileText class="selected-template__icon" />
+                    <div class="selected-template__text">
+                      <div class="selected-template__name">
+                        {{
+                          currentSelectedTemplate?.name ||
+                          "No template selected"
+                        }}
+                      </div>
+                      <div class="selected-template__meta">
+                        By
+                        <span class="selected-template__author">{{
+                          currentSelectedTemplate?.author || "—"
+                        }}</span>
+                        <span
+                          v-if="currentSelectedTemplate?.verified"
+                          class="selected-template__separator"
+                          >•</span
+                        >
+                        <span
+                          v-if="currentSelectedTemplate?.verified"
+                          class="verified"
+                        >
+                          <Check class="verified__icon" />
+                          Verified
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <AppButton
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  @click="scrollToTemplateSelection"
-                >
-                  {{ currentSelectedTemplate ? "Change" : "Select" }}
-                </AppButton>
+                  <AppButton
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    @click="scrollToTemplateSelection"
+                  >
+                    {{ currentSelectedTemplate ? "Change" : "Select" }}
+                  </AppButton>
+                </div>
               </div>
-            </div>
-          </Field>
+            </Field>
 
-          <!-- Name of Document -->
-          <Field name="name" v-slot="{ field, errors, meta }">
-            <div
-              class="form-field"
-              :class="{
-                'has-error': errors.length && meta.touched,
-              }"
-            >
-              <label class="form-field__label">
-                Name of your document
-                <span class="form-field__required">*</span>
-              </label>
-              <AppInput
-                v-bind="field"
-                placeholder="For example Accelerator Contract 2025"
+            <!-- Name of Document -->
+            <Field name="name" v-slot="{ field, errors, meta }">
+              <div
+                class="form-field"
                 :class="{
-                  'input-error': errors.length && meta.touched,
+                  'has-error': errors.length && meta.touched,
                 }"
-              />
-              <transition name="fade">
-                <div v-if="errors.length && meta.touched" class="error-message">
-                  {{ errors[0] }}
-                </div>
-              </transition>
-            </div>
-          </Field>
-
-          <!-- File Name -->
-          <Field
-            name="filename"
-            v-slot="{ value, errors, meta, handleChange, handleBlur }"
-          >
-            <div
-              class="form-field"
-              :class="{
-                'has-error': errors.length && meta.touched,
-              }"
-            >
-              <label class="form-field__label">
-                File name to save <span class="form-field__required">*</span>
-              </label>
-              <AppInputWithPrefix
-                :model-value="value"
-                @update:model-value="handleChange"
-                @blur="handleBlur"
-                prefix="doclast-"
-                placeholder="accelerator-contract-2025"
-                :class="{
-                  'input-error': errors.length && meta.touched,
-                }"
-              />
-              <transition name="fade">
-                <div v-if="errors.length && meta.touched" class="error-message">
-                  {{ errors[0] }}
-                </div>
-                <div v-else class="form-field__hint">
-                  Use lowercase letters, numbers, and hyphens only
-                </div>
-              </transition>
-            </div>
-          </Field>
-
-          <!-- Description -->
-          <Field name="description" v-slot="{ field, errors, meta }">
-            <div
-              class="form-field"
-              :class="{
-                'has-error': errors.length && meta.touched,
-              }"
-            >
-              <label class="form-field__label">Description</label>
-              <AppTextarea
-                v-bind="field"
-                placeholder="Provide some details about what this document for ..."
-                rows="5"
-                :class="{
-                  'input-error': errors.length && meta.touched,
-                }"
-              />
-              <div class="form-field__footer">
+              >
+                <label class="form-field__label">
+                  Name of your document
+                  <span class="form-field__required">*</span>
+                </label>
+                <AppInput
+                  v-bind="field"
+                  placeholder="For example Accelerator Contract 2025"
+                  :class="{
+                    'input-error': errors.length && meta.touched,
+                  }"
+                />
                 <transition name="fade">
                   <div
                     v-if="errors.length && meta.touched"
@@ -234,81 +179,192 @@
                     {{ errors[0] }}
                   </div>
                 </transition>
-                <div
-                  class="form-field__char-count"
-                  :class="{ 'count-warning': (field.value?.length || 0) > 450 }"
-                >
-                  {{ field.value?.length || 0 }} / 500 characters
+              </div>
+            </Field>
+
+            <!-- File Name -->
+            <Field
+              name="filename"
+              v-slot="{ value, errors, meta, handleChange, handleBlur }"
+            >
+              <div
+                class="form-field"
+                :class="{
+                  'has-error': errors.length && meta.touched,
+                }"
+              >
+                <label class="form-field__label">
+                  File name to save <span class="form-field__required">*</span>
+                </label>
+                <AppInputWithPrefix
+                  :model-value="value"
+                  @update:model-value="handleChange"
+                  @blur="handleBlur"
+                  prefix="doclast-"
+                  placeholder="accelerator-contract-2025"
+                  :class="{
+                    'input-error': errors.length && meta.touched,
+                  }"
+                />
+                <transition name="fade">
+                  <div
+                    v-if="errors.length && meta.touched"
+                    class="error-message"
+                  >
+                    {{ errors[0] }}
+                  </div>
+                  <div v-else class="form-field__hint">
+                    Use lowercase letters, numbers, and hyphens only
+                  </div>
+                </transition>
+              </div>
+            </Field>
+
+            <!-- Description -->
+            <Field name="description" v-slot="{ field, errors, meta }">
+              <div
+                class="form-field"
+                :class="{
+                  'has-error': errors.length && meta.touched,
+                }"
+              >
+                <label class="form-field__label">Description</label>
+                <AppTextarea
+                  v-bind="field"
+                  placeholder="Provide some details about what this document for ..."
+                  rows="5"
+                  :class="{
+                    'input-error': errors.length && meta.touched,
+                  }"
+                />
+                <div class="form-field__footer">
+                  <transition name="fade">
+                    <div
+                      v-if="errors.length && meta.touched"
+                      class="error-message"
+                    >
+                      {{ errors[0] }}
+                    </div>
+                  </transition>
+                  <div
+                    class="form-field__char-count"
+                    :class="{
+                      'count-warning': (field.value?.length || 0) > 450,
+                    }"
+                  >
+                    {{ field.value?.length || 0 }} / 500 characters
+                  </div>
                 </div>
               </div>
-            </div>
-          </Field>
+            </Field>
 
-          <!-- Status -->
-          <Field name="status" v-slot="{ field }">
-            <div class="form-field">
-              <label class="form-field__label">Status</label>
-              <AppSelect v-bind="field">
-                <option value="draft">Draft</option>
-                <option value="active">Active</option>
-                <option value="archived">Archived</option>
-              </AppSelect>
-            </div>
-          </Field>
-
-          <!-- Action Buttons -->
-          <div class="form-actions">
-            <AppButton
-              type="button"
-              variant="ghost"
-              size="md"
-              @click="handleDiscard"
-            >
-              Discard
-            </AppButton>
-            <AppButton
-              type="submit"
-              variant="primary"
-              size="md"
-              :disabled="
-                !currentSelectedTemplate ||
-                !formValues.name ||
-                !formValues.filename
-              "
-            >
-              <Plus class="form-actions__icon" />
-              Create
-            </AppButton>
-          </div>
-
-          <!-- Form Summary -->
-          <transition name="fade">
-            <div
-              v-if="Object.keys(formErrors).length > 0 && formMeta.touched"
-              class="form-summary"
-            >
-              <AlertCircle class="form-summary__icon" />
-              <div class="form-summary__content">
-                <p class="form-summary__title">
-                  Please fix the following errors:
-                </p>
-                <ul class="form-summary__list">
-                  <li v-for="(error, field) in formErrors" :key="field">
-                    <strong>{{ formatFieldName(field) }}:</strong> {{ error }}
-                  </li>
-                </ul>
+            <!-- Status -->
+            <Field name="status" v-slot="{ field }">
+              <div class="form-field">
+                <label class="form-field__label">Status</label>
+                <AppSelect v-bind="field">
+                  <option value="draft">Draft</option>
+                  <option value="active">Active</option>
+                  <option value="archived">Archived</option>
+                </AppSelect>
               </div>
+            </Field>
+
+            <!-- Save Status Indicator -->
+            <transition name="fade">
+              <div
+                v-if="showSaveStatus"
+                class="save-status"
+                :class="saveStatusClass"
+              >
+                <component :is="saveStatusIcon" class="save-status__icon" />
+                <span class="save-status__text">{{ saveStatusText }}</span>
+              </div>
+            </transition>
+
+            <!-- Action Buttons -->
+            <div class="form-actions">
+              <AppButton
+                type="button"
+                variant="ghost"
+                size="md"
+                :disabled="isSaving"
+                @click="handleDiscard"
+              >
+                Discard
+              </AppButton>
+              <AppButton
+                type="submit"
+                variant="primary"
+                size="md"
+                :disabled="
+                  !currentSelectedTemplate ||
+                  !formValues.name ||
+                  !formValues.filename ||
+                  isSaving
+                "
+              >
+                <Loader
+                  v-if="isSaving"
+                  class="form-actions__icon animate-spin"
+                />
+                <Plus v-else class="form-actions__icon" />
+                {{ isSaving ? "Creating..." : "Create" }}
+              </AppButton>
             </div>
-          </transition>
-        </div>
-      </Form>
-    </section>
+
+            <!-- Form Summary -->
+            <transition name="fade">
+              <div
+                v-if="Object.keys(formErrors).length > 0 && formMeta.touched"
+                class="form-summary"
+              >
+                <AlertCircle class="form-summary__icon" />
+                <div class="form-summary__content">
+                  <p class="form-summary__title">
+                    Please fix the following errors:
+                  </p>
+                  <ul class="form-summary__list">
+                    <li v-for="(error, field) in formErrors" :key="field">
+                      <strong>{{ formatFieldName(field) }}:</strong> {{ error }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </transition>
+
+            <!-- Keyboard Shortcuts Hint -->
+            <div class="keyboard-hints">
+              <kbd class="kbd">Enter</kbd> Create document
+              <span class="keyboard-hints__separator">•</span>
+              <kbd class="kbd">Esc</kbd> Discard
+            </div>
+          </div>
+        </Form>
+      </section>
+    </ErrorBoundary>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
-import { Search, FileText, Check, Plus, AlertCircle } from "lucide-vue-next";
+import {
+  ref,
+  computed,
+  onMounted,
+  watch,
+  nextTick,
+  onBeforeUnmount,
+} from "vue";
+import {
+  Search,
+  FileText,
+  Check,
+  Plus,
+  AlertCircle,
+  Loader,
+  Save,
+  AlertTriangle,
+} from "lucide-vue-next";
 import { Form, Field, useForm } from "vee-validate";
 import * as yup from "yup";
 import { useTemplatesStore } from "@/stores/useTemplatesStore";
@@ -319,6 +375,8 @@ import AppSelect from "@/components/ui/AppSelect.vue";
 import AppTextarea from "@/components/ui/AppTextarea.vue";
 import AppTagInput from "@/components/ui/AppTagInput.vue";
 import TemplateTable from "./TemplateTable.vue";
+import ErrorBoundary from "./ErrorBoundary.vue";
+import { useFormPersistence } from "@/composables/useFormPersistence";
 
 const props = defineProps({
   form: {
@@ -341,11 +399,94 @@ const emit = defineEmits([
 // Use templates store
 const templatesStore = useTemplatesStore();
 
+// ============================================
+// FORM PERSISTENCE SETUP
+// ============================================
+const {
+  isSaving,
+  lastSaveTime,
+  saveError,
+  saveNow,
+  startWatching,
+  restoreEmergencyBackup,
+  clearEmergencyBackup,
+} = useFormPersistence(
+  "details-step",
+  async (data) => {
+    const { templateId, ...formData } = data;
+    emit("update:form", formData);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  },
+  {
+    debounceMs: 500,
+    enableEmergencyBackup: true,
+    logChanges: import.meta.env.DEV,
+  }
+);
+
+// Save status
+const showSaveStatus = ref(false);
+const saveStatusType = ref("idle");
+
+const saveStatusClass = computed(() => ({
+  "save-status--saving": saveStatusType.value === "saving",
+  "save-status--saved": saveStatusType.value === "saved",
+  "save-status--error": saveStatusType.value === "error",
+}));
+
+const saveStatusIcon = computed(() => {
+  switch (saveStatusType.value) {
+    case "saving":
+      return Loader;
+    case "saved":
+      return Check;
+    case "error":
+      return AlertTriangle;
+    default:
+      return Save;
+  }
+});
+
+const saveStatusText = computed(() => {
+  switch (saveStatusType.value) {
+    case "saving":
+      return "Saving...";
+    case "saved":
+      return "All changes saved";
+    case "error":
+      return "Save failed (backup created)";
+    default:
+      return "";
+  }
+});
+
+watch(isSaving, (saving) => {
+  if (saving) {
+    saveStatusType.value = "saving";
+    showSaveStatus.value = true;
+  }
+});
+
+watch(lastSaveTime, () => {
+  saveStatusType.value = "saved";
+  showSaveStatus.value = true;
+  setTimeout(() => {
+    showSaveStatus.value = false;
+  }, 2000);
+});
+
+watch(saveError, (error) => {
+  if (error) {
+    saveStatusType.value = "error";
+    showSaveStatus.value = true;
+  }
+});
+
 // Local state for template
 const currentSelectedTemplate = ref(null);
 const templateErrorMessage = ref("");
 
-// Validation schema with proper template validation
+// Validation schema with proper template validation (FIXED)
 const validationSchema = yup.object({
   templateId: yup
     .string()
@@ -357,13 +498,12 @@ const validationSchema = yup.object({
     ),
   name: yup
     .string()
-    .required("Document name is required")
     .min(3, "Document name must be at least 3 characters")
     .max(100, "Document name must not exceed 100 characters")
+    .required("Document name is required")
     .trim(),
   filename: yup
     .string()
-    .required("File name is required")
     .min(3, "File name must be at least 3 characters")
     .max(50, "File name must not exceed 50 characters")
     .matches(
@@ -377,6 +517,7 @@ const validationSchema = yup.object({
       "File name cannot contain consecutive hyphens",
       (value) => !value?.includes("--")
     )
+    .required("File name is required")
     .trim(),
   description: yup
     .string()
@@ -404,14 +545,87 @@ const { values, setFieldValue, setValues, resetForm } = useForm({
   initialValues: initialFormValues,
 });
 
-// Set default template on mount
+// ============================================
+// LIFECYCLE HOOKS
+// ============================================
+// onMounted(() => {
+//   console.log("[Details Step] Mounted");
+
+//   initializeDefaultTemplate();
+
+//   // Restore form data if available
+//   if (props.form && Object.keys(props.form).length > 0) {
+//     console.log("[Details Step] Restoring form data:", props.form);
+//     Object.keys(props.form).forEach((key) => {
+//       if (key !== "template") {
+//         setFieldValue(key, props.form[key]);
+//       }
+//     });
+//   }
+
+//   // Start watching for changes
+//   startWatching(() => values);
+
+//   // Setup keyboard shortcuts
+//   setupKeyboardShortcuts();
+// });
+
 onMounted(() => {
+  const backup = restoreEmergencyBackup();
+  if (backup) {
+    setValues(backup);
+  }
+
   initializeDefaultTemplate();
+
+  if (props.form && Object.keys(props.form).length > 0) {
+    setValues({ ...initialFormValues, ...props.form });
+  }
+
+  startWatching(() => values);
 });
 
-// Initialize default template (Non Disclosure Agreement)
+onBeforeUnmount(() => {
+  console.log("[Details Step] Unmounting");
+  cleanupKeyboardShortcuts();
+});
+
+// ============================================
+// KEYBOARD SHORTCUTS
+// ============================================
+let keyboardHandler = null;
+
+function setupKeyboardShortcuts() {
+  keyboardHandler = (e) => {
+    // Escape: Discard
+    if (
+      e.key === "Escape" &&
+      !e.shiftKey &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.altKey
+    ) {
+      e.preventDefault();
+      if (!isSaving.value) {
+        handleDiscard();
+      }
+    }
+  };
+
+  window.addEventListener("keydown", keyboardHandler);
+}
+
+function cleanupKeyboardShortcuts() {
+  if (keyboardHandler) {
+    window.removeEventListener("keydown", keyboardHandler);
+    keyboardHandler = null;
+  }
+}
+
+// ============================================
+// TEMPLATE INITIALIZATION
+// ============================================
 function initializeDefaultTemplate() {
-  // If no template is selected, try to find and select the default one
   if (!currentSelectedTemplate.value && !props.selectedTemplate) {
     const defaultTemplate =
       templatesStore.filteredTemplates.find(
@@ -427,7 +641,7 @@ function initializeDefaultTemplate() {
   }
 }
 
-// Watch for external template changes
+// Watch for external changes
 watch(
   () => props.selectedTemplate,
   (newTemplate) => {
@@ -439,30 +653,21 @@ watch(
   { immediate: true }
 );
 
-// Watch for external form changes
-watch(
-  () => props.form,
-  (newForm) => {
-    if (newForm.name) setFieldValue("name", newForm.name);
-    if (newForm.filename) setFieldValue("filename", newForm.filename);
-    if (newForm.description !== undefined)
-      setFieldValue("description", newForm.description);
-    if (newForm.status) setFieldValue("status", newForm.status);
-  },
-  { deep: true, immediate: true }
-);
+// watch(
+//   () => props.form,
+//   (newForm) => {
+//     if (newForm.name) setFieldValue("name", newForm.name);
+//     if (newForm.filename) setFieldValue("filename", newForm.filename);
+//     if (newForm.description !== undefined)
+//       setFieldValue("description", newForm.description);
+//     if (newForm.status) setFieldValue("status", newForm.status);
+//   },
+//   { deep: true, immediate: true }
+// );
 
-// Watch form values and emit updates for autosave
-watch(
-  values,
-  (newValues) => {
-    const { templateId, ...formData } = newValues;
-    emit("update:form", formData);
-  },
-  { deep: true }
-);
-
-// Handle template selection
+// ============================================
+// HANDLERS
+// ============================================
 function handleSelectTemplate(template) {
   currentSelectedTemplate.value = template;
   setFieldValue("templateId", template.id);
@@ -470,47 +675,55 @@ function handleSelectTemplate(template) {
   emit("selectTemplate", template);
 }
 
-// Scroll to template selection
 function scrollToTemplateSelection() {
   const templateSection = document.querySelector(".section");
   templateSection?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-// Handle form submission
 async function handleSubmit(formValues) {
-  // Additional validation for template
   if (!currentSelectedTemplate.value) {
     templateErrorMessage.value = "Please select a template to continue";
     scrollToTemplateSelection();
     return;
   }
 
-  // Prepare submission data
-  const submissionData = {
-    ...formValues,
-    template: currentSelectedTemplate.value,
-  };
+  try {
+    console.log("[Details Step] Submitting form...");
 
-  // Remove templateId from the data sent to parent
-  const { templateId, ...formData } = submissionData;
+    // Save before proceeding
+    await saveNow(formValues);
 
-  emit("continue", { ...formData, template: currentSelectedTemplate.value });
+    await nextTick();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const { templateId, ...formData } = formValues;
+
+    console.log("[Details Step] Proceeding to next step");
+    emit("continue", { ...formData, template: currentSelectedTemplate.value });
+  } catch (error) {
+    console.error("[Details Step] Failed to submit:", error);
+    alert("Failed to save your progress. Please try again.");
+  }
 }
 
-// Handle discard
 function handleDiscard() {
-  resetForm({
-    values: initialFormValues,
-  });
-  // Re-initialize default template after discard
-  setTimeout(() => {
-    initializeDefaultTemplate();
-  }, 0);
-  templateErrorMessage.value = "";
-  emit("discard");
+  const confirmed = confirm(
+    "Are you sure you want to discard? All your changes will be lost."
+  );
+
+  if (confirmed) {
+    resetForm({
+      values: initialFormValues,
+    });
+    setTimeout(() => {
+      initializeDefaultTemplate();
+    }, 0);
+    templateErrorMessage.value = "";
+    clearEmergencyBackup();
+    emit("discard");
+  }
 }
 
-// Clear filters
 function clearFilters() {
   templatesStore.setSearchQuery("");
   templatesStore.setStatusFilter("verified");
@@ -518,7 +731,6 @@ function clearFilters() {
   templatesStore.clearAllTags();
 }
 
-// Format field name for error display
 function formatFieldName(fieldName) {
   const fieldNames = {
     templateId: "Template",
@@ -529,12 +741,31 @@ function formatFieldName(fieldName) {
   };
   return fieldNames[fieldName] || fieldName;
 }
+
+// ============================================
+// ERROR HANDLING
+// ============================================
+function handleFormError(errorInfo) {
+  console.error("[Details Step] Error caught:", errorInfo);
+  if (values && Object.keys(values).length > 0) {
+    localStorage.setItem(
+      "emergency-backup-details-step",
+      JSON.stringify(values)
+    );
+  }
+}
+
+function handleRecover() {
+  const backup = restoreEmergencyBackup();
+  if (backup) {
+    setValues(backup);
+  }
+}
 </script>
 
 <style scoped lang="scss">
 @use "./stepStyles.scss";
 
-// Filters layout
 .filters {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -562,7 +793,6 @@ function formatFieldName(fieldName) {
   }
 }
 
-// Form field states
 .form-field {
   position: relative;
   margin-bottom: 1.5rem;
@@ -613,7 +843,6 @@ function formatFieldName(fieldName) {
   }
 }
 
-// Input states
 .input-error {
   border-color: #dc2626 !important;
 
@@ -623,7 +852,6 @@ function formatFieldName(fieldName) {
   }
 }
 
-// Error message
 .error-message {
   display: flex;
   align-items: center;
@@ -634,7 +862,55 @@ function formatFieldName(fieldName) {
   font-weight: 500;
 }
 
-// Selected template
+.save-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+
+  &--saving {
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+  }
+
+  &--saved {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+  }
+
+  &--error {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+  }
+
+  &__icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+
+    &.animate-spin {
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .selected-template {
   margin-bottom: 2rem;
 
@@ -714,7 +990,6 @@ function formatFieldName(fieldName) {
   }
 }
 
-// Verified badge
 .verified {
   display: inline-flex;
   align-items: center;
@@ -728,7 +1003,6 @@ function formatFieldName(fieldName) {
   }
 }
 
-// Form summary
 .form-summary {
   display: flex;
   gap: 0.75rem;
@@ -778,7 +1052,6 @@ function formatFieldName(fieldName) {
   }
 }
 
-// Form actions
 .form-actions {
   display: flex;
   gap: 0.75rem;
@@ -793,7 +1066,37 @@ function formatFieldName(fieldName) {
   }
 }
 
-// Animations
+.keyboard-hints {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  background-color: #f9fafb;
+  border-radius: 0.375rem;
+
+  &__separator {
+    margin: 0 0.25rem;
+    color: #d1d5db;
+  }
+}
+
+.kbd {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -809,7 +1112,6 @@ function formatFieldName(fieldName) {
   transform: translateY(-4px);
 }
 
-// Disabled button state
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
