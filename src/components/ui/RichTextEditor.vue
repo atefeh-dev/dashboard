@@ -1207,7 +1207,9 @@ function setFontSize(size) {
 
 function setTextColor(color) {
   if (editor.value && color) {
+    // Apply color to selection or set for future typing
     editor.value.chain().focus().setColor(color).run();
+
     currentColor.value = color;
     showColorPicker.value = false;
   }
@@ -2278,6 +2280,9 @@ onBeforeUnmount(() => {
   max-width: 100%;
   margin: 1em 0;
   transition: opacity 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 
   &:hover .resize-handles {
     opacity: 1;
@@ -2291,9 +2296,6 @@ onBeforeUnmount(() => {
     img {
       pointer-events: none;
       opacity: 0.9;
-    }
-
-    * {
       user-select: none;
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -2385,6 +2387,9 @@ onBeforeUnmount(() => {
   pointer-events: all;
   transition: all 0.2s ease;
   z-index: 10;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 
   &:hover {
     transform: scale(1.3);
@@ -2433,6 +2438,9 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   background: #ffffff;
   transition: all 0.3s ease;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
 
   @media (max-width: 768px) {
     padding: 24px;
@@ -2468,15 +2476,18 @@ onBeforeUnmount(() => {
     font-size: 15px;
     line-height: 1.7;
     color: #111827;
-    transform: none !important;
-    animation: none !important;
     user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
     cursor: text;
     line-height: 1.75;
     letter-spacing: 0.01em;
 
     p {
       margin-bottom: 1em;
+      user-select: text;
+      -webkit-user-select: text;
+      -moz-user-select: text;
 
       &:last-child {
         margin-bottom: 0;
@@ -2486,18 +2497,22 @@ onBeforeUnmount(() => {
     strong {
       font-weight: 700;
       color: #000000;
+      user-select: text;
     }
 
     em {
       font-style: italic;
+      user-select: text;
     }
 
     u {
       text-decoration: underline;
+      user-select: text;
     }
 
     s {
       text-decoration: line-through;
+      user-select: text;
     }
 
     a {

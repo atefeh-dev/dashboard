@@ -53,6 +53,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  template: {
+    type: Object,
+    required: true, // full template object from Details step
+  },
 });
 
 // Emits
@@ -67,17 +71,26 @@ const hasInitialized = ref(false);
 
 // Find template by name
 const templateFromStore = computed(() => {
-  if (!props.documentInfo?.templateName) {
-    console.warn("No template name in documentInfo");
+  if (!props.template) {
+    console.warn("⚠️ No template passed to PreviewStep");
     return null;
   }
 
-  const template = templatesStore.templates.find(
-    (t) => t.name === props.documentInfo.templateName
+  // Prefer ID lookup
+  let template = templatesStore.templates.find(
+    (t) => t.id === props.template.id
   );
 
+  // Fallback to name (safety)
   if (!template) {
-    console.error("Template not found:", props.documentInfo.templateName);
+    template = templatesStore.templates.find(
+      (t) => t.name === props.template.name
+    );
+  }
+
+  if (!template) {
+    console.error("❌ Template not found in store:", props.template);
+    return null;
   }
 
   return template;
@@ -91,6 +104,7 @@ watch(
 
     editorContent.value = template.content;
     hasInitialized.value = true;
+
     console.log("✅ Editor initialized with template content");
   },
   { immediate: true }

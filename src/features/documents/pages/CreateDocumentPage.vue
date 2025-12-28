@@ -53,6 +53,7 @@
     <PreviewStep
       v-if="currentStep === 'preview'"
       :step-data="stepData.preview"
+      :template="selectedTemplate"
       @continue="completeStep"
       @back="previousStep"
       @update:data="updateStepData('preview', $event)"
