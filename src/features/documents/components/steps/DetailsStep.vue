@@ -86,6 +86,7 @@
 
         <Form
           :validation-schema="validationSchema"
+          :initial-values="initialFormValues"
           @submit="handleSubmit"
           v-slot="{ meta: formMeta, errors: formErrors, values: formValues }"
         >
@@ -270,18 +271,6 @@
               </div>
             </Field>
 
-            <!-- Save Status Indicator -->
-            <transition name="fade">
-              <div
-                v-if="showSaveStatus"
-                class="save-status"
-                :class="saveStatusClass"
-              >
-                <component :is="saveStatusIcon" class="save-status__icon" />
-                <span class="save-status__text">{{ saveStatusText }}</span>
-              </div>
-            </transition>
-
             <!-- Action Buttons -->
             <div class="form-actions">
               <AppButton
@@ -334,10 +323,15 @@
             </transition>
 
             <!-- Keyboard Shortcuts Hint -->
+            <!-- Keyboard Shortcuts Hint - Cross Platform -->
             <div class="keyboard-hints">
-              <kbd class="kbd">Enter</kbd> Create document
+              <kbd class="kbd">{{ shortcutLabels.alt }}</kbd>
+              <kbd class="kbd">{{ shortcutLabels.left }}</kbd>
+              Back
               <span class="keyboard-hints__separator">•</span>
-              <kbd class="kbd">Esc</kbd> Discard
+              <kbd class="kbd">{{ shortcutLabels.alt }}</kbd>
+              <kbd class="kbd">{{ shortcutLabels.right }}</kbd>
+              Continue
             </div>
           </div>
         </Form>
@@ -362,8 +356,6 @@ import {
   Plus,
   AlertCircle,
   Loader,
-  Save,
-  AlertTriangle,
 } from "lucide-vue-next";
 import { Form, Field, useForm } from "vee-validate";
 import * as yup from "yup";
@@ -377,6 +369,7 @@ import AppTagInput from "@/components/ui/AppTagInput.vue";
 import TemplateTable from "./TemplateTable.vue";
 import ErrorBoundary from "./ErrorBoundary.vue";
 import { useFormPersistence } from "@/composables/useFormPersistence";
+import { getShortcutLabels } from "@/composables/useKeyboardShortcuts";
 
 const props = defineProps({
   form: {
@@ -396,6 +389,8 @@ const emit = defineEmits([
   "update:form",
 ]);
 
+const shortcutLabels = getShortcutLabels();
+
 // Use templates store
 const templatesStore = useTemplatesStore();
 
@@ -404,8 +399,6 @@ const templatesStore = useTemplatesStore();
 // ============================================
 const {
   isSaving,
-  lastSaveTime,
-  saveError,
   saveNow,
   startWatching,
   restoreEmergencyBackup,
@@ -424,69 +417,11 @@ const {
   }
 );
 
-// Save status
-const showSaveStatus = ref(false);
-const saveStatusType = ref("idle");
-
-const saveStatusClass = computed(() => ({
-  "save-status--saving": saveStatusType.value === "saving",
-  "save-status--saved": saveStatusType.value === "saved",
-  "save-status--error": saveStatusType.value === "error",
-}));
-
-const saveStatusIcon = computed(() => {
-  switch (saveStatusType.value) {
-    case "saving":
-      return Loader;
-    case "saved":
-      return Check;
-    case "error":
-      return AlertTriangle;
-    default:
-      return Save;
-  }
-});
-
-const saveStatusText = computed(() => {
-  switch (saveStatusType.value) {
-    case "saving":
-      return "Saving...";
-    case "saved":
-      return "All changes saved";
-    case "error":
-      return "Save failed (backup created)";
-    default:
-      return "";
-  }
-});
-
-watch(isSaving, (saving) => {
-  if (saving) {
-    saveStatusType.value = "saving";
-    showSaveStatus.value = true;
-  }
-});
-
-watch(lastSaveTime, () => {
-  saveStatusType.value = "saved";
-  showSaveStatus.value = true;
-  setTimeout(() => {
-    showSaveStatus.value = false;
-  }, 2000);
-});
-
-watch(saveError, (error) => {
-  if (error) {
-    saveStatusType.value = "error";
-    showSaveStatus.value = true;
-  }
-});
-
 // Local state for template
 const currentSelectedTemplate = ref(null);
 const templateErrorMessage = ref("");
 
-// Validation schema with proper template validation (FIXED)
+// Validation schema (FIXED - required comes last)
 const validationSchema = yup.object({
   templateId: yup
     .string()
@@ -531,64 +466,117 @@ const validationSchema = yup.object({
 });
 
 // Initial form values
-const initialFormValues = {
-  templateId: "",
-  name: "",
-  filename: "",
-  description: "",
-  status: "draft",
-};
+const initialFormValues = computed(() => ({
+  templateId: currentSelectedTemplate.value?.id || "",
+  name: props.form.name || "",
+  filename: props.form.filename || "",
+  description: props.form.description || "",
+  status: props.form.status || "draft",
+}));
 
 // Initialize form with VeeValidate
 const { values, setFieldValue, setValues, resetForm } = useForm({
   validationSchema,
-  initialValues: initialFormValues,
+  initialValues: initialFormValues.value,
 });
 
 // ============================================
-// LIFECYCLE HOOKS
+// LIFECYCLE HOOKS - FIXED DATA RESTORATION
 // ============================================
-// onMounted(() => {
-//   console.log("[Details Step] Mounted");
-
-//   initializeDefaultTemplate();
-
-//   // Restore form data if available
-//   if (props.form && Object.keys(props.form).length > 0) {
-//     console.log("[Details Step] Restoring form data:", props.form);
-//     Object.keys(props.form).forEach((key) => {
-//       if (key !== "template") {
-//         setFieldValue(key, props.form[key]);
-//       }
-//     });
-//   }
-
-//   // Start watching for changes
-//   startWatching(() => values);
-
-//   // Setup keyboard shortcuts
-//   setupKeyboardShortcuts();
-// });
-
 onMounted(() => {
-  const backup = restoreEmergencyBackup();
-  if (backup) {
-    setValues(backup);
-  }
+  console.log("[Details Step] Mounted, restoring data...");
+  console.log("[Details Step] Props form:", props.form);
+  console.log("[Details Step] Selected template:", props.selectedTemplate);
 
+  // First, initialize default template if none selected
   initializeDefaultTemplate();
 
+  // Then restore form data from props
   if (props.form && Object.keys(props.form).length > 0) {
-    setValues({ ...initialFormValues, ...props.form });
+    console.log("[Details Step] Restoring form data from props");
+
+    // Restore each field explicitly
+    if (props.form.name) {
+      setFieldValue("name", props.form.name);
+    }
+    if (props.form.filename) {
+      setFieldValue("filename", props.form.filename);
+    }
+    if (props.form.description !== undefined) {
+      setFieldValue("description", props.form.description);
+    }
+    if (props.form.status) {
+      setFieldValue("status", props.form.status);
+    }
+
+    console.log("[Details Step] Form values after restore:", values);
+  } else {
+    // Try emergency backup
+    const backup = restoreEmergencyBackup();
+    if (backup) {
+      console.warn("[Details Step] Restored from emergency backup");
+      setValues(backup);
+      clearEmergencyBackup();
+    }
   }
 
+  // Start watching for changes
   startWatching(() => values);
+
+  // Setup keyboard shortcuts
+  setupKeyboardShortcuts();
 });
 
 onBeforeUnmount(() => {
-  console.log("[Details Step] Unmounting");
+  console.log("[Details Step] Unmounting, saving current values:", values);
+
+  // Force save current state before unmounting
+  if (values && Object.keys(values).length > 0) {
+    const { templateId, ...formData } = values;
+    emit("update:form", formData);
+  }
+
   cleanupKeyboardShortcuts();
 });
+
+// ============================================
+// WATCH FOR EXTERNAL CHANGES - IMPROVED
+// ============================================
+watch(
+  () => props.form,
+  (newForm) => {
+    console.log("[Details Step] Props form changed:", newForm);
+
+    if (newForm && Object.keys(newForm).length > 0) {
+      // Only update if values are different
+      if (newForm.name !== values.name) {
+        setFieldValue("name", newForm.name || "");
+      }
+      if (newForm.filename !== values.filename) {
+        setFieldValue("filename", newForm.filename || "");
+      }
+      if (newForm.description !== values.description) {
+        setFieldValue("description", newForm.description || "");
+      }
+      if (newForm.status !== values.status) {
+        setFieldValue("status", newForm.status || "draft");
+      }
+    }
+  },
+  { deep: true, immediate: true }
+);
+
+watch(
+  () => props.selectedTemplate,
+  (newTemplate) => {
+    console.log("[Details Step] Selected template changed:", newTemplate);
+    if (newTemplate && newTemplate.id !== currentSelectedTemplate.value?.id) {
+      currentSelectedTemplate.value = newTemplate;
+      setFieldValue("templateId", newTemplate.id);
+    }
+  },
+  { immediate: true }
+);
 
 // ============================================
 // KEYBOARD SHORTCUTS
@@ -626,7 +614,15 @@ function cleanupKeyboardShortcuts() {
 // TEMPLATE INITIALIZATION
 // ============================================
 function initializeDefaultTemplate() {
-  if (!currentSelectedTemplate.value && !props.selectedTemplate) {
+  // If template already selected from props, use it
+  if (props.selectedTemplate) {
+    currentSelectedTemplate.value = props.selectedTemplate;
+    setFieldValue("templateId", props.selectedTemplate.id);
+    return;
+  }
+
+  // Otherwise, select default template if none selected
+  if (!currentSelectedTemplate.value) {
     const defaultTemplate =
       templatesStore.filteredTemplates.find(
         (t) => t.name === "Non Disclosure Agreement"
@@ -635,40 +631,14 @@ function initializeDefaultTemplate() {
     if (defaultTemplate) {
       handleSelectTemplate(defaultTemplate);
     }
-  } else if (props.selectedTemplate) {
-    currentSelectedTemplate.value = props.selectedTemplate;
-    setFieldValue("templateId", props.selectedTemplate.id);
   }
 }
-
-// Watch for external changes
-watch(
-  () => props.selectedTemplate,
-  (newTemplate) => {
-    if (newTemplate && newTemplate.id !== currentSelectedTemplate.value?.id) {
-      currentSelectedTemplate.value = newTemplate;
-      setFieldValue("templateId", newTemplate.id);
-    }
-  },
-  { immediate: true }
-);
-
-// watch(
-//   () => props.form,
-//   (newForm) => {
-//     if (newForm.name) setFieldValue("name", newForm.name);
-//     if (newForm.filename) setFieldValue("filename", newForm.filename);
-//     if (newForm.description !== undefined)
-//       setFieldValue("description", newForm.description);
-//     if (newForm.status) setFieldValue("status", newForm.status);
-//   },
-//   { deep: true, immediate: true }
-// );
 
 // ============================================
 // HANDLERS
 // ============================================
 function handleSelectTemplate(template) {
+  console.log("[Details Step] Template selected:", template);
   currentSelectedTemplate.value = template;
   setFieldValue("templateId", template.id);
   templateErrorMessage.value = "";
@@ -688,17 +658,16 @@ async function handleSubmit(formValues) {
   }
 
   try {
-    console.log("[Details Step] Submitting form...");
+    console.log("[Details Step] Submitting form, values:", formValues);
 
     // Save before proceeding
     await saveNow(formValues);
-
     await nextTick();
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     const { templateId, ...formData } = formValues;
 
-    console.log("[Details Step] Proceeding to next step");
+    console.log("[Details Step] Emitting continue with data:", formData);
     emit("continue", { ...formData, template: currentSelectedTemplate.value });
   } catch (error) {
     console.error("[Details Step] Failed to submit:", error);
@@ -713,11 +682,19 @@ function handleDiscard() {
 
   if (confirmed) {
     resetForm({
-      values: initialFormValues,
+      values: {
+        templateId: "",
+        name: "",
+        filename: "",
+        description: "",
+        status: "draft",
+      },
     });
+
     setTimeout(() => {
       initializeDefaultTemplate();
     }, 0);
+
     templateErrorMessage.value = "";
     clearEmergencyBackup();
     emit("discard");
@@ -860,55 +837,6 @@ function handleRecover() {
   color: #dc2626;
   margin-top: 0.375rem;
   font-weight: 500;
-}
-
-.save-status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-  transition: all 0.2s ease;
-
-  &--saving {
-    background-color: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #1e40af;
-  }
-
-  &--saved {
-    background-color: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    color: #166534;
-  }
-
-  &--error {
-    background-color: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #991b1b;
-  }
-
-  &__icon {
-    width: 1rem;
-    height: 1rem;
-    flex-shrink: 0;
-
-    &.animate-spin {
-      animation: spin 1s linear infinite;
-    }
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .selected-template {
@@ -1063,6 +991,19 @@ function handleRecover() {
   &__icon {
     width: 1rem;
     height: 1rem;
+
+    &.animate-spin {
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 

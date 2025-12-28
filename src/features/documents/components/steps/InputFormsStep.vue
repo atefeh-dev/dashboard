@@ -105,18 +105,6 @@
               </div>
             </Field>
 
-            <!-- Save Status Indicator -->
-            <transition name="fade">
-              <div
-                v-if="showSaveStatus"
-                class="save-status"
-                :class="saveStatusClass"
-              >
-                <component :is="saveStatusIcon" class="save-status__icon" />
-                <span class="save-status__text">{{ saveStatusText }}</span>
-              </div>
-            </transition>
-
             <!-- Navigation Buttons -->
             <div class="form-actions">
               <AppButton
@@ -172,11 +160,15 @@
               </div>
             </transition>
 
-            <!-- Keyboard Shortcuts Hint -->
+            <!-- Keyboard Shortcuts Hint - Cross Platform -->
             <div class="keyboard-hints">
-              <kbd class="kbd">Alt</kbd> + <kbd class="kbd">←</kbd> Back
+              <kbd class="kbd">{{ shortcutLabels.alt }}</kbd>
+              <kbd class="kbd">{{ shortcutLabels.left }}</kbd>
+              Back
               <span class="keyboard-hints__separator">•</span>
-              <kbd class="kbd">Alt</kbd> + <kbd class="kbd">→</kbd> Continue
+              <kbd class="kbd">{{ shortcutLabels.alt }}</kbd>
+              <kbd class="kbd">{{ shortcutLabels.right }}</kbd>
+              Continue
             </div>
           </div>
         </Form>
@@ -199,9 +191,6 @@ import {
   ChevronRight,
   AlertCircle,
   Loader,
-  Check,
-  AlertTriangle,
-  Save,
 } from "lucide-vue-next";
 import { Form, Field, useForm } from "vee-validate";
 import * as yup from "yup";
@@ -211,6 +200,10 @@ import AppTextarea from "@/components/ui/AppTextarea.vue";
 import AppSelect from "@/components/ui/AppSelect.vue";
 import ErrorBoundary from "./ErrorBoundary.vue";
 import { useFormPersistence } from "@/composables/useFormPersistence";
+import {
+  useKeyboardShortcuts,
+  getShortcutLabels,
+} from "@/composables/useKeyboardShortcuts";
 
 const props = defineProps({
   stepTitle: {
@@ -233,13 +226,14 @@ const props = defineProps({
 
 const emit = defineEmits(["continue", "back", "update:data"]);
 
+// Get keyboard shortcut labels for current OS
+const shortcutLabels = getShortcutLabels();
+
 // ============================================
 // FORM PERSISTENCE SETUP
 // ============================================
 const {
   isSaving,
-  lastSaveTime,
-  saveError,
   saveNow,
   startWatching,
   restoreEmergencyBackup,
@@ -247,9 +241,7 @@ const {
 } = useFormPersistence(
   "input-step",
   async (data) => {
-    // Emit to parent for autosave
     emit("update:data", data);
-    // Wait a bit to ensure parent processes
     await new Promise((resolve) => setTimeout(resolve, 50));
   },
   {
@@ -258,66 +250,6 @@ const {
     logChanges: import.meta.env.DEV,
   }
 );
-
-// Save status indicator
-const showSaveStatus = ref(false);
-const saveStatusType = ref("idle"); // 'idle', 'saving', 'saved', 'error'
-
-const saveStatusClass = computed(() => ({
-  "save-status--saving": saveStatusType.value === "saving",
-  "save-status--saved": saveStatusType.value === "saved",
-  "save-status--error": saveStatusType.value === "error",
-}));
-
-const saveStatusIcon = computed(() => {
-  switch (saveStatusType.value) {
-    case "saving":
-      return Loader;
-    case "saved":
-      return Check;
-    case "error":
-      return AlertTriangle;
-    default:
-      return Save;
-  }
-});
-
-const saveStatusText = computed(() => {
-  switch (saveStatusType.value) {
-    case "saving":
-      return "Saving...";
-    case "saved":
-      return "All changes saved";
-    case "error":
-      return "Save failed (backup created)";
-    default:
-      return "";
-  }
-});
-
-// Watch save status
-watch(isSaving, (saving) => {
-  if (saving) {
-    saveStatusType.value = "saving";
-    showSaveStatus.value = true;
-  }
-});
-
-watch(lastSaveTime, () => {
-  saveStatusType.value = "saved";
-  showSaveStatus.value = true;
-  // Hide after 2 seconds
-  setTimeout(() => {
-    showSaveStatus.value = false;
-  }, 2000);
-});
-
-watch(saveError, (error) => {
-  if (error) {
-    saveStatusType.value = "error";
-    showSaveStatus.value = true;
-  }
-});
 
 // ============================================
 // VALIDATION RULES (FIXED)
@@ -363,7 +295,6 @@ function createFieldValidation(field) {
           (value) => value == null || value.length >= 3
         );
   }
-
   // Add required validation LAST (takes precedence)
   if (field.required) {
     validation = validation.required(`${field.label} is required`);
@@ -371,7 +302,6 @@ function createFieldValidation(field) {
     validation = validation.notRequired();
   }
 
-  // Add max length if specified
   if (field.maxLength) {
     validation = validation.max(
       field.maxLength,
@@ -414,85 +344,52 @@ const { values, setFieldValue, setValues, resetForm } = useForm({
 onMounted(() => {
   console.log("[Input Step] Mounted, restoring data...");
 
-  // Try to restore from saved data first
   if (props.stepData && Object.keys(props.stepData).length > 0) {
     console.log("[Input Step] Restoring from props:", props.stepData);
     setValues(props.stepData);
   } else {
-    // Try emergency backup
     const backup = restoreEmergencyBackup();
     if (backup) {
       console.warn("[Input Step] Restored from emergency backup");
       setValues(backup);
-      // Clear the backup after successful restore
       clearEmergencyBackup();
     }
   }
 
-  // Start watching for changes
   startWatching(() => values);
-
-  // Setup keyboard shortcuts
-  setupKeyboardShortcuts();
 });
 
 onBeforeUnmount(() => {
   console.log("[Input Step] Unmounting, saving data...");
 
-  // Save current state before unmounting
   if (values && Object.keys(values).length > 0) {
     emit("update:data", values);
   }
-
-  // Cleanup keyboard listeners
-  cleanupKeyboardShortcuts();
 });
 
 // ============================================
-// KEYBOARD SHORTCUTS
+// CROSS-PLATFORM KEYBOARD SHORTCUTS
 // ============================================
-let keyboardHandler = null;
-
-function setupKeyboardShortcuts() {
-  keyboardHandler = (e) => {
-    // Alt + Left Arrow: Go back
-    if (
-      e.altKey &&
-      e.key === "ArrowLeft" &&
-      !e.shiftKey &&
-      !e.ctrlKey &&
-      !e.metaKey
-    ) {
-      e.preventDefault();
+useKeyboardShortcuts({
+  back: {
+    shortcut: { key: "ArrowLeft", alt: true },
+    handler: () => {
       if (!isSaving.value) {
         handleBack(values);
       }
-    }
-
-    // Alt + Right Arrow: Continue (if valid)
-    if (
-      e.altKey &&
-      e.key === "ArrowRight" &&
-      !e.shiftKey &&
-      !e.ctrlKey &&
-      !e.metaKey
-    ) {
-      e.preventDefault();
+    },
+    description: "Go back",
+  },
+  continue: {
+    shortcut: { key: "ArrowRight", alt: true },
+    handler: () => {
       if (canContinue(values) && !isSaving.value) {
         handleContinue(values);
       }
-    }
-  };
-
-  window.addEventListener("keydown", keyboardHandler);
-}
-
-function cleanupKeyboardShortcuts() {
-  if (keyboardHandler) {
-    window.removeEventListener("keydown", keyboardHandler);
-    keyboardHandler = null;
-  }
-}
+    },
+    description: "Continue to next step",
+  },
+});
 
 // ============================================
 // WATCH FOR EXTERNAL CHANGES
@@ -512,7 +409,7 @@ watch(
 );
 
 // ============================================
-// HANDLERS WITH IMPROVED PERSISTENCE
+// HANDLERS
 // ============================================
 function canContinue(formValues) {
   const requiredFields = props.formFields.filter((f) => f.required);
@@ -529,13 +426,8 @@ async function handleContinue(formValues) {
   try {
     console.log("[Input Step] Continue clicked, saving...");
 
-    // Save and wait for completion
     await saveNow(formValues);
-
-    // Wait for next tick to ensure all updates propagate
     await nextTick();
-
-    // Small additional delay for parent state updates
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     console.log("[Input Step] Data saved, proceeding to next step");
@@ -550,13 +442,8 @@ async function handleBack(formValues) {
   try {
     console.log("[Input Step] Back clicked, saving...");
 
-    // Save and wait for completion
     await saveNow(formValues);
-
-    // Wait for next tick
     await nextTick();
-
-    // Small additional delay
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     console.log("[Input Step] Data saved, going back");
@@ -578,7 +465,6 @@ function getFieldLabel(fieldName) {
 function handleFormError(errorInfo) {
   console.error("[Input Step] Form error caught:", errorInfo);
 
-  // Save current data to emergency backup
   if (values && Object.keys(values).length > 0) {
     const backup = {
       ...values,
@@ -588,7 +474,6 @@ function handleFormError(errorInfo) {
     localStorage.setItem("emergency-backup-input-step", JSON.stringify(backup));
   }
 
-  // Show user-friendly message
   alert(
     "An error occurred with the form. Your data has been saved as a backup. " +
       "Please refresh the page or contact support if the problem persists."
@@ -598,7 +483,6 @@ function handleFormError(errorInfo) {
 function handleRecover() {
   console.log("[Input Step] Attempting to recover...");
 
-  // Try to restore from backup
   const backup = restoreEmergencyBackup();
   if (backup) {
     setValues(backup);
@@ -668,59 +552,6 @@ function handleReset() {
   font-weight: 500;
 }
 
-.save-status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-  transition: all 0.2s ease;
-
-  &--saving {
-    background-color: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #1e40af;
-  }
-
-  &--saved {
-    background-color: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    color: #166534;
-  }
-
-  &--error {
-    background-color: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #991b1b;
-  }
-
-  &__icon {
-    width: 1rem;
-    height: 1rem;
-    flex-shrink: 0;
-
-    &.animate-spin {
-      animation: spin 1s linear infinite;
-    }
-  }
-
-  &__text {
-    flex: 1;
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .form-summary {
   display: flex;
   gap: 0.75rem;
@@ -781,6 +612,19 @@ function handleReset() {
   &__icon {
     width: 1rem;
     height: 1rem;
+
+    &.animate-spin {
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -788,7 +632,7 @@ function handleReset() {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
   margin-top: 1rem;
   padding: 0.75rem;
   font-size: 0.75rem;
@@ -797,7 +641,7 @@ function handleReset() {
   border-radius: 0.375rem;
 
   &__separator {
-    margin: 0 0.25rem;
+    margin: 0 0.5rem;
     color: #d1d5db;
   }
 }
@@ -813,6 +657,8 @@ function handleReset() {
   border: 1px solid #d1d5db;
   border-radius: 0.25rem;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  min-width: 1.5rem;
+  text-align: center;
 }
 
 .fade-enter-active,

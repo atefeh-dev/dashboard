@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useDocumentsStore } from "@/stores/useDocumentsStore";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -88,7 +88,9 @@ const documentsStore = useDocumentsStore();
 const authStore = useAuthStore();
 const contactsStore = useContactsStore();
 
-// Step configuration
+// ========================================
+// STEP CONFIGURATION
+// ========================================
 const steps = [
   { id: "details", title: "Details", subtitle: "Template and information" },
   { id: "input", title: "Input forms", subtitle: "Based on template needs" },
@@ -99,10 +101,16 @@ const steps = [
 
 const currentStepIndex = ref(0);
 const completedSteps = ref([]);
+const stepCompletionStatus = ref({
+  details: false,
+  input: false,
+  review: false,
+  preview: false,
+  document: false,
+});
+
 const currentStep = computed(() => steps[currentStepIndex.value].id);
 const isSaving = ref(false);
-
-// NEW: Track if documents have been sent
 const documentsSent = ref(false);
 
 // Form data
@@ -124,13 +132,10 @@ const stepData = ref({
 // ========================================
 // SIDEBAR CONFIGURATION
 // ========================================
-
-// Show sidebar for all steps except Details (step 0)
 const showSidebarForCurrentStep = computed(() => {
   return currentStepIndex.value !== 0;
 });
 
-// Sidebar data (for steps 1-4)
 const sidebarData = computed(() => ({
   title: documentForm.value.name || "Document title",
   lastEdit: timeSinceLastSave.value || "(not saved yet)",
@@ -145,12 +150,12 @@ const sidebarData = computed(() => ({
   checklistItems: checklistItems.value,
 }));
 
-// Dynamic checklist based on STEP completion
 const checklistItems = computed(() => {
   return steps.map((step, index) => ({
     title: step.title,
     subtitle: step.subtitle,
-    completed: completedSteps.value.includes(index),
+    completed: stepCompletionStatus.value[step.id],
+    visited: completedSteps.value.includes(index),
     active: currentStepIndex.value === index,
   }));
 });
@@ -158,7 +163,6 @@ const checklistItems = computed(() => {
 // ========================================
 // FORM FIELDS CONFIGURATION (Step 2)
 // ========================================
-
 const inputFormFields = [
   {
     name: "yourName",
@@ -208,7 +212,6 @@ const inputFormFields = [
 // ========================================
 // REVIEW SECTIONS CONFIGURATION (Step 3)
 // ========================================
-
 const reviewSections = [
   {
     key: "details",
@@ -296,38 +299,57 @@ const reviewSections = [
   },
 ];
 
-// All step data for review
 const allStepData = computed(() => ({
   details: documentForm.value,
   input: stepData.value.input,
 }));
 
 // ========================================
-// AUTOSAVE SETUP
+// AUTOSAVE SETUP (FIXED - FASTER CONFIG)
 // ========================================
-
 const { timeSinceLastSave, scheduleAutosave, forceSave } = useAutosave(
   async () => {
     await saveDraftToStore();
   },
   {
-    debounceMs: 2000,
-    updateIntervalMs: 10000,
+    debounceMs: 500, // FIXED: Faster (was 2000)
+    updateIntervalMs: 1000, // Update every second for navbar display
   }
 );
 
 async function saveDraftToStore() {
   isSaving.value = true;
   try {
-    await documentsStore.saveDraft({
+    const draftData = {
       currentStep: currentStepIndex.value,
       completedSteps: completedSteps.value,
+      stepCompletionStatus: stepCompletionStatus.value,
       formData: documentForm.value,
       selectedTemplate: selectedTemplate.value,
       stepData: stepData.value,
       name: documentForm.value.name || "Untitled Document",
       documentsSent: documentsSent.value,
-    });
+    };
+
+    console.log("[Parent] Saving draft:", draftData);
+    await documentsStore.saveDraft(draftData);
+    console.log("[Parent] Draft saved successfully");
+  } catch (error) {
+    console.error("[Parent] Failed to save draft:", error);
+
+    // Emergency backup to localStorage
+    try {
+      const backup = {
+        documentForm: documentForm.value,
+        stepData: stepData.value,
+        currentStep: currentStepIndex.value,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem("emergency-backup-document", JSON.stringify(backup));
+      console.warn("[Parent] Emergency backup saved to localStorage");
+    } catch (backupError) {
+      console.error("[Parent] Emergency backup also failed:", backupError);
+    }
   } finally {
     isSaving.value = false;
   }
@@ -336,14 +358,15 @@ async function saveDraftToStore() {
 // ========================================
 // INITIALIZATION
 // ========================================
-
 const draftId = route.query.draftId;
 
 if (draftId) {
   const draft = documentsStore.loadDraft(draftId);
   if (draft) {
+    console.log("[Parent] Loading draft:", draft);
     currentStepIndex.value = draft.currentStep;
     completedSteps.value = [...draft.completedSteps];
+    stepCompletionStatus.value = { ...draft.stepCompletionStatus } || {};
     documentForm.value = { ...draft.formData };
     selectedTemplate.value = draft.selectedTemplate;
     stepData.value = { ...draft.stepData };
@@ -351,9 +374,38 @@ if (draftId) {
   }
 } else {
   documentsStore.createDraft();
+
+  // Try to restore from emergency backup
+  try {
+    const backupStr = localStorage.getItem("emergency-backup-document");
+    if (backupStr) {
+      const backup = JSON.parse(backupStr);
+      const age = Date.now() - backup.timestamp;
+      if (age < 24 * 60 * 60 * 1000) {
+        // 24 hours
+        console.warn("[Parent] Restoring from emergency backup");
+        setTimeout(() => {
+          if (
+            confirm("We found unsaved changes. Would you like to restore them?")
+          ) {
+            if (backup.documentForm) documentForm.value = backup.documentForm;
+            if (backup.stepData) stepData.value = backup.stepData;
+            if (backup.currentStep !== undefined)
+              currentStepIndex.value = backup.currentStep;
+            console.log("[Parent] Backup restored");
+          } else {
+            localStorage.removeItem("emergency-backup-document");
+          }
+        }, 500);
+      } else {
+        localStorage.removeItem("emergency-backup-document");
+      }
+    }
+  } catch (error) {
+    console.error("[Parent] Failed to restore emergency backup:", error);
+  }
 }
 
-// Load contacts on mount
 onMounted(async () => {
   try {
     await contactsStore.fetchContacts();
@@ -363,36 +415,63 @@ onMounted(async () => {
 });
 
 // ========================================
-// WATCH FOR CHANGES
+// OPTIMIZED WATCH FOR CHANGES (FIXED)
 // ========================================
+// Watch individual objects with JSON stringify for better performance
+watch(
+  () => JSON.stringify(documentForm.value),
+  () => {
+    console.log("[Parent] documentForm changed, scheduling autosave");
+    scheduleAutosave();
+  }
+);
 
 watch(
-  [documentForm, stepData, currentStepIndex, completedSteps, documentsSent],
+  () => JSON.stringify(stepData.value),
   () => {
+    console.log("[Parent] stepData changed, scheduling autosave");
     scheduleAutosave();
-  },
-  { deep: true }
+  }
 );
+
+watch([currentStepIndex, documentsSent], () => {
+  console.log("[Parent] Navigation/status changed, scheduling autosave");
+  scheduleAutosave();
+});
+
+// Debug logging in development
+if (import.meta.env.DEV) {
+  watch(
+    () => stepData.value.input,
+    (newValue) => {
+      console.log("[Parent] Input step data changed:", newValue);
+    },
+    { deep: true }
+  );
+
+  watch(currentStepIndex, (newIndex, oldIndex) => {
+    console.log(`[Parent] Navigation: Step ${oldIndex} → Step ${newIndex}`);
+  });
+}
 
 // ========================================
 // FORM DATA UPDATES
 // ========================================
-
 function updateFormData(updates) {
+  console.log("[Parent] Updating form data:", updates);
   documentForm.value = { ...documentForm.value, ...updates };
 }
 
 function updateStepData(step, data) {
+  console.log(`[Parent] Updating ${step} data:`, data);
   stepData.value[step] = { ...stepData.value[step], ...data };
 }
 
 function updateReviewData(data) {
-  // Update document form from details section
   if (data.details) {
     documentForm.value = { ...documentForm.value, ...data.details };
   }
 
-  // Update step data from other sections
   Object.keys(data).forEach((key) => {
     if (key !== "details") {
       stepData.value[key] = { ...stepData.value[key], ...data[key] };
@@ -401,48 +480,73 @@ function updateReviewData(data) {
 }
 
 // ========================================
-// STEP NAVIGATION
+// STEP NAVIGATION (FIXED - ASYNC/AWAIT)
 // ========================================
-
-function goToStep(index) {
+async function goToStep(index) {
   if (index <= currentStepIndex.value || completedSteps.value.includes(index)) {
+    console.log(`[Parent] Navigating to step ${index}, saving first...`);
+
+    // FIXED: Wait for save to complete
+    await forceSave();
+    await nextTick();
+
+    // Small delay to ensure store updates
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
     currentStepIndex.value = index;
-    forceSave();
+    console.log(`[Parent] Navigation to step ${index} complete`);
   }
 }
 
-function completeStep() {
+async function completeStep() {
+  const currentStepId = steps[currentStepIndex.value].id;
+  console.log(`[Parent] Completing step: ${currentStepId}`);
+
+  // Mark step as completed
   if (!completedSteps.value.includes(currentStepIndex.value)) {
     completedSteps.value.push(currentStepIndex.value);
   }
 
-  forceSave();
+  // Mark step as properly completed
+  stepCompletionStatus.value[currentStepId] = true;
+
+  // FIXED: Wait for save to complete
+  await forceSave();
+  await nextTick();
+  await new Promise((resolve) => setTimeout(resolve, 50));
 
   if (currentStepIndex.value < steps.length - 1) {
     currentStepIndex.value++;
+    console.log(`[Parent] Moved to step ${currentStepIndex.value}`);
   }
 }
 
-function previousStep() {
+async function previousStep() {
   if (currentStepIndex.value > 0) {
+    console.log("[Parent] Going to previous step, saving first...");
+
+    // FIXED: Wait for save to complete
+    await forceSave();
+    await nextTick();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
     currentStepIndex.value--;
-    forceSave();
+    console.log(`[Parent] Moved to step ${currentStepIndex.value}`);
   }
 }
 
 // ========================================
 // TEMPLATE SELECTION
 // ========================================
-
 function selectTemplate(template) {
+  console.log("[Parent] Template selected:", template);
   selectedTemplate.value = template;
-  forceSave();
+  scheduleAutosave(); // Changed from forceSave to scheduleAutosave
 }
 
 // ========================================
 // UTILITY FUNCTIONS
 // ========================================
-
 function getStatusVariant(status) {
   const variants = {
     draft: "ghost",
@@ -455,65 +559,69 @@ function getStatusVariant(status) {
 // ========================================
 // ACTION BUTTONS
 // ========================================
+async function handleGoBack() {
+  await forceSave();
 
-function handleGoBack() {
-  forceSave();
+  // Wait a bit to ensure save completes
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   const confirmed = confirm(
     "Your progress has been saved as a draft. Return to documents?"
   );
+
   if (confirmed) {
     router.push("/documents");
   }
 }
 
-function saveAndExit() {
-  forceSave();
-  setTimeout(() => {
-    router.push("/documents");
-  }, 100);
+async function saveAndExit() {
+  await forceSave();
+
+  // Wait to ensure save completes
+  await new Promise((resolve) => setTimeout(resolve, 200));
+
+  router.push("/documents");
 }
 
 function discard() {
   const confirmed = confirm(
     "Are you sure you want to discard this document? All progress will be lost."
   );
+
   if (confirmed) {
     if (documentsStore.currentDraft) {
       documentsStore.deleteDraft(documentsStore.currentDraft.id);
     }
+
+    localStorage.removeItem("emergency-backup-document");
     router.push("/documents");
   }
 }
 
-function handleEditInfo() {
-  // Navigate back to details step
+async function handleEditInfo() {
+  await forceSave();
+  await nextTick();
+
   currentStepIndex.value = 0;
-  forceSave();
 }
 
 // ========================================
-// SEND DOCUMENTS (from DocumentStep)
+// SEND DOCUMENTS
 // ========================================
-
 async function handleSendDocuments(emailData) {
   try {
     isSaving.value = true;
 
     // TODO: Replace with actual API call
-    // await documentsStore.sendDocuments(documentForm.value.id, emailData);
-
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     console.log("Sending documents to:", emailData);
 
-    // Mark documents as sent
     documentsSent.value = true;
+    stepCompletionStatus.value.document = true;
 
-    // Save the updated state
     await forceSave();
 
-    // Show success message (you can use a toast notification here)
     alert("Documents sent successfully! You can now complete the workflow.");
   } catch (error) {
     console.error("Failed to send documents:", error);
@@ -526,7 +634,6 @@ async function handleSendDocuments(emailData) {
 // ========================================
 // COMPLETE DOCUMENT
 // ========================================
-
 async function completeDocument() {
   if (!documentsSent.value) {
     alert("Please send the documents first before completing.");
@@ -536,7 +643,6 @@ async function completeDocument() {
   try {
     isSaving.value = true;
 
-    // Mark document as completed
     documentForm.value.status = "completed";
 
     if (documentsStore.currentDraft) {
@@ -544,6 +650,8 @@ async function completeDocument() {
         documentsStore.currentDraft.id
       );
     }
+
+    localStorage.removeItem("emergency-backup-document");
 
     router.push({
       name: "documents",
