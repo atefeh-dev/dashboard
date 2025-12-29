@@ -759,12 +759,22 @@ const ResizableImage = Node.create({
       img.src = node.attrs.src;
       if (node.attrs.alt) img.alt = node.attrs.alt;
       if (node.attrs.title) img.title = node.attrs.title;
-
-      if (node.attrs.width) img.style.width = node.attrs.width;
-      if (node.attrs.height) img.style.height = node.attrs.height;
+      if (node.attrs.width) {
+        img.style.width = node.attrs.width;
+        container.style.width = node.attrs.width; // ← ADD THIS
+      }
+      if (node.attrs.height) {
+        img.style.height = node.attrs.height;
+      }
 
       img.className = "editor-image";
       img.draggable = false;
+      img.onload = () => {
+        if (!node.attrs.width) {
+          const computedWidth = img.offsetWidth;
+          container.style.width = `${computedWidth}px`;
+        }
+      };
 
       const resizeHandles = document.createElement("div");
       resizeHandles.className = "resize-handles";
@@ -839,6 +849,7 @@ const ResizableImage = Node.create({
 
         img.style.width = `${newWidth}px`;
         img.style.height = `${newHeight}px`;
+        container.style.width = `${newWidth}px`; // ← ADD THIS LINE
 
         // Update size indicator
         sizeIndicator.textContent = `${Math.round(newWidth)} × ${Math.round(
@@ -918,10 +929,13 @@ const ResizableImage = Node.create({
         update: (updatedNode) => {
           if (updatedNode.type.name !== "resizableImage") return false;
           img.src = updatedNode.attrs.src;
-          if (updatedNode.attrs.width)
+          if (updatedNode.attrs.width) {
             img.style.width = updatedNode.attrs.width;
-          if (updatedNode.attrs.height)
+            container.style.width = updatedNode.attrs.width; // ← ADD THIS
+          }
+          if (updatedNode.attrs.height) {
             img.style.height = updatedNode.attrs.height;
+          }
 
           // Update alignment class
           container.className = `image-resizer-container image-align-${
@@ -2278,6 +2292,8 @@ onBeforeUnmount(() => {
 :deep(.image-resizer-container) {
   position: relative;
   max-width: 100%;
+  display: inline-block;
+
   margin: 1em 0;
   transition: opacity 0.2s ease;
   user-select: none;
