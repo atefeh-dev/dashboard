@@ -60,8 +60,12 @@
     />
 
     <!-- Step 5: Document (With Sidebar) -->
+    <!-- Step 5: Document (With Sidebar) -->
     <DocumentStep
       v-if="currentStep === 'document'"
+      :document-metadata="documentForm"
+      :template="selectedTemplate"
+      :all-step-data="allStepData"
       @finish="handleSendDocuments"
       @back="previousStep"
     />
@@ -302,6 +306,11 @@ const reviewSections = [
 const allStepData = computed(() => ({
   details: documentForm.value,
   input: stepData.value.input,
+  review: {
+    details: documentForm.value,
+    input: stepData.value.input,
+  },
+  preview: stepData.value.preview,
 }));
 
 // ========================================
@@ -612,10 +621,58 @@ async function handleSendDocuments(emailData) {
   try {
     isSaving.value = true;
 
+    // Prepare complete data payload for API
+    const apiPayload = {
+      // Document metadata from Details step
+      document: {
+        name: documentForm.value.name,
+        filename: documentForm.value.filename,
+        description: documentForm.value.description,
+        status: documentForm.value.status,
+      },
+      // Template information
+      template: {
+        id: selectedTemplate.value?.id,
+        name: selectedTemplate.value?.name,
+      },
+      // Input form data (Step 2)
+      inputData: stepData.value.input || {},
+      // Review data (Step 3)
+      reviewData: {
+        details: documentForm.value,
+        input: stepData.value.input,
+      },
+      // Preview content (Step 4) - the edited document content
+      previewContent: stepData.value.preview?.content || "",
+      // Email recipients and settings (Step 5)
+      emailSettings: {
+        recipients: emailData.recipients,
+        alternativeEmail: emailData.alternativeEmail,
+        sendToSelf: emailData.sendToSelf,
+        documents: emailData.documents,
+      },
+      // Metadata
+      metadata: {
+        createdAt: new Date().toISOString(),
+        userId: authStore.user?.id,
+        draftId: documentsStore.currentDraft?.id,
+      },
+    };
+
+    console.log("📤 Sending complete data to API:", apiPayload);
+
     // TODO: Replace with actual API call
+    // const response = await fetch('/api/documents/send', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(apiPayload)
+    // });
+    // const result = await response.json();
+
+    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    console.log("Sending documents to:", emailData);
+    console.log("✅ Documents sent successfully!");
 
     documentsSent.value = true;
     stepCompletionStatus.value.document = true;
@@ -624,7 +681,7 @@ async function handleSendDocuments(emailData) {
 
     alert("Documents sent successfully! You can now complete the workflow.");
   } catch (error) {
-    console.error("Failed to send documents:", error);
+    console.error("❌ Failed to send documents:", error);
     alert("Failed to send documents. Please try again.");
   } finally {
     isSaving.value = false;
@@ -644,6 +701,27 @@ async function completeDocument() {
     isSaving.value = true;
 
     documentForm.value.status = "completed";
+
+    // Log the complete document data structure for reference
+    console.log("📋 COMPLETE DOCUMENT DATA STRUCTURE:");
+    console.log("=====================================");
+    console.log("Document Metadata:", {
+      name: documentForm.value.name,
+      filename: documentForm.value.filename,
+      description: documentForm.value.description,
+      status: documentForm.value.status,
+    });
+    console.log("Template:", {
+      id: selectedTemplate.value?.id,
+      name: selectedTemplate.value?.name,
+    });
+    console.log("Input Data:", stepData.value.input);
+    console.log(
+      "Preview Content Length:",
+      stepData.value.preview?.content?.length || 0
+    );
+    console.log("Documents Sent:", documentsSent.value);
+    console.log("=====================================");
 
     if (documentsStore.currentDraft) {
       await documentsStore.convertDraftToDocument(
