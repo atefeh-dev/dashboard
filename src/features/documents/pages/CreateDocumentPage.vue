@@ -60,7 +60,6 @@
     />
 
     <!-- Step 5: Document (With Sidebar) -->
-    <!-- Step 5: Document (With Sidebar) -->
     <DocumentStep
       v-if="currentStep === 'document'"
       :document-metadata="documentForm"
@@ -73,6 +72,52 @@
 </template>
 
 <script setup>
+/**
+ * CREATE DOCUMENT PAGE - MULTI-STEP WORKFLOW
+ *
+ * This component manages a 5-step document creation workflow with auto-save:
+ *
+ * STEP 1 - DETAILS:
+ *   User enters: name, filename, description, status
+ *   Selects: template
+ *   → Stored in: documentForm, selectedTemplate
+ *
+ * STEP 2 - INPUT FORMS:
+ *   User fills: dynamic form fields based on template
+ *   → Stored in: stepData.input
+ *
+ * STEP 3 - REVIEW:
+ *   User reviews and edits all previous data
+ *   → Updates: documentForm, stepData.input
+ *
+ * STEP 4 - PREVIEW:
+ *   User edits document content in rich text editor
+ *   → Stored in: stepData.preview.content
+ *
+ * STEP 5 - DOCUMENT:
+ *   User selects recipients and sends documents
+ *   Documents use filename from Step 1 (e.g., "accelerator-contract-2025.pdf")
+ *   → Triggers API submission with complete payload
+ *
+ * API PAYLOAD STRUCTURE (sent via handleSendDocuments):
+ * {
+ *   document: { name, filename, description, status },
+ *   template: { id, name },
+ *   inputData: { ...form fields from step 2... },
+ *   reviewData: { details, input },
+ *   previewContent: "...rich text HTML content...",
+ *   emailSettings: {
+ *     recipients: [...],
+ *     alternativeEmail: string | null,
+ *     sendToSelf: boolean,
+ *     documents: [
+ *       { name: "accelerator-contract-2025.pdf", format: "pdf" },
+ *       { name: "accelerator-contract-2025.docx", format: "docx" }
+ *     ]
+ *   },
+ *   metadata: { createdAt, userId, draftId }
+ * }
+ */
 import { ref, computed, watch, onMounted, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useDocumentsStore } from "@/stores/useDocumentsStore";
@@ -140,19 +185,30 @@ const showSidebarForCurrentStep = computed(() => {
   return currentStepIndex.value !== 0;
 });
 
-const sidebarData = computed(() => ({
-  title: documentForm.value.name || "Document title",
-  lastEdit: timeSinceLastSave.value || "(not saved yet)",
-  status: documentForm.value.status || "Draft",
-  statusVariant: getStatusVariant(documentForm.value.status),
-  authorName: authStore.user?.name || "User Name",
-  authorAvatar: authStore.user?.avatar || "/src/assets/images/av.png",
-  templateName: selectedTemplate.value?.name || "Non-Disclosure Agreement",
-  templateAuthor: selectedTemplate.value?.author || "doclast",
-  templateUpdateDate: selectedTemplate.value?.lastUpdate || "December 5, 2025",
-  templateTags: selectedTemplate.value?.tags || ["Tag 1", "Tag 2", "Tag 3"],
-  checklistItems: checklistItems.value,
-}));
+const sidebarData = computed(() => {
+  // Determine display status based on document state
+  let displayStatus = documentForm.value.status || "Draft";
+
+  // When documents are sent, show "Sent" status
+  if (documentsSent.value) {
+    displayStatus = "Sent";
+  }
+
+  return {
+    title: documentForm.value.name || "Document title",
+    lastEdit: timeSinceLastSave.value || "(not saved yet)",
+    status: displayStatus,
+    statusVariant: getStatusVariant(displayStatus),
+    authorName: authStore.user?.name || "User Name",
+    authorAvatar: authStore.user?.avatar || "/src/assets/images/av.png",
+    templateName: selectedTemplate.value?.name || "Non-Disclosure Agreement",
+    templateAuthor: selectedTemplate.value?.author || "doclast",
+    templateUpdateDate:
+      selectedTemplate.value?.lastUpdate || "December 5, 2025",
+    templateTags: selectedTemplate.value?.tags || ["Tag 1", "Tag 2", "Tag 3"],
+    checklistItems: checklistItems.value,
+  };
+});
 
 const checklistItems = computed(() => {
   return steps.map((step, index) => ({
@@ -561,8 +617,10 @@ function getStatusVariant(status) {
     draft: "ghost",
     active: "success",
     archived: "secondary",
+    sent: "success", // ← Add support for "Sent" status
+    completed: "success", // ← Add support for "Completed" status
   };
-  return variants[status] || "ghost";
+  return variants[status?.toLowerCase()] || "ghost";
 }
 
 // ========================================
