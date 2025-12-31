@@ -43,11 +43,11 @@
 
         <template #right>
           <button class="navbar-custom__icon-btn" aria-label="History">
-            <Clock class="navbar-custom__icon" />
+            <ClockReVindIcon />
           </button>
 
           <button class="navbar-custom__icon-btn" aria-label="Settings">
-            <Settings class="navbar-custom__icon" />
+            <SettingIcon />
           </button>
 
           <!-- Autosave indicator -->
@@ -92,7 +92,7 @@
           </div>
 
           <AppButton variant="primary" size="md" @click="saveAndExit">
-            <Download class="navbar-custom__btn-icon" />
+            <ExportSaveIcon />
             Save & exit
           </AppButton>
         </template>
@@ -164,6 +164,9 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import Navbar from "@/components/layout/Navbar.vue";
 import AppButton from "@/components/ui/AppButton.vue";
 import DocumentStepLayout from "@/features/documents/layout/DocumentStepLayout.vue";
+import ClockReVindIcon from "@/assets/icons/common/clock-rewind.svg";
+import SettingIcon from "@/assets/icons/common/setting.svg";
+import ExportSaveIcon from "@/assets/icons/common/export-save.svg";
 
 const props = defineProps({
   currentStepIndex: {
@@ -312,12 +315,20 @@ function completeDocument() {
     white-space: nowrap;
 
     &--active {
-      color: #6366f1;
-      font-weight: 500;
+      color: #4539cc;
+      font-weight: 600;
+      font-size: 0.875rem;
     }
 
     &--status {
-      color: #9ca3af;
+      color: #414651;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 0.5rem;
+      background-color: #fafafa;
+      border: 1px solid #e9eaeb;
+      padding: 0.25rem 0.625rem;
+      text-transform: capitalize;
     }
   }
 
