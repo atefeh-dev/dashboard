@@ -380,8 +380,10 @@ function completeDocument() {
   }
 
   &__autosave-text {
-    color: #6b7280;
+    color: #535862;
+    font-size: 0.875rem;
     white-space: nowrap;
+    font-weight: 600;
   }
 
   &__btn-icon {
