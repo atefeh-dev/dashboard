@@ -469,8 +469,10 @@ function completeDocument() {
     flex: 1;
     min-width: fit-content;
     padding: 1rem 1.5rem;
+    padding-bottom: 1rem;
     background: transparent;
     border: none;
+    margin-top: 1.25rem;
     cursor: pointer;
     transition: background-color 0.2s;
     text-align: left;
@@ -485,36 +487,38 @@ function completeDocument() {
 
     &--completed {
       .steps__title {
-        color: #10b981;
+        color: #414651;
         font-weight: 600;
       }
 
       .steps__subtitle {
-        color: #6b7280;
+        color: #535862;
+        font-weight: 400;
       }
     }
 
     &--active {
       .steps__title {
-        color: #6366f1;
+        color: #4539cc;
         font-weight: 600;
       }
 
       .steps__subtitle {
-        color: #6366f1;
+        color: #4539cc;
+        font-weight: 400;
       }
     }
 
     &--upcoming {
       cursor: not-allowed;
-      opacity: 0.5;
+      opacity: 0.9;
 
       .steps__title {
-        color: #9ca3af;
+        color: #414651;
       }
 
       .steps__subtitle {
-        color: #d1d5db;
+        color: #535862;
       }
     }
   }
@@ -553,13 +557,13 @@ function completeDocument() {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    height: 0.313rem;
     background-color: transparent;
     transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
     &--completed,
     &--active {
-      background-color: #6366f1;
+      background-color: #4539cc;
     }
   }
 }
