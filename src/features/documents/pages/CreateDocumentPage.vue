@@ -248,12 +248,12 @@ const inputFormFields = [
     required: false,
   },
   {
+    type: "select",
     name: "role",
     label: "Your role",
-    type: "select",
     required: true,
+    placeholder: "Select your role",
     options: [
-      { value: "", label: "Select your role" },
       { value: "ceo", label: "CEO" },
       { value: "manager", label: "Manager" },
       { value: "employee", label: "Employee" },

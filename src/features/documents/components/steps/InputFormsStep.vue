@@ -68,9 +68,8 @@
                 <AppSelect
                   v-else-if="field.type === 'select'"
                   v-bind="fieldProps"
-                  :class="{ 'input-error': errors.length && meta.touched }"
+                  :placeholder="field.placeholder"
                 >
-                  <option value="" disabled>Select an option</option>
                   <option
                     v-for="option in field.options"
                     :key="option.value"

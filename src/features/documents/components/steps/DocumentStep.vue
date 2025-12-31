@@ -81,7 +81,7 @@
             @update:model-value="handleContactSelect"
             :disabled="isSending"
           >
-            <option value="" disabled>Select from People</option>
+            <option value="" selected hidden>Select from People</option>
             <option
               v-for="contact in availableExternalContacts"
               :key="contact.id"

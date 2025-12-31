@@ -1,22 +1,26 @@
 <template>
   <select
     v-bind="$attrs"
-    :value="modelValue"
-    :disabled="disabled"
+    :value="modelValue ?? ''"
     class="app-select"
-    :class="{
-      'app-select--error': error,
-      'app-select--disabled': disabled,
-    }"
-    @change="$emit('update:modelValue', $event.target.value)"
+    @change="handleChange"
   >
+    <!-- Placeholder ONLY when no value -->
+    <option v-if="!modelValue && placeholder" value="" disabled>
+      {{ placeholder }}
+    </option>
+
     <slot />
   </select>
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   modelValue: [String, Number],
+  placeholder: {
+    type: String,
+    default: "",
+  },
   error: {
     type: Boolean,
     default: false,
@@ -27,7 +31,12 @@ defineProps({
   },
 });
 
-defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue"]);
+
+function handleChange(event) {
+  const value = event.target.value;
+  emit("update:modelValue", value);
+}
 </script>
 
 <style scoped lang="scss">
@@ -55,7 +64,7 @@ defineEmits(["update:modelValue"]);
   }
 
   &--error {
-    border-color: #d5d1d7;
+    border-color: #ef4444;
 
     &:focus {
       box-shadow: 0 0 0 2px #ef4444;
@@ -66,6 +75,11 @@ defineEmits(["update:modelValue"]);
     opacity: 0.5;
     cursor: not-allowed;
     background-color: #f9fafb;
+  }
+
+  // Style placeholder text differently
+  &--placeholder {
+    color: #9ca3af;
   }
 }
 </style>
