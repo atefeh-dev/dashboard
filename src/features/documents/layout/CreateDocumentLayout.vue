@@ -129,6 +129,7 @@ import ClockReVindIcon from "@/assets/icons/common/clock-rewind.svg";
 import SettingIcon from "@/assets/icons/common/setting.svg";
 import ExportSaveIcon from "@/assets/icons/common/export-save.svg";
 import AppLoadingSpinner from "@/components/ui/AppLoadingSpinner.vue";
+import ChevronRight from "@/assets/icons/common/nav-chevron-right.svg";
 
 const props = defineProps({
   currentStepIndex: {
@@ -248,8 +249,7 @@ function completeDocument() {
   right: 0;
   z-index: 100;
   background-color: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #e9eaeb;
 }
 
 // Navbar styles
@@ -400,7 +400,7 @@ function completeDocument() {
 // FIXED: Steps
 .steps-wrapper {
   position: fixed;
-  top: 64px;
+  top: 3.625rem;
   left: 0;
   right: 0;
   z-index: 90;
@@ -476,6 +476,7 @@ function completeDocument() {
     &--upcoming {
       cursor: not-allowed;
       opacity: 0.9;
+      border-bottom: 5px solid #e9eaeb;
 
       .steps__title {
         color: #414651;
