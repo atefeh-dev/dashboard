@@ -42,50 +42,19 @@
         </template>
 
         <template #right>
-          <button class="navbar-custom__icon-btn" aria-label="History">
-            <ClockReVindIcon />
-          </button>
+          <div class="navbar-custom__setting-section">
+            <button class="navbar-custom__icon-btn" aria-label="History">
+              <ClockReVindIcon />
+            </button>
 
-          <button class="navbar-custom__icon-btn" aria-label="Settings">
-            <SettingIcon />
-          </button>
+            <button class="navbar-custom__icon-btn" aria-label="Settings">
+              <SettingIcon />
+            </button>
+          </div>
 
           <!-- Autosave indicator -->
           <div class="navbar-custom__autosave" v-if="lastSaveTime">
-            <svg
-              class="navbar-custom__autosave-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="2"
-                fill="none"
-              />
-              <path
-                v-if="!isSaving"
-                d="M8 12l2 2 4-4"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <circle
-                v-else
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-dasharray="60"
-                stroke-dashoffset="15"
-                fill="none"
-                class="navbar-custom__autosave-spinner"
-              />
-            </svg>
+            <AppLoadingSpinner v-if="!isSaving" />
             <span class="navbar-custom__autosave-text">
               Auto saved {{ lastSaveTime }}
             </span>
@@ -167,6 +136,7 @@ import DocumentStepLayout from "@/features/documents/layout/DocumentStepLayout.v
 import ClockReVindIcon from "@/assets/icons/common/clock-rewind.svg";
 import SettingIcon from "@/assets/icons/common/setting.svg";
 import ExportSaveIcon from "@/assets/icons/common/export-save.svg";
+import AppLoadingSpinner from "@/components/ui/AppLoadingSpinner.vue";
 
 const props = defineProps({
   currentStepIndex: {
@@ -366,13 +336,16 @@ function completeDocument() {
     width: 1rem;
     height: 1rem;
   }
+  &__setting-section {
+    display: flex;
+    gap: 0.125rem;
+  }
 
   &__icon-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
+    padding: 0.625rem 1rem;
     background: transparent;
     border: none;
     border-radius: 0.5rem;
@@ -391,22 +364,21 @@ function completeDocument() {
   }
 
   &__autosave {
-    display: none;
-    align-items: center;
+    display: flex;
+    background-color: #fafafa;
     gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.875rem;
-    color: #6b7280;
-    font-weight: 400;
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.5rem;
+    color: #535862;
 
     @media (min-width: 1024px) {
       display: flex;
+      align-items: center;
     }
   }
 
   &__autosave-icon {
     width: 1.25rem;
-    height: 1.25rem;
     color: #9ca3af;
     flex-shrink: 0;
   }
