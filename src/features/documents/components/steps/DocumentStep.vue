@@ -92,43 +92,13 @@
           </AppSelect>
         </div>
 
-        <!-- Alternative Email -->
-        <div class="alternative-email">
-          <input
-            type="checkbox"
-            id="alt-email"
-            v-model="sendToAlternativeEmail"
-            class="alternative-email__checkbox"
-            :disabled="isSending"
-            @change="handleAlternativeEmailToggle"
-          />
-          <label for="alt-email" class="alternative-email__label">
-            Send to an alternative email
-          </label>
-        </div>
-
-        <transition name="fade">
-          <div v-if="sendToAlternativeEmail" class="alternative-email__input">
-            <Mail class="alternative-email__icon" />
-            <input
-              type="email"
-              v-model="alternativeEmail"
-              placeholder="email@example.com"
-              class="alternative-email__field"
-              :class="{
-                'alternative-email__field--error': alternativeEmailError,
-              }"
-              :disabled="isSending"
-              @blur="validateAlternativeEmail"
-              @input="alternativeEmailError = ''"
-            />
-            <transition name="fade">
-              <div v-if="alternativeEmailError" class="field-error">
-                {{ alternativeEmailError }}
-              </div>
-            </transition>
-          </div>
-        </transition>
+        <!-- Alternative Email Component -->
+        <AppAlternativeEmailInput
+          v-model="alternativeEmail"
+          v-model:enabled="sendToAlternativeEmail"
+          :disabled="isSending"
+          @error="handleAlternativeEmailError"
+        />
 
         <!-- Send to My Email -->
         <div class="my-email">
@@ -195,20 +165,34 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
+/**
+ * DOCUMENT STEP - EMAIL & EXPORT
+ *
+ * Final step of document workflow with instant error clearing
+ */
+
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+} from "vue";
 import { storeToRefs } from "pinia";
 import {
   FileText,
-  Mail,
   ChevronLeft,
   Loader,
   Send,
   AlertCircle,
 } from "lucide-vue-next";
 import DocumentExportList from "../document-export/DocumentExportList.vue";
+import AppAlternativeEmailInput from "@/components/ui/AppAlternativeEmailInput.vue";
 import AppButton from "@/components/ui/AppButton.vue";
 import AppSelect from "@/components/ui/AppSelect.vue";
 import ErrorBoundary from "./ErrorBoundary.vue";
+import ContactSelectItem from "../contact/ContactSelectItem.vue";
 import { useContactsStore } from "@/stores/useContactsStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useFormPersistence } from "@/composables/useFormPersistence";
@@ -216,35 +200,44 @@ import {
   useKeyboardShortcuts,
   getShortcutLabels,
 } from "@/composables/useKeyboardShortcuts";
-import ContactSelectItem from "../contact/ContactSelectItem.vue";
 
+// ============================================
+// PROPS & EMITS
+// ============================================
 const props = defineProps({
   stepData: {
     type: Object,
     default: () => ({}),
   },
-  // NEW: Accept document metadata from parent
   documentMetadata: {
     type: Object,
+    required: true,
     default: () => ({}),
   },
-  // NEW: Accept selected template
   template: {
     type: Object,
+    required: true,
     default: null,
+  },
+  allStepData: {
+    type: Object,
+    default: () => ({}),
   },
 });
 
 const emit = defineEmits(["finish", "back", "update:data"]);
 
-// Stores
+// ============================================
+// STORES & COMPOSABLES
+// ============================================
 const contactsStore = useContactsStore();
 const authStore = useAuthStore();
-
 const { internalContacts, externalContacts } = storeToRefs(contactsStore);
 const shortcutLabels = getShortcutLabels();
 
-// State
+// ============================================
+// STATE - ALL REFS DECLARED FIRST
+// ============================================
 const selectedRecipientIds = ref([]);
 const selectedContactId = ref("");
 const sendToAlternativeEmail = ref(false);
@@ -255,42 +248,34 @@ const isSaving = ref(false);
 const alternativeEmailError = ref("");
 const validationErrors = ref([]);
 
+// ============================================
+// COMPUTED PROPERTIES
+// ============================================
 const userEmail = computed(() => authStore.user?.email || "user@doclast.com");
 
-// ============================================
-// GENERATE DOCUMENTS FROM USER'S FILENAME
-// ============================================
 const generatedDocuments = computed(() => {
-  // Get filename from documentMetadata (from Details step)
   const baseFilename = props.documentMetadata?.filename || "untitled-document";
   const documentName = props.documentMetadata?.name || "Untitled Document";
-  const templateName = props.template?.name || "Document";
 
-  // Generate documents based on template
-  // Usually you'd have PDF, DOCX, etc. versions
-  const documents = [];
+  const documents = [
+    {
+      id: 1,
+      name: `${baseFilename}.pdf`,
+      displayName: `${documentName} (PDF)`,
+      size: calculateEstimatedSize("pdf"),
+      status: "completed",
+      format: "pdf",
+    },
+    {
+      id: 2,
+      name: `${baseFilename}.docx`,
+      displayName: `${documentName} (Word)`,
+      size: calculateEstimatedSize("docx"),
+      status: "completed",
+      format: "docx",
+    },
+  ];
 
-  // PDF version (primary)
-  documents.push({
-    id: 1,
-    name: `${baseFilename}.pdf`,
-    displayName: `${documentName} (PDF)`,
-    size: calculateEstimatedSize("pdf"),
-    status: "completed",
-    format: "pdf",
-  });
-
-  // DOCX version (editable)
-  documents.push({
-    id: 2,
-    name: `${baseFilename}.docx`,
-    displayName: `${documentName} (Word)`,
-    size: calculateEstimatedSize("docx"),
-    status: "completed",
-    format: "docx",
-  });
-
-  // If template supports additional formats
   if (props.template?.supportsHTML) {
     documents.push({
       id: 3,
@@ -305,20 +290,58 @@ const generatedDocuments = computed(() => {
   return documents;
 });
 
-// Helper to calculate estimated file size
-function calculateEstimatedSize(format) {
-  // In real app, this would come from actual document generation
-  const baseSizes = {
-    pdf: 648, // KB
-    docx: 245,
-    html: 128,
-  };
+const selectedExternalContacts = computed(() => {
+  return externalContacts.value.filter((contact) =>
+    selectedRecipientIds.value.includes(contact.id)
+  );
+});
 
-  const size = baseSizes[format] || 500;
-  return size >= 1024 ? `${(size / 1024).toFixed(1)} MB` : `${size} KB`;
-}
+const availableExternalContacts = computed(() => {
+  return externalContacts.value.filter(
+    (contact) => !selectedRecipientIds.value.includes(contact.id)
+  );
+});
 
-// Form persistence
+const documentStepData = computed(() => ({
+  selectedRecipientIds: selectedRecipientIds.value,
+  sendToAlternativeEmail: sendToAlternativeEmail.value,
+  alternativeEmail: alternativeEmail.value,
+  sendToMyEmail: sendToMyEmail.value,
+}));
+
+// ============================================
+// WATCHERS - IMMEDIATE CLEARING
+// ============================================
+watch(
+  sendToAlternativeEmail,
+  (newValue, oldValue) => {
+    // Only clear when transitioning from true to false
+    if (oldValue === true && newValue === false) {
+      console.log("[Document Step] Alternative email disabled - INSTANT CLEAR");
+
+      // Clear SYNCHRONOUSLY (no await, no nextTick)
+      alternativeEmailError.value = "";
+      alternativeEmail.value = "";
+
+      // Clear validation errors SYNCHRONOUSLY
+      const filtered = validationErrors.value.filter((e) => {
+        const lowerError = e.toLowerCase();
+        return (
+          !lowerError.includes("alternative") &&
+          !lowerError.includes("enter an alternative") &&
+          !lowerError.includes("email is required")
+        );
+      });
+
+      validationErrors.value = filtered;
+    }
+  },
+  { flush: "sync" } // CRITICAL: Use sync flush for immediate execution
+);
+
+// ============================================
+// FORM PERSISTENCE
+// ============================================
 const { saveNow, startWatching, restoreEmergencyBackup, clearEmergencyBackup } =
   useFormPersistence(
     "document-step",
@@ -333,106 +356,49 @@ const { saveNow, startWatching, restoreEmergencyBackup, clearEmergencyBackup } =
     }
   );
 
-// Computed for auto-save
-const documentStepData = computed(() => ({
-  selectedRecipientIds: selectedRecipientIds.value,
-  sendToAlternativeEmail: sendToAlternativeEmail.value,
-  alternativeEmail: alternativeEmail.value,
-  sendToMyEmail: sendToMyEmail.value,
-}));
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+function calculateEstimatedSize(format) {
+  const baseSizes = { pdf: 648, docx: 245, html: 128 };
+  const size = baseSizes[format] || 500;
+  return size >= 1024 ? `${(size / 1024).toFixed(1)} MB` : `${size} KB`;
+}
 
-// Lifecycle
-onMounted(async () => {
-  console.log("[Document Step] Mounted");
-  console.log("[Document Step] Document metadata:", props.documentMetadata);
-  console.log("[Document Step] Template:", props.template);
-
-  await contactsStore.fetchContacts();
-
-  // Restore from stepData or emergency backup
-  if (props.stepData && Object.keys(props.stepData).length > 0) {
-    console.log("[Document Step] Restoring from stepData");
-    restoreState(props.stepData);
-  } else {
-    const backup = restoreEmergencyBackup();
-    if (backup) {
-      console.warn("[Document Step] Restored from emergency backup");
-      restoreState(backup);
-      clearEmergencyBackup();
-    } else {
-      // Pre-select internal contacts by default
-      selectedRecipientIds.value = internalContacts.value.map((c) => c.id);
-    }
-  }
-
-  // Start auto-save watching
-  startWatching(() => documentStepData.value);
-});
-
-onBeforeUnmount(() => {
-  console.log("[Document Step] Unmounting");
-  if (documentStepData.value) {
-    emit("update:data", documentStepData.value);
-  }
-});
-
-// Restore state helper
 function restoreState(data) {
   if (data.selectedRecipientIds) {
     selectedRecipientIds.value = [...data.selectedRecipientIds];
   }
+
   if (data.sendToAlternativeEmail !== undefined) {
     sendToAlternativeEmail.value = data.sendToAlternativeEmail;
   }
+
   if (data.alternativeEmail) {
     alternativeEmail.value = data.alternativeEmail;
   }
+
   if (data.sendToMyEmail !== undefined) {
     sendToMyEmail.value = data.sendToMyEmail;
   }
+
+  // Clean up if disabled
+  if (!sendToAlternativeEmail.value) {
+    alternativeEmail.value = "";
+    alternativeEmailError.value = "";
+  }
 }
 
-// Keyboard shortcuts
-useKeyboardShortcuts({
-  back: {
-    shortcut: { key: "ArrowLeft", alt: true },
-    handler: () => {
-      if (!isSending.value && !isSaving.value) {
-        handleBack();
-      }
-    },
-    description: "Go back",
-  },
-  send: {
-    shortcut: { key: "Enter", mod: true },
-    handler: () => {
-      if (!isSending.value && generatedDocuments.value.length > 0) {
-        sendDocuments();
-      }
-    },
-    description: "Send documents",
-  },
-});
-
-// Contact management
-const selectedExternalContacts = computed(() => {
-  return externalContacts.value.filter((contact) =>
-    selectedRecipientIds.value.includes(contact.id)
-  );
-});
-
-const availableExternalContacts = computed(() => {
-  return externalContacts.value.filter(
-    (contact) => !selectedRecipientIds.value.includes(contact.id)
-  );
-});
-
+// ============================================
+// CONTACT MANAGEMENT
+// ============================================
 function isRecipientSelected(id) {
   return selectedRecipientIds.value.includes(id);
 }
 
 function toggleRecipient(id) {
   const index = selectedRecipientIds.value.indexOf(id);
+
   if (index > -1) {
     selectedRecipientIds.value.splice(index, 1);
   } else {
@@ -441,60 +407,76 @@ function toggleRecipient(id) {
 }
 
 function handleContactSelect(contactId) {
-  if (contactId && !selectedRecipientIds.value.includes(Number(contactId))) {
-    selectedRecipientIds.value.push(Number(contactId));
+  const numericId = Number(contactId);
+
+  if (contactId && !selectedRecipientIds.value.includes(numericId)) {
+    selectedRecipientIds.value.push(numericId);
     selectedContactId.value = "";
   }
 }
 
-// Email validation
-function validateAlternativeEmail() {
+// ============================================
+// ALTERNATIVE EMAIL HANDLING
+// ============================================
+function handleAlternativeEmailError(error) {
+  // If checkbox is disabled, ignore all errors
   if (!sendToAlternativeEmail.value) {
     alternativeEmailError.value = "";
-    return true;
+
+    // Remove any alternative email errors
+    validationErrors.value = validationErrors.value.filter((e) => {
+      const lowerError = e.toLowerCase();
+      return (
+        !lowerError.includes("alternative") &&
+        !lowerError.includes("enter an alternative") &&
+        !lowerError.includes("email is required")
+      );
+    });
+    return;
   }
 
-  if (!alternativeEmail.value) {
-    alternativeEmailError.value = "Email is required";
-    return false;
-  }
+  // Checkbox is enabled - handle normally
+  alternativeEmailError.value = error || "";
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(alternativeEmail.value)) {
-    alternativeEmailError.value = "Please enter a valid email address";
-    return false;
+  // Clear from validation if error resolved
+  if (!error) {
+    validationErrors.value = validationErrors.value.filter(
+      (e) => !e.toLowerCase().includes("alternative")
+    );
   }
-
-  alternativeEmailError.value = "";
-  return true;
 }
 
-function handleAlternativeEmailToggle() {
-  if (!sendToAlternativeEmail.value) {
-    alternativeEmail.value = "";
-    alternativeEmailError.value = "";
-  }
-}
-
-// Validation
+// ============================================
+// VALIDATION
+// ============================================
 function validateForm() {
+  // Clear all errors first
   validationErrors.value = [];
 
   const hasRecipients = selectedRecipientIds.value.length > 0;
-  const hasAlternativeEmail =
-    sendToAlternativeEmail.value && alternativeEmail.value;
+  const hasValidAlternativeEmail =
+    sendToAlternativeEmail.value &&
+    alternativeEmail.value &&
+    !alternativeEmailError.value;
   const hasSelfEmail = sendToMyEmail.value;
 
-  if (!hasRecipients && !hasAlternativeEmail && !hasSelfEmail) {
+  // At least one recipient required
+  if (!hasRecipients && !hasValidAlternativeEmail && !hasSelfEmail) {
     validationErrors.value.push("Please select at least one recipient");
   }
 
-  if (sendToAlternativeEmail.value) {
-    if (!validateAlternativeEmail()) {
-      validationErrors.value.push("Please enter a valid alternative email");
+  // Only validate alternative email if checkbox is enabled
+  if (sendToAlternativeEmail.value === true) {
+    if (!alternativeEmail.value?.trim()) {
+      validationErrors.value.push(
+        "Please enter an alternative email address or uncheck the option"
+      );
+    } else if (alternativeEmailError.value) {
+      validationErrors.value.push(alternativeEmailError.value);
     }
   }
 
+  // Check documents available
   if (generatedDocuments.value.length === 0) {
     validationErrors.value.push(
       "No documents available. Please complete previous steps."
@@ -504,17 +486,17 @@ function validateForm() {
   return validationErrors.value.length === 0;
 }
 
-// Navigation handlers
+// ============================================
+// NAVIGATION HANDLERS
+// ============================================
 async function handleBack() {
+  if (isSending.value || isSaving.value) return;
+
   try {
     isSaving.value = true;
-    console.log("[Document Step] Back clicked, saving...");
-
     await saveNow(documentStepData.value);
     await nextTick();
     await new Promise((resolve) => setTimeout(resolve, 100));
-
-    console.log("[Document Step] Data saved, going back");
     emit("back");
   } catch (error) {
     console.error("[Document Step] Failed to go back:", error);
@@ -525,18 +507,16 @@ async function handleBack() {
 }
 
 async function sendDocuments() {
+  if (isSending.value || generatedDocuments.value.length === 0) return;
+
   if (!validateForm()) {
     const errorElement = document.querySelector(".validation-errors");
-    if (errorElement) {
-      errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    errorElement?.scrollIntoView({ behavior: "smooth", block: "center" });
     return;
   }
 
   try {
     isSending.value = true;
-    console.log("[Document Step] Sending documents...");
-
     const recipients = contactsStore.getContactsByIds(
       selectedRecipientIds.value
     );
@@ -559,25 +539,24 @@ async function sendDocuments() {
         size: d.size,
         format: d.format,
       })),
-      // Include document metadata for backend
       documentMetadata: {
         name: props.documentMetadata?.name,
         filename: props.documentMetadata?.filename,
         description: props.documentMetadata?.description,
-        template: props.template?.name,
+        status: props.documentMetadata?.status,
       },
+      template: {
+        id: props.template?.id,
+        name: props.template?.name,
+      },
+      allStepData: props.allStepData,
     };
-
-    console.log("[Document Step] Email data:", emailData);
 
     await saveNow(documentStepData.value);
     await nextTick();
-
     emit("finish", emailData);
-
-    console.log("[Document Step] Documents sent successfully");
   } catch (error) {
-    console.error("[Document Step] Failed to send documents:", error);
+    console.error("[Document Step] Failed to send:", error);
     validationErrors.value = ["Failed to send documents. Please try again."];
   } finally {
     isSending.value = false;
@@ -585,13 +564,16 @@ async function sendDocuments() {
 }
 
 function downloadDocument(doc) {
-  console.log("Downloading document:", doc.name);
-  // TODO: Implement actual download logic
-  // This would typically call an API to generate and download the document
-  // Example: window.location.href = `/api/documents/${doc.id}/download`;
+  alert(
+    `Download functionality coming soon!\n\nFilename: ${
+      doc.name
+    }\nFormat: ${doc.format.toUpperCase()}`
+  );
 }
 
-// Error handling
+// ============================================
+// ERROR HANDLING
+// ============================================
 function handleError(errorInfo) {
   console.error("[Document Step] Error:", errorInfo);
 
@@ -608,15 +590,66 @@ function handleError(errorInfo) {
 
 function handleRecover() {
   const backup = restoreEmergencyBackup();
+
   if (backup) {
     restoreState(backup.data || backup);
     alert("Your selections have been restored successfully.");
   }
 }
+
+// ============================================
+// LIFECYCLE HOOKS
+// ============================================
+onMounted(async () => {
+  await contactsStore.fetchContacts();
+
+  if (props.stepData && Object.keys(props.stepData).length > 0) {
+    restoreState(props.stepData);
+  } else {
+    const backup = restoreEmergencyBackup();
+    if (backup) {
+      restoreState(backup);
+      clearEmergencyBackup();
+    } else {
+      selectedRecipientIds.value = internalContacts.value.map((c) => c.id);
+    }
+  }
+
+  startWatching(() => documentStepData.value);
+});
+
+onBeforeUnmount(() => {
+  if (documentStepData.value) {
+    emit("update:data", documentStepData.value);
+  }
+});
+
+// ============================================
+// KEYBOARD SHORTCUTS
+// ============================================
+useKeyboardShortcuts({
+  back: {
+    shortcut: { key: "ArrowLeft", alt: true },
+    handler: () => {
+      if (!isSending.value && !isSaving.value) {
+        handleBack();
+      }
+    },
+    description: "Go back",
+  },
+  send: {
+    shortcut: { key: "Enter", mod: true },
+    handler: () => {
+      if (!isSending.value && generatedDocuments.value.length > 0) {
+        sendDocuments();
+      }
+    },
+    description: "Send documents",
+  },
+});
 </script>
 
 <style scoped lang="scss">
-// Same styles as before...
 .document-step {
   &__section {
     margin-bottom: 3rem;
@@ -727,105 +760,27 @@ function handleRecover() {
   }
 }
 
-.alternative-email {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-
-  &__checkbox {
-    width: 1.25rem;
-    height: 1.25rem;
-    cursor: pointer;
-    accent-color: #6366f1;
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
-  }
-
-  &__label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #111827;
-    cursor: pointer;
-  }
-
-  &__input {
-    position: relative;
-    margin-bottom: 1.5rem;
-  }
-
-  &__icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1.25rem;
-    height: 1.25rem;
-    color: #6b7280;
-    pointer-events: none;
-  }
-
-  &__field {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 3rem;
-    font-size: 0.875rem;
-    color: #111827;
-    background-color: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    outline: none;
-    transition: all 0.2s;
-
-    &:focus {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    }
-
-    &::placeholder {
-      color: #9ca3af;
-    }
-
-    &:disabled {
-      background-color: #f3f4f6;
-      cursor: not-allowed;
-    }
-
-    &--error {
-      border-color: #ef4444;
-
-      &:focus {
-        border-color: #ef4444;
-        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-      }
-    }
-  }
-}
-
-.field-error {
-  font-size: 0.75rem;
-  color: #ef4444;
-  margin-top: 0.375rem;
-  font-weight: 500;
-}
-
 .my-email {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  margin: 1.5rem 0;
 
   &__checkbox {
     width: 1.25rem;
     height: 1.25rem;
     cursor: pointer;
     accent-color: #6366f1;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
 
     &:disabled {
       cursor: not-allowed;
       opacity: 0.5;
+    }
+
+    &:hover:not(:disabled) {
+      transform: scale(1.05);
     }
   }
 
@@ -834,6 +789,12 @@ function handleRecover() {
     font-weight: 500;
     color: #111827;
     cursor: pointer;
+    user-select: none;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #6366f1;
+    }
   }
 
   &__address {
@@ -853,7 +814,7 @@ function handleRecover() {
   border-left: 4px solid #ef4444;
   border-radius: 0.5rem;
   margin-top: 1.5rem;
-  animation: slideIn 0.3s ease;
+  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   @keyframes slideIn {
     from {

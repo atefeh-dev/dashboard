@@ -7,13 +7,18 @@
         <div class="sidebar-content__section">
           <h3 class="sidebar-content__title">{{ documentInfo.title }}</h3>
           <p class="sidebar-content__subtitle">
-            Last edit {{ documentInfo.lastEdit }}
+            Last edit
+            <span class="betweengap">
+              {{ documentInfo.lastEdit }}
+            </span>
           </p>
 
           <!-- Status and Author - Inline -->
           <div class="sidebar-content__meta-row">
             <!-- Status Column -->
-            <div class="sidebar-content__meta-col">
+            <div
+              class="sidebar-content__meta-col sidebar-content__meta-col--first"
+            >
               <span class="sidebar-content__label">Status</span>
               <span
                 class="sidebar-content__badge sidebar-content__badge--status"
@@ -39,7 +44,7 @@
           </div>
 
           <AppButton variant="ghost" size="sm" @click="$emit('edit-info')">
-            <Edit class="sidebar-content__icon" />
+            <EditDocumentIcon />
             Edit document information
           </AppButton>
         </div>
@@ -51,27 +56,28 @@
           </h3>
 
           <div class="sidebar-content__badge-group">
-            <span
-              class="sidebar-content__badge sidebar-content__badge--verified"
-            >
-              <Check class="sidebar-content__badge-icon" />
+            <span class="sidebar-content__badge--verified">
+              <VerifyTickIcon class="sidebar-content__badge-icon" />
               Verified
             </span>
-            <span class="sidebar-content__badge sidebar-content__badge--author">
-              By {{ documentInfo.templateAuthor }}
+            <span class="sidebar-content__badge--author">
+              By
+              <span class="sidebar-content__badge--author--brand">{{
+                documentInfo.templateAuthor
+              }}</span>
             </span>
           </div>
 
+          <span class="sidebar-content__date-text">
+            This template updated on
+          </span>
           <div class="sidebar-content__template-date">
-            <Calendar class="sidebar-content__date-icon" />
-            <span class="sidebar-content__date-text">
-              This template updated on
-            </span>
-          </div>
+            <CalenderIcon class="sidebar-content__date-icon" />
 
-          <p class="sidebar-content__date-value">
-            {{ documentInfo.templateUpdateDate }}
-          </p>
+            <p class="sidebar-content__date-value">
+              {{ documentInfo.templateUpdateDate }}
+            </p>
+          </div>
 
           <div class="sidebar-content__tags">
             <span
@@ -103,8 +109,15 @@
                       'sidebar-content__check-icon--completed': item.completed,
                     },
                   ]"
+                  :style="getStepOpacity(item, index)"
                 >
-                  <Check v-if="item.completed" class="sidebar-content__check" />
+                  <CheckIcon
+                    v-if="item.completed"
+                    class="sidebar-content__check"
+                  />
+                  <span v-else class="sidebar-content__check-number">
+                    {{ index + 1 }}
+                  </span>
                 </div>
 
                 <!-- Vertical Dotted Line (not on last item) -->
@@ -115,7 +128,10 @@
               </div>
 
               <!-- Content -->
-              <div class="sidebar-content__checklist-content">
+              <div
+                class="sidebar-content__checklist-content"
+                :style="getStepOpacity(item, index)"
+              >
                 <p class="sidebar-content__checklist-title">{{ item.title }}</p>
                 <p class="sidebar-content__checklist-subtitle">
                   {{ item.subtitle }}
@@ -135,7 +151,11 @@
 </template>
 
 <script setup>
-import { Edit, Calendar, Check } from "lucide-vue-next";
+import EditDocumentIcon from "@/assets/icons/common/edit-document.svg";
+import CheckIcon from "@/assets/icons/common/check.svg";
+
+import CalenderIcon from "@/assets/icons/common/calendar.svg";
+import VerifyTickIcon from "@/assets/icons/common/verified-tick.svg";
 import AppButton from "@/components/ui/AppButton.vue";
 
 defineProps({
@@ -161,6 +181,18 @@ defineProps({
 });
 
 defineEmits(["edit-info"]);
+
+// Calculate opacity for each step
+const getStepOpacity = (item, index) => {
+  if (item.completed) {
+    return { opacity: 1 };
+  }
+
+  // Progressive transparency with minimum of 0.4
+  // Step 1: 1.0, Step 2: 0.8, Step 3: 0.6, Step 4: 0.4
+  const opacityValue = Math.max(0.4, 1 - index * 0.2);
+  return { opacity: opacityValue };
+};
 </script>
 
 <style scoped lang="scss">
@@ -212,15 +244,18 @@ defineEmits(["edit-info"]);
     min-width: 0;
   }
 }
-
+.betweengap {
+  padding-left: 0.5rem;
+}
 // Sidebar Content
 .sidebar-content {
   display: flex;
   flex-direction: column;
   gap: 0;
+  max-width: 20rem;
   padding: 1.5rem;
   background-color: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #d5d7da;
   border-radius: 0.75rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
@@ -228,8 +263,8 @@ defineEmits(["edit-info"]);
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 2px dotted #e5e7eb; // Dotted divider
+    padding-bottom: 1rem;
+    border-bottom: 2px dotted #d5d7da;
 
     &:last-child {
       border-bottom: none;
@@ -237,10 +272,9 @@ defineEmits(["edit-info"]);
     }
 
     &:not(:first-child) {
-      padding-top: 1.5rem;
+      padding-top: 1rem;
     }
 
-    // Remove border from checklist section (has its own styling)
     &--checklist {
       border-bottom: none;
       padding-bottom: 0;
@@ -248,10 +282,10 @@ defineEmits(["edit-info"]);
   }
 
   &__title {
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 600;
     line-height: 1.5;
-    color: #111827;
+    color: #181d27;
     margin: 0;
   }
 
@@ -262,22 +296,33 @@ defineEmits(["edit-info"]);
     margin: 0;
   }
 
-  // Status and Author - Inline Layout
   &__meta-row {
     display: flex;
-    gap: 1.5rem;
-    margin-top: 0.5rem;
+    gap: 1rem;
+    align-items: flex-start;
   }
 
   &__meta-col {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.125rem;
+
+    &--first {
+      border-right: 2px solid #d5d7da;
+      padding-right: 1rem;
+    }
+  }
+
+  &__meta-col > :last-child {
+    min-height: 1.5rem;
+    display: flex;
+    align-items: center;
   }
 
   &__label {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     line-height: 1.25rem;
+    font-weight: 500;
     color: #6b7280;
   }
 
@@ -285,32 +330,44 @@ defineEmits(["edit-info"]);
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.25rem 0.5rem;
+    padding: 0.125rem 0.5rem;
     font-size: 0.75rem;
     font-weight: 500;
-    line-height: 1rem;
+    line-height: 1.25rem;
     border-radius: 0.375rem;
     width: fit-content;
 
-    // Status badge (Draft)
     &--status {
       color: #374151;
-      background-color: #f3f4f6;
-      border: 1px solid #e5e7eb;
+      background-color: #f8f9fc;
+      border: 1px solid #d5d9eb;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 0.375rem;
+      height: 1.5rem;
     }
 
-    // Verified badge
     &--verified {
-      color: #2563eb;
-      background-color: #dbeafe;
-      border: 1px solid #bfdbfe;
+      font-size: 0.875rem;
+      font-weight: 400;
+      display: flex;
+      color: #535862;
+      padding-right: 0.25rem;
+      border-radius: 0;
+      gap: 0.25rem;
+      align-items: center;
+      border-right: 1px solid #d5d7da;
     }
 
-    // Author badge
     &--author {
-      color: #6b7280;
-      background-color: #f9fafb;
-      border: 1px solid #e5e7eb;
+      color: #535862;
+      padding-left: 0.25rem;
+      font-size: 0.875rem;
+      font-weight: 400;
+
+      &--brand {
+        color: #4539cc;
+      }
     }
   }
 
@@ -322,22 +379,21 @@ defineEmits(["edit-info"]);
   &__author {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.375rem;
   }
 
   &__avatar {
     width: 1.5rem;
     height: 1.5rem;
-    border-radius: 50%;
+    border-radius: 0.25rem;
     object-fit: cover;
     flex-shrink: 0;
   }
 
   &__author-name {
-    font-size: 0.875rem;
-    font-weight: 500;
-    line-height: 1.25rem;
-    color: #111827;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #181d27;
   }
 
   &__icon {
@@ -345,18 +401,16 @@ defineEmits(["edit-info"]);
     height: 1rem;
   }
 
-  // Template Section
   &__section-title {
-    font-size: 0.9375rem;
+    font-size: 1.125rem;
     font-weight: 600;
     line-height: 1.5;
-    color: #111827;
+    color: #181d27;
     margin: 0;
   }
 
   &__badge-group {
     display: flex;
-    gap: 0.5rem;
     flex-wrap: wrap;
   }
 
@@ -374,16 +428,17 @@ defineEmits(["edit-info"]);
   }
 
   &__date-text {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
+    font-weight: 500;
     line-height: 1.25rem;
-    color: #6b7280;
+    color: #717680;
   }
 
   &__date-value {
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 600;
     line-height: 1.25rem;
-    color: #111827;
+    color: #181d27;
     margin: 0;
   }
 
@@ -394,17 +449,16 @@ defineEmits(["edit-info"]);
   }
 
   &__tag {
-    padding: 0.25rem 0.75rem;
+    padding: 0.125rem 0.375rem;
     font-size: 0.75rem;
     font-weight: 500;
     line-height: 1rem;
-    color: #374151;
-    background-color: #f3f4f6;
-    border: 1px solid #e5e7eb;
+    color: #414651;
+    border: 1px solid #d5d7da;
     border-radius: 0.375rem;
   }
 
-  // Progress Checklist with Vertical Dotted Line
+  // Progress Checklist
   &__checklist {
     display: flex;
     flex-direction: column;
@@ -436,58 +490,62 @@ defineEmits(["edit-info"]);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #d1d5db;
+    border: 1px solid #e9eaeb;
     border-radius: 50%;
     background-color: #ffffff;
     transition: all 0.2s ease;
     z-index: 1;
+    position: relative;
 
     &--completed {
-      background-color: #10b981;
-      border-color: #10b981;
+      background-color: #079455;
+      border-color: #079455;
     }
   }
 
-  &__check {
-    width: 0.875rem;
-    height: 0.875rem;
-    color: #ffffff;
+  &__check-number {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    line-height: 1;
   }
 
-  // Vertical Dotted Line
+  // Vertical Dotted Line with 4px padding from circle
   &__checklist-line {
     position: absolute;
-    top: 1.5rem;
+    top: calc(1.5rem + 4px); // Circle height + 4px padding
     left: 50%;
     transform: translateX(-50%);
-    width: 2px;
-    height: calc(100% + 1.25rem);
+    width: 1px;
+    height: calc(100% + 1.25rem - 8px); // Subtract 4px top + 4px bottom
     background-image: repeating-linear-gradient(
       to bottom,
       #d1d5db,
-      #d1d5db 4px,
-      transparent 4px,
-      transparent 8px
+      #d1d5db 2px,
+      transparent 2px,
+      transparent 6px
     );
   }
 
   &__checklist-content {
     flex: 1;
     padding-top: 0.125rem;
+    transition: opacity 0.2s ease;
   }
 
   &__checklist-title {
     font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.25rem;
-    color: #111827;
-    margin: 0 0 0.25rem 0;
+    color: #414651;
+    margin: 0;
   }
 
   &__checklist-subtitle {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 400;
     line-height: 1rem;
-    color: #6b7280;
+    color: #535862;
     margin: 0;
   }
 }
