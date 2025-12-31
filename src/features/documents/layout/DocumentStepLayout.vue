@@ -7,8 +7,7 @@
         <div class="sidebar-content__section">
           <h3 class="sidebar-content__title">{{ documentInfo.title }}</h3>
           <p class="sidebar-content__subtitle">
-            Last edit
-            <span class="betweengap">
+            Last edit<span class="betweengap">
               {{ documentInfo.lastEdit }}
             </span>
           </p>
@@ -245,7 +244,7 @@ const getStepOpacity = (item, index) => {
   }
 }
 .betweengap {
-  padding-left: 0.5rem;
+  padding-left: 0.25rem;
 }
 // Sidebar Content
 .sidebar-content {
@@ -308,7 +307,7 @@ const getStepOpacity = (item, index) => {
     gap: 0.125rem;
 
     &--first {
-      border-right: 2px solid #d5d7da;
+      border-right: 1px solid #d5d7da;
       padding-right: 1rem;
     }
   }
@@ -517,7 +516,7 @@ const getStepOpacity = (item, index) => {
     left: 50%;
     transform: translateX(-50%);
     width: 1px;
-    height: calc(100% + 1.25rem - 8px); // Subtract 4px top + 4px bottom
+    height: calc(100% + 1.25rem - 1rem); // Subtract 4px top + 4px bottom
     background-image: repeating-linear-gradient(
       to bottom,
       #d1d5db,
