@@ -119,14 +119,6 @@
 </template>
 
 <script setup>
-import {
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Settings,
-  Download,
-  CheckCircle,
-} from "lucide-vue-next";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/useAuthStore";
