@@ -9,7 +9,7 @@
         class="tag-input__tag"
       >
         {{ tag }}
-        <X
+        <XCloseIcon
           class="tag-input__remove"
           @click="removeTag(tag)"
           @keydown.enter="removeTag(tag)"
@@ -66,7 +66,7 @@
           class="tag-input__tag tag-input__tag--popover"
         >
           {{ tag }}
-          <X
+          <XCloseIcon
             class="tag-input__remove"
             @click="removeTag(tag)"
             @keydown.enter="removeTag(tag)"
@@ -82,8 +82,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { X } from "lucide-vue-next";
-
+import XCloseIcon from "@/assets/icons/common/x-close.svg";
 const props = defineProps({
   tags: {
     type: Array,
@@ -181,10 +180,6 @@ defineExpose({
   border-radius: 0.5rem;
   background-color: #ffffff;
 
-  // CRITICAL: Fixed height
-  min-height: 2.75rem;
-  max-height: 2.75rem;
-
   transition: all 0.2s;
   cursor: text;
 
@@ -209,16 +204,21 @@ defineExpose({
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.125rem 0.35rem 0.125rem 0.563rem;
     border: 1px solid #d5d7da;
     border-radius: 0.5rem;
     background-color: #ffffff;
+    transition: all 0.2s;
+    color: #414651;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: text;
 
     transition: all 0.2s;
     cursor: text;
 
     &:hover {
-      background-color: #dbeafe;
+      background-color: #fafafa;
     }
 
     &--popover {
@@ -227,9 +227,6 @@ defineExpose({
   }
 
   &__remove {
-    width: 0.875rem;
-    height: 0.875rem;
-    color: #3b82f6;
     cursor: pointer;
     flex-shrink: 0;
 
