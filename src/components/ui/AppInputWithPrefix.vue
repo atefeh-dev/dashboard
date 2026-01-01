@@ -67,11 +67,11 @@ const isFocused = ref(false);
   &__prefix {
     display: flex;
     align-items: center;
-    padding: 0.625rem 0 0.625rem 1rem;
+    padding: 0.625rem 0.75rem 0.625rem 0.875rem;
     font-size: 0.875rem;
-    color: #6b7280;
-    background-color: #f9fafb;
-    border-right: 1px solid #e5e7eb;
+    color: #535862;
+    /* background-color: #f9fafb; */
+    border-right: 1px solid #d5d7da;
     white-space: nowrap;
   }
 

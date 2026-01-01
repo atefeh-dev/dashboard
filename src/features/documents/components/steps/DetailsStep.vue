@@ -119,7 +119,7 @@
                   }"
                 >
                   <div class="selected-template__info">
-                    <FileText class="selected-template__icon" />
+                    <FileTypeIcon class="selected-template__icon" />
                     <div class="selected-template__text">
                       <div class="selected-template__name">
                         {{
@@ -132,17 +132,8 @@
                         <span class="selected-template__author">{{
                           currentSelectedTemplate?.author || "—"
                         }}</span>
-                        <span
-                          v-if="currentSelectedTemplate?.verified"
-                          class="selected-template__separator"
-                          >•</span
-                        >
-                        <span
-                          v-if="currentSelectedTemplate?.verified"
-                          class="verified"
-                        >
-                          <Check class="verified__icon" />
-                          Verified
+                        <span class="selected-template__verify">
+                          <VerifiedTickIcon /> Verified
                         </span>
                       </div>
                     </div>
@@ -381,6 +372,7 @@ import ErrorBoundary from "./ErrorBoundary.vue";
 import { useFormPersistence } from "@/composables/useFormPersistence";
 import { getShortcutLabels } from "@/composables/useKeyboardShortcuts";
 import FileTypeIcon from "@/assets/icons/common/file-type-icon.svg";
+import VerifiedTickIcon from "@/assets/icons/common/verified-tick.svg";
 
 const props = defineProps({
   form: {
@@ -702,9 +694,8 @@ function handleRecover() {
     padding: 0 1.5rem;
     font-size: 1.125rem;
     font-weight: 600;
-    color: #111827;
+    color: #181d27;
     white-space: nowrap;
-    background-color: #f9fafb;
   }
 }
 
@@ -742,56 +733,6 @@ function handleRecover() {
   }
 }
 
-.form-field {
-  position: relative;
-  margin-bottom: 1.5rem;
-
-  &.has-error {
-    .form-field__label {
-      color: #dc2626;
-    }
-  }
-
-  &__label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 0.5rem;
-    transition: color 0.2s ease;
-  }
-
-  &__required {
-    color: #dc2626;
-  }
-
-  &__hint {
-    font-size: 0.75rem;
-    color: #6b7280;
-    margin-top: 0.375rem;
-  }
-
-  &__footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 0.375rem;
-    min-height: 1.25rem;
-  }
-
-  &__char-count {
-    font-size: 0.75rem;
-    color: #6b7280;
-    margin-left: auto;
-    transition: color 0.2s ease;
-
-    &.count-warning {
-      color: #f59e0b;
-      font-weight: 600;
-    }
-  }
-}
-
 .input-error {
   border-color: #dc2626 !important;
 
@@ -809,98 +750,6 @@ function handleRecover() {
   color: #dc2626;
   margin-top: 0.375rem;
   font-weight: 500;
-}
-
-.selected-template {
-  margin-bottom: 2rem;
-
-  &__label-col {
-    margin-bottom: 0.75rem;
-  }
-
-  &__label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 0.25rem;
-  }
-
-  &__hint {
-    font-size: 0.75rem;
-    color: #6b7280;
-  }
-
-  &__card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 0.5rem;
-    background-color: #fff;
-    transition: all 0.2s ease;
-
-    &.has-error {
-      border-color: #dc2626;
-      background-color: #fef2f2;
-    }
-  }
-
-  &__info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  &__icon {
-    width: 2.5rem;
-    height: 2.5rem;
-    color: #3b82f6;
-    flex-shrink: 0;
-  }
-
-  &__text {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  &__name {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: #111827;
-  }
-
-  &__meta {
-    font-size: 0.8125rem;
-    color: #6b7280;
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-  }
-
-  &__author {
-    font-weight: 500;
-    color: #374151;
-  }
-
-  &__separator {
-    color: #d1d5db;
-  }
-}
-
-.verified {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: #059669;
-  font-weight: 500;
-
-  &__icon {
-    width: 0.875rem;
-    height: 0.875rem;
-  }
 }
 
 .form-summary {
