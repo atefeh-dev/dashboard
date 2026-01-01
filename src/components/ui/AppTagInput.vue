@@ -205,18 +205,17 @@ defineExpose({
   }
 
   &__tag {
-    display: inline-flex;
+    position: relative;
+    display: flex;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.125rem 0.5rem;
-    background-color: #eff6ff;
-    color: #3b82f6;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    line-height: 1.5;
-    white-space: nowrap;
-    flex-shrink: 0;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d5d7da;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+
+    transition: all 0.2s;
+    cursor: text;
 
     &:hover {
       background-color: #dbeafe;

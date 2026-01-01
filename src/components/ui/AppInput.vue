@@ -23,11 +23,12 @@ defineProps({
 .app-input {
   width: 100%;
   gap: 0.75rem;
-  padding: 0.625rem 1rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #d5d1d7;
   border-radius: 0.5rem;
-  font-size: 0.875rem;
-  color: #111827;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #717680;
   transition: box-shadow 0.2s, border-color 0.2s;
   box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
 
