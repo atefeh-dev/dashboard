@@ -198,7 +198,7 @@ const getStepOpacity = (item, index) => {
 .document-step-layout {
   display: flex;
   gap: 2rem;
-  max-width: 90rem;
+  max-width: 67rem;
   margin: 0 auto;
 
   @media (max-width: 1024px) {

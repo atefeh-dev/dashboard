@@ -25,7 +25,7 @@
             >
               <td class="template-table__cell">
                 <div class="template-name">
-                  <FileText class="template-name__icon" />
+                  <FileTypeIcon class="template-name__icon" />
                   <span class="template-table__name">
                     {{ template.name }}
                   </span>
@@ -104,9 +104,11 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import { FileText, FileX } from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
+import FileTypeIcon from "@/assets/icons/common/file-type-icon.svg";
 
 const props = defineProps({
   templates: {
@@ -123,7 +125,12 @@ const emit = defineEmits(["select", "preview", "clear-filters"]);
 
 // SENIOR APPROACH: Consistent color assignment based on tag name
 // Same tag = same color always (deterministic)
-const TAG_COLOR_ORDER = ["blue", "purple", "yellow", "green"];
+const TAG_COLOR_ORDER = [
+  "sugarCrystal",
+  "Seashell",
+  "pinkishWhite",
+  "aliceBlue",
+];
 
 function getTagColor(_, index) {
   return TAG_COLOR_ORDER[index % TAG_COLOR_ORDER.length];
@@ -145,43 +152,51 @@ function handlePreview(template) {
 @include table-base-styles("template-table");
 
 .template-table {
+  &__cell {
+    vertical-align: middle !important; // Override mixin's 'top'
+    &:first-child {
+      padding: 1rem 1.5rem 1rem 1.25rem;
+    }
+  }
+
+  &__actions {
+    gap: 0.5rem !important;
+  }
+
   // Override tag colors ONLY in this component
   &__tag {
     font-weight: 500;
+    font-size: 0.75rem;
+    border-radius: 50px;
+    padding: 0.125rem 0.5rem;
 
-    // Blue tags
-    &--blue {
-      background-color: #eff6ff;
-      color: #1e40af;
-      border-color: #bfdbfe;
+    // sugarCrystal tags (Purple)
+    &--sugarCrystal {
+      background-color: #f9f5ff;
+      color: #6941c6;
+      border-color: #e9d7fe;
     }
 
-    // Green tags
-    &--green {
-      background-color: #f0fdf4;
-      color: #15803d;
-      border-color: #bbf7d0;
+    // aliceBlue tags (Blue)
+    &--aliceBlue {
+      background-color: #eff8ff;
+      color: #175cd3;
+      border-color: #b2ddff;
     }
 
-    // Yellow tags
-    &--yellow {
-      background-color: #fefce8;
-      color: #a16207;
-      border-color: #fde047;
+    // pinkishWhite tags (Pink)
+    &--pinkishWhite {
+      background-color: #fdf2fa;
+      color: #c11574;
+      border-color: #fcceee;
     }
 
-    // Purple tags
-    &--purple {
-      background-color: #faf5ff;
-      color: #7c3aed;
-      border-color: #e9d5ff;
+    // Seashell tags (Orange)
+    &--Seashell {
+      background-color: #fef6ee;
+      color: #b93815;
+      border-color: #f9dbaf;
     }
-  }
-  // Action buttons container
-  &__actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
   }
 
   // Selected row styling
@@ -198,9 +213,6 @@ function handlePreview(template) {
   gap: 0.5rem;
 
   &__icon {
-    width: 1rem;
-    height: 1rem;
-    color: #6b7280;
     flex-shrink: 0;
   }
 }

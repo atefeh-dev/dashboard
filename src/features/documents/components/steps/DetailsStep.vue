@@ -380,6 +380,7 @@ import TemplateTable from "./TemplateTable.vue";
 import ErrorBoundary from "./ErrorBoundary.vue";
 import { useFormPersistence } from "@/composables/useFormPersistence";
 import { getShortcutLabels } from "@/composables/useKeyboardShortcuts";
+import FileTypeIcon from "@/assets/icons/common/file-type-icon.svg";
 
 const props = defineProps({
   form: {
@@ -676,6 +677,7 @@ function handleRecover() {
 @use "./stepStyles.scss";
 
 // NEW: Section Divider with Text
+
 .section-divider {
   position: relative;
   display: flex;
