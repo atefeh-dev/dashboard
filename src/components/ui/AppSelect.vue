@@ -60,14 +60,14 @@ function handleChange(event) {
   &:focus {
     outline: none;
     border-color: transparent;
-    box-shadow: 0 0 0 2px #6366f1;
+    box-shadow: 0 0 0 1px #4539cc;
   }
 
   &--error {
-    border-color: #ef4444;
+    border-color: #d92d20;
 
     &:focus {
-      box-shadow: 0 0 0 2px #ef4444;
+      box-shadow: 0 0 0 1px #d92d20;
     }
   }
 
