@@ -225,7 +225,8 @@ function completeDocument() {
 <style scoped lang="scss">
 .create-document-layout {
   min-height: 100vh;
-  background-color: #f9fafb;
+  max-width: 80rem;
+  margin: 0 auto;
   padding-top: 130px;
 
   @media (max-width: 768px) {
@@ -234,6 +235,8 @@ function completeDocument() {
 
   &__content {
     padding: 2rem 1.5rem;
+    max-width: 64rem;
+    margin: 0 auto;
 
     @media (max-width: 768px) {
       padding: 1.5rem 1rem;

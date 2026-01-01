@@ -35,6 +35,7 @@
               :model-value="templatesStore.statusFilter"
               @update:model-value="templatesStore.setStatusFilter"
             >
+              <option value="" disabled selected hidden>Select status</option>
               <option value="verified">Verified</option>
               <option value="all">All</option>
             </AppSelect>
@@ -46,6 +47,7 @@
               :model-value="templatesStore.typeFilter"
               @update:model-value="templatesStore.setTypeFilter"
             >
+              <option value="" disabled selected hidden>Select type</option>
               <option value="all">All</option>
               <option value="agreement">Agreement</option>
               <option value="contract">Contract</option>
@@ -80,10 +82,15 @@
         </transition>
       </section>
 
-      <!-- Document Details Form -->
-      <section class="section">
-        <h2 class="section__heading">Give your document some details</h2>
+      <!-- Divider with Heading -->
+      <div class="section-divider">
+        <span class="section-divider__text"
+          >Give your document some details</span
+        >
+      </div>
 
+      <!-- Document Details Form -->
+      <section class="section section--form">
         <Form
           :validation-schema="validationSchema"
           :initial-values="initialFormValues"
@@ -264,6 +271,9 @@
               <div class="form-field">
                 <label class="form-field__label">Status</label>
                 <AppSelect v-bind="field">
+                  <option value="" disabled selected hidden>
+                    Select status
+                  </option>
                   <option value="draft">Draft</option>
                   <option value="active">Active</option>
                   <option value="archived">Archived</option>
@@ -323,7 +333,6 @@
             </transition>
 
             <!-- Keyboard Shortcuts Hint -->
-            <!-- Keyboard Shortcuts Hint - Cross Platform -->
             <div class="keyboard-hints">
               <kbd class="kbd">{{ shortcutLabels.alt }}</kbd>
               <kbd class="kbd">{{ shortcutLabels.left }}</kbd>
@@ -341,6 +350,7 @@
 </template>
 
 <script setup>
+// ... (keep all your existing script - no changes needed)
 import {
   ref,
   computed,
@@ -390,13 +400,8 @@ const emit = defineEmits([
 ]);
 
 const shortcutLabels = getShortcutLabels();
-
-// Use templates store
 const templatesStore = useTemplatesStore();
 
-// ============================================
-// FORM PERSISTENCE SETUP
-// ============================================
 const {
   isSaving,
   saveNow,
@@ -417,11 +422,9 @@ const {
   }
 );
 
-// Local state for template
 const currentSelectedTemplate = ref(null);
 const templateErrorMessage = ref("");
 
-// Validation schema (FIXED - required comes last)
 const validationSchema = yup.object({
   templateId: yup
     .string()
@@ -465,7 +468,6 @@ const validationSchema = yup.object({
     .default("draft"),
 });
 
-// Initial form values
 const initialFormValues = computed(() => ({
   templateId: currentSelectedTemplate.value?.id || "",
   name: props.form.name || "",
@@ -474,93 +476,52 @@ const initialFormValues = computed(() => ({
   status: props.form.status || "draft",
 }));
 
-// Initialize form with VeeValidate
 const { values, setFieldValue, setValues, resetForm } = useForm({
   validationSchema,
   initialValues: initialFormValues.value,
 });
 
-// ============================================
-// LIFECYCLE HOOKS - FIXED DATA RESTORATION
-// ============================================
 onMounted(() => {
-  console.log("[Details Step] Mounted, restoring data...");
-  console.log("[Details Step] Props form:", props.form);
-  console.log("[Details Step] Selected template:", props.selectedTemplate);
-
-  // First, initialize default template if none selected
   initializeDefaultTemplate();
 
-  // Then restore form data from props
   if (props.form && Object.keys(props.form).length > 0) {
-    console.log("[Details Step] Restoring form data from props");
-
-    // Restore each field explicitly
-    if (props.form.name) {
-      setFieldValue("name", props.form.name);
-    }
-    if (props.form.filename) {
-      setFieldValue("filename", props.form.filename);
-    }
-    if (props.form.description !== undefined) {
+    if (props.form.name) setFieldValue("name", props.form.name);
+    if (props.form.filename) setFieldValue("filename", props.form.filename);
+    if (props.form.description !== undefined)
       setFieldValue("description", props.form.description);
-    }
-    if (props.form.status) {
-      setFieldValue("status", props.form.status);
-    }
-
-    console.log("[Details Step] Form values after restore:", values);
+    if (props.form.status) setFieldValue("status", props.form.status);
   } else {
-    // Try emergency backup
     const backup = restoreEmergencyBackup();
     if (backup) {
-      console.warn("[Details Step] Restored from emergency backup");
       setValues(backup);
       clearEmergencyBackup();
     }
   }
 
-  // Start watching for changes
   startWatching(() => values);
-
-  // Setup keyboard shortcuts
   setupKeyboardShortcuts();
 });
 
 onBeforeUnmount(() => {
-  console.log("[Details Step] Unmounting, saving current values:", values);
-
-  // Force save current state before unmounting
   if (values && Object.keys(values).length > 0) {
     const { templateId, ...formData } = values;
     emit("update:form", formData);
   }
-
   cleanupKeyboardShortcuts();
 });
 
-// ============================================
-// WATCH FOR EXTERNAL CHANGES - IMPROVED
-// ============================================
 watch(
   () => props.form,
   (newForm) => {
-    console.log("[Details Step] Props form changed:", newForm);
-
     if (newForm && Object.keys(newForm).length > 0) {
-      // Only update if values are different
-      if (newForm.name !== values.name) {
+      if (newForm.name !== values.name)
         setFieldValue("name", newForm.name || "");
-      }
-      if (newForm.filename !== values.filename) {
+      if (newForm.filename !== values.filename)
         setFieldValue("filename", newForm.filename || "");
-      }
-      if (newForm.description !== values.description) {
+      if (newForm.description !== values.description)
         setFieldValue("description", newForm.description || "");
-      }
-      if (newForm.status !== values.status) {
+      if (newForm.status !== values.status)
         setFieldValue("status", newForm.status || "draft");
-      }
     }
   },
   { deep: true, immediate: true }
@@ -569,7 +530,6 @@ watch(
 watch(
   () => props.selectedTemplate,
   (newTemplate) => {
-    console.log("[Details Step] Selected template changed:", newTemplate);
     if (newTemplate && newTemplate.id !== currentSelectedTemplate.value?.id) {
       currentSelectedTemplate.value = newTemplate;
       setFieldValue("templateId", newTemplate.id);
@@ -578,14 +538,10 @@ watch(
   { immediate: true }
 );
 
-// ============================================
-// KEYBOARD SHORTCUTS
-// ============================================
 let keyboardHandler = null;
 
 function setupKeyboardShortcuts() {
   keyboardHandler = (e) => {
-    // Escape: Discard
     if (
       e.key === "Escape" &&
       !e.shiftKey &&
@@ -594,12 +550,9 @@ function setupKeyboardShortcuts() {
       !e.altKey
     ) {
       e.preventDefault();
-      if (!isSaving.value) {
-        handleDiscard();
-      }
+      if (!isSaving.value) handleDiscard();
     }
   };
-
   window.addEventListener("keydown", keyboardHandler);
 }
 
@@ -610,35 +563,24 @@ function cleanupKeyboardShortcuts() {
   }
 }
 
-// ============================================
-// TEMPLATE INITIALIZATION
-// ============================================
 function initializeDefaultTemplate() {
-  // If template already selected from props, use it
   if (props.selectedTemplate) {
     currentSelectedTemplate.value = props.selectedTemplate;
     setFieldValue("templateId", props.selectedTemplate.id);
     return;
   }
 
-  // Otherwise, select default template if none selected
   if (!currentSelectedTemplate.value) {
     const defaultTemplate =
       templatesStore.filteredTemplates.find(
         (t) => t.name === "Non Disclosure Agreement"
       ) || templatesStore.filteredTemplates[0];
 
-    if (defaultTemplate) {
-      handleSelectTemplate(defaultTemplate);
-    }
+    if (defaultTemplate) handleSelectTemplate(defaultTemplate);
   }
 }
 
-// ============================================
-// HANDLERS
-// ============================================
 function handleSelectTemplate(template) {
-  console.log("[Details Step] Template selected:", template);
   currentSelectedTemplate.value = template;
   setFieldValue("templateId", template.id);
   templateErrorMessage.value = "";
@@ -658,16 +600,11 @@ async function handleSubmit(formValues) {
   }
 
   try {
-    console.log("[Details Step] Submitting form, values:", formValues);
-
-    // Save before proceeding
     await saveNow(formValues);
     await nextTick();
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     const { templateId, ...formData } = formValues;
-
-    console.log("[Details Step] Emitting continue with data:", formData);
     emit("continue", { ...formData, template: currentSelectedTemplate.value });
   } catch (error) {
     console.error("[Details Step] Failed to submit:", error);
@@ -719,9 +656,6 @@ function formatFieldName(fieldName) {
   return fieldNames[fieldName] || fieldName;
 }
 
-// ============================================
-// ERROR HANDLING
-// ============================================
 function handleFormError(errorInfo) {
   console.error("[Details Step] Error caught:", errorInfo);
   if (values && Object.keys(values).length > 0) {
@@ -734,14 +668,50 @@ function handleFormError(errorInfo) {
 
 function handleRecover() {
   const backup = restoreEmergencyBackup();
-  if (backup) {
-    setValues(backup);
-  }
+  if (backup) setValues(backup);
 }
 </script>
 
 <style scoped lang="scss">
 @use "./stepStyles.scss";
+
+// NEW: Section Divider with Text
+.section-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 3.5rem 0 3rem 0;
+
+  &::before {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: #e9eaeb;
+  }
+
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: #e9eaeb;
+  }
+
+  &__text {
+    padding: 0 1.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    white-space: nowrap;
+    background-color: #f9fafb;
+  }
+}
+
+// Update section spacing
+.section {
+  &--form {
+    margin-top: 0; // Remove extra top margin since divider handles it
+  }
+}
 
 .filters {
   display: grid;
