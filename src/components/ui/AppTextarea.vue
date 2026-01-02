@@ -32,6 +32,7 @@ defineEmits(["update:modelValue"]);
   font-family: inherit;
   line-height: 1.5;
   resize: vertical;
+  color: #717680;
   outline: none;
   transition: all 0.2s;
   box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);

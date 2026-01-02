@@ -248,10 +248,16 @@
                   <div
                     class="form-field__char-count"
                     :class="{
-                      'count-warning': (field.value?.length || 0) > 450,
+                      'count-warning': getRemainingChars(field.value) < 50,
                     }"
                   >
-                    {{ field.value?.length || 0 }} / 500 characters
+                    {{ getRemainingChars(field.value) }}
+                    {{
+                      getRemainingChars(field.value) === 1
+                        ? "character"
+                        : "characters"
+                    }}
+                    left
                   </div>
                 </div>
               </div>
@@ -298,7 +304,7 @@
                   v-if="isSaving"
                   class="form-actions__icon animate-spin"
                 />
-                <Plus v-else class="form-actions__icon" />
+                <ExportFilePlus v-else />
                 {{ isSaving ? "Creating..." : "Create" }}
               </AppButton>
             </div>
@@ -341,7 +347,6 @@
 </template>
 
 <script setup>
-// ... (keep all your existing script - no changes needed)
 import {
   ref,
   computed,
@@ -373,6 +378,7 @@ import { useFormPersistence } from "@/composables/useFormPersistence";
 import { getShortcutLabels } from "@/composables/useKeyboardShortcuts";
 import FileTypeIcon from "@/assets/icons/common/file-type-icon.svg";
 import VerifiedTickIcon from "@/assets/icons/common/verified-tick.svg";
+import ExportFilePlus from "@/assets/icons/common/export-file-plus.svg";
 
 const props = defineProps({
   form: {
@@ -418,6 +424,14 @@ const {
 const currentSelectedTemplate = ref(null);
 const templateErrorMessage = ref("");
 
+const MAX_DESCRIPTION_LENGTH = 500;
+
+// Helper function to calculate remaining characters
+const getRemainingChars = (value) => {
+  const currentLength = value?.length || 0;
+  return MAX_DESCRIPTION_LENGTH - currentLength;
+};
+
 const validationSchema = yup.object({
   templateId: yup
     .string()
@@ -452,7 +466,10 @@ const validationSchema = yup.object({
     .trim(),
   description: yup
     .string()
-    .max(500, "Description must not exceed 500 characters")
+    .max(
+      MAX_DESCRIPTION_LENGTH,
+      `Description must not exceed ${MAX_DESCRIPTION_LENGTH} characters`
+    )
     .notRequired()
     .transform((value) => value || ""),
   status: yup
@@ -668,8 +685,7 @@ function handleRecover() {
 <style scoped lang="scss">
 @use "./stepStyles.scss";
 
-// NEW: Section Divider with Text
-
+// Section Divider with Text
 .section-divider {
   position: relative;
   display: flex;
@@ -702,7 +718,7 @@ function handleRecover() {
 // Update section spacing
 .section {
   &--form {
-    margin-top: 0; // Remove extra top margin since divider handles it
+    margin-top: 0;
   }
 }
 
@@ -801,12 +817,17 @@ function handleRecover() {
   }
 }
 
+// Updated form-actions to extend border full width
 .form-actions {
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
   margin-top: 2rem;
+  margin-left: -2rem;
+  margin-right: -2rem;
   padding-top: 1.5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
   border-top: 1px solid #e5e7eb;
 
   &__icon {
@@ -833,12 +854,16 @@ function handleRecover() {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: 1rem;
-  padding: 0.75rem;
+  margin-top: 1.5rem;
+  margin-left: -2rem;
+  margin-right: -2rem;
+  margin-bottom: -2rem;
+  padding: 1rem 2rem;
   font-size: 0.75rem;
   color: #6b7280;
-  background-color: #f9fafb;
-  border-radius: 0.375rem;
+  background-color: #fafafa;
+  border-top: 1px solid #e5e7eb;
+  border-radius: 0;
 
   &__separator {
     margin: 0 0.25rem;

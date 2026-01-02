@@ -82,7 +82,9 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import { X } from "lucide-vue-next";
 import XCloseIcon from "@/assets/icons/common/x-close.svg";
+
 const props = defineProps({
   tags: {
     type: Array,

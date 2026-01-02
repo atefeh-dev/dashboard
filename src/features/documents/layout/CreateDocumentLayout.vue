@@ -122,6 +122,7 @@
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { ChevronLeft, CheckCircle } from "lucide-vue-next";
 import Navbar from "@/components/layout/Navbar.vue";
 import AppButton from "@/components/ui/AppButton.vue";
 import DocumentStepLayout from "@/features/documents/layout/DocumentStepLayout.vue";
