@@ -23,7 +23,7 @@ defineProps({
 .app-input {
   width: 100%;
   gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.625rem 0.875rem;
   border: 1px solid #d5d1d7;
   border-radius: 0.5rem;
   font-size: 1rem;

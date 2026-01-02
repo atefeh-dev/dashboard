@@ -103,71 +103,61 @@
                 </p>
               </div>
             </Field>
+          </div>
+          <!-- Navigation Buttons -->
+          <div class="form-actions">
+            <AppButton
+              type="button"
+              variant="blank"
+              size="md"
+              :disabled="isSaving"
+              @click="handleBack(formValues)"
+            >
+              <Loader v-if="isSaving" class="form-actions__icon animate-spin" />
+              <ArrowNarrowLetIcon v-else class="form-actions__icon" />
+              {{ isSaving ? "Saving..." : "Back" }}
+            </AppButton>
+            <AppButton
+              type="submit"
+              variant="primary"
+              size="md"
+              :disabled="!canContinue(formValues) || isSaving"
+            >
+              {{ isSaving ? "Saving..." : "Continue" }}
+              <Loader v-if="isSaving" class="form-actions__icon animate-spin" />
+            </AppButton>
+          </div>
 
-            <!-- Navigation Buttons -->
-            <div class="form-actions">
-              <AppButton
-                type="button"
-                variant="blank"
-                size="md"
-                :disabled="isSaving"
-                @click="handleBack(formValues)"
-              >
-                <Loader
-                  v-if="isSaving"
-                  class="form-actions__icon animate-spin"
-                />
-                <ArrowNarrowLetIcon v-else class="form-actions__icon" />
-                {{ isSaving ? "Saving..." : "Back" }}
-              </AppButton>
-              <AppButton
-                type="submit"
-                variant="primary"
-                size="md"
-                :disabled="!canContinue(formValues) || isSaving"
-              >
-                {{ isSaving ? "Saving..." : "Continue" }}
-                <Loader
-                  v-if="isSaving"
-                  class="form-actions__icon animate-spin"
-                />
-              </AppButton>
-            </div>
-
-            <!-- Form Summary -->
-            <transition name="fade">
-              <div
-                v-if="Object.keys(formErrors).length > 0 && formMeta.touched"
-                class="form-summary"
-              >
-                <AlertCircle class="form-summary__icon" />
-                <div class="form-summary__content">
-                  <p class="form-summary__title">
-                    Please fix the following errors:
-                  </p>
-                  <ul class="form-summary__list">
-                    <li
-                      v-for="(error, fieldName) in formErrors"
-                      :key="fieldName"
-                    >
-                      <strong>{{ getFieldLabel(fieldName) }}:</strong>
-                      {{ error }}
-                    </li>
-                  </ul>
-                </div>
+          <!-- Form Summary -->
+          <transition name="fade">
+            <div
+              v-if="Object.keys(formErrors).length > 0 && formMeta.touched"
+              class="form-summary"
+            >
+              <AlertCircle class="form-summary__icon" />
+              <div class="form-summary__content">
+                <p class="form-summary__title">
+                  Please fix the following errors:
+                </p>
+                <ul class="form-summary__list">
+                  <li v-for="(error, fieldName) in formErrors" :key="fieldName">
+                    <strong>{{ getFieldLabel(fieldName) }}:</strong>
+                    {{ error }}
+                  </li>
+                </ul>
               </div>
-            </transition>
-
-            <!-- Keyboard Shortcuts Hint - Cross Platform -->
-            <div class="keyboard-hints">
-              <kbd class="kbd">{{ shortcutLabels.alt }}</kbd>
-              <kbd class="kbd">{{ shortcutLabels.left }}</kbd>
-              Back
-              <span class="keyboard-hints__separator">•</span>
-              <kbd class="kbd">{{ shortcutLabels.alt }}</kbd>
-              <kbd class="kbd">{{ shortcutLabels.right }}</kbd>
-              Continue
             </div>
+          </transition>
+
+          <!-- Keyboard Shortcuts Hint - Cross Platform -->
+          <div class="keyboard-hints">
+            <kbd class="kbd">{{ shortcutLabels.alt }}</kbd>
+            <kbd class="kbd">{{ shortcutLabels.left }}</kbd>
+            Back
+            <span class="keyboard-hints__separator">•</span>
+            <kbd class="kbd">{{ shortcutLabels.alt }}</kbd>
+            <kbd class="kbd">{{ shortcutLabels.right }}</kbd>
+            Continue
           </div>
         </Form>
       </section>
@@ -500,5 +490,7 @@ function handleReset() {
 
 .form-actions {
   justify-content: space-between;
+  margin-right: unset;
+  margin-left: unset;
 }
 </style>

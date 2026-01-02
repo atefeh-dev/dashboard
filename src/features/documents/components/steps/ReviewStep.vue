@@ -143,7 +143,7 @@
             :disabled="isSaving"
           >
             <Loader v-if="isSaving" class="form-actions__icon animate-spin" />
-            <ChevronLeft v-else class="form-actions__icon" />
+            <ArrowNarrowLetIcon />
             {{ isSaving ? "Saving..." : "Back" }}
           </AppButton>
           <AppButton
@@ -192,6 +192,7 @@ import {
   useKeyboardShortcuts,
   getShortcutLabels,
 } from "@/composables/useKeyboardShortcuts";
+import ArrowNarrowLetIcon from "@/assets/icons/common/arrow-narrow-left.svg";
 
 const props = defineProps({
   stepData: {
@@ -603,5 +604,7 @@ function handleRecover() {
 // Override form-actions for Review step (space between layout)
 .form-actions {
   justify-content: space-between;
+  margin-left: unset;
+  margin-right: unset;
 }
 </style>
