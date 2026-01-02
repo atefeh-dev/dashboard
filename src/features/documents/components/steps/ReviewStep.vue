@@ -137,7 +137,7 @@
         <!-- Navigation Buttons -->
         <div class="form-actions">
           <AppButton
-            variant="ghost"
+            variant="blank"
             size="md"
             @click="handleBack"
             :disabled="isSaving"

@@ -7,23 +7,42 @@
       @recover="handleRecover"
     >
       <section class="section">
-        <h2 class="section__heading">Preview and customize your document</h2>
+        <h2 class="section__heading">
+          Preview your generated document content
+        </h2>
 
         <p class="section__description">
-          Review and edit your document content. All changes are automatically
-          saved.
+          You can see your answers in action with template and generated
+          content.
         </p>
 
-        <!-- Info Banner -->
-        <div class="info-banner">
-          <Pencil class="info-banner__icon" />
-          <div class="info-banner__content">
-            <p class="info-banner__title">Editable Preview</p>
-            <p class="info-banner__text">
-              Feel free to customize the content. Your changes are automatically
-              saved as you type.
-            </p>
-          </div>
+        <!-- Export Buttons -->
+        <div class="export-buttons">
+          <AppButton
+            variant="secondary"
+            size="sm"
+            @click="handleExport1"
+            class="padding"
+          >
+            Export 1
+          </AppButton>
+          <AppButton
+            variant="secondary"
+            size="sm"
+            @click="handleExport2"
+            class="padding"
+          >
+            Export 2
+          </AppButton>
+        </div>
+
+        <!-- Warning Banner -->
+        <div class="warning-banner">
+          <WarningIcon />
+          <p class="warning-banner__text">
+            You can edit and style the generated content but you can't save your
+            new changed content
+          </p>
         </div>
 
         <!-- Loading State -->
@@ -45,7 +64,7 @@
         <div class="form-actions">
           <AppButton variant="ghost" @click="handleBack" :disabled="isSaving">
             <Loader v-if="isSaving" class="form-actions__icon animate-spin" />
-            <ChevronLeft v-else class="form-actions__icon" />
+            <ArrowNarrowLetIcon v-else class="form-actions__icon" />
             {{ isSaving ? "Saving..." : "Back" }}
           </AppButton>
 
@@ -56,7 +75,6 @@
           >
             {{ isSaving ? "Saving..." : "Continue" }}
             <Loader v-if="isSaving" class="form-actions__icon animate-spin" />
-            <ChevronRight v-else class="form-actions__icon" />
           </AppButton>
         </div>
 
@@ -84,7 +102,7 @@ import {
   onBeforeUnmount,
   nextTick,
 } from "vue";
-import { ChevronLeft, ChevronRight, Pencil, Loader } from "lucide-vue-next";
+import { AlertCircle, Loader } from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
 import RichTextEditor from "@/components/ui/RichTextEditor.vue";
 import ErrorBoundary from "./ErrorBoundary.vue";
@@ -94,6 +112,8 @@ import {
   useKeyboardShortcuts,
   getShortcutLabels,
 } from "@/composables/useKeyboardShortcuts";
+import ArrowNarrowLetIcon from "@/assets/icons/common/arrow-narrow-left.svg";
+import WarningIcon from "@/assets/icons/common/warning.svg";
 
 const props = defineProps({
   stepData: {
@@ -254,6 +274,19 @@ useKeyboardShortcuts({
   },
 });
 
+// Export handlers
+function handleExport1() {
+  console.log("Export 1 clicked");
+  // TODO: Implement export logic
+  alert("Export 1 functionality coming soon");
+}
+
+function handleExport2() {
+  console.log("Export 2 clicked");
+  // TODO: Implement export logic
+  alert("Export 2 functionality coming soon");
+}
+
 // Event handlers with proper saving
 async function handleBack() {
   try {
@@ -313,52 +346,41 @@ function handleRecover() {
 <style scoped lang="scss">
 @use "./stepStyles.scss";
 
-.info-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px 16px;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border: 1px solid #86efac;
-  border-left: 4px solid #22c55e;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  animation: infoSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+// ====================================
+// PREVIEW STEP SPECIFIC STYLES
+// ====================================
 
-  @keyframes infoSlideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+.export-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.25rem;
+  border: 1px solid #e9eaeb;
+  border-radius: 0.5rem;
+  background-color: #fafafa;
+}
+.padding {
+  padding: 0.5rem 0.75rem;
+}
+
+.warning-banner {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  align-items: center;
+  border: 1px solid #d5d7da;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
 
   &__icon {
-    width: 20px;
-    height: 20px;
-    color: #16a34a;
     flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  &__content {
-    flex: 1;
-  }
-
-  &__title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #15803d;
-    margin-bottom: 4px;
   }
 
   &__text {
-    font-size: 14px;
-    color: #15803d;
-    line-height: 1.5;
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0;
   }
 }
 
@@ -383,85 +405,12 @@ function handleRecover() {
   }
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .editor-wrapper {
-  margin-bottom: 32px;
-  animation: editorFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s backwards;
-
-  @keyframes editorFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+  margin-bottom: 2rem;
 }
 
+// Override form-actions for Preview step (space between layout)
 .form-actions {
-  display: flex;
-  gap: 0.75rem;
   justify-content: space-between;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
-
-  &__icon {
-    width: 1rem;
-    height: 1rem;
-
-    &.animate-spin {
-      animation: spin 1s linear infinite;
-    }
-  }
-}
-
-.keyboard-hints {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-  margin-top: 1rem;
-  padding: 0.75rem;
-  font-size: 0.75rem;
-  color: #6b7280;
-  background-color: #f9fafb;
-  border-radius: 0.375rem;
-
-  &__separator {
-    margin: 0 0.5rem;
-    color: #d1d5db;
-  }
-}
-
-.kbd {
-  display: inline-block;
-  padding: 0.125rem 0.375rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #374151;
-  background-color: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  min-width: 1.5rem;
-  text-align: center;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 </style>
