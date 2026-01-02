@@ -110,6 +110,7 @@
       <DocumentStepLayout
         :show-sidebar="showSidebar"
         :document-info="documentInfo"
+        :current-step="currentStepIndex + 1"
         @edit-info="$emit('edit-info')"
       >
         <slot />

@@ -1,5 +1,5 @@
 <template>
-  <div class="document-step-layout">
+  <div class="document-step-layout" :data-step="currentStep">
     <!-- Left Sidebar -->
     <aside v-if="showSidebar" class="document-step-layout__sidebar">
       <div class="sidebar-content">
@@ -177,6 +177,10 @@ defineProps({
       checklistItems: [],
     }),
   },
+  currentStep: {
+    type: Number,
+    default: 1,
+  },
 });
 
 defineEmits(["edit-info"]);
@@ -198,9 +202,14 @@ const getStepOpacity = (item, index) => {
 .document-step-layout {
   display: flex;
   gap: 2rem;
-  max-width: 67rem;
-  margin: 0 auto;
   padding-top: 5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin: 0 auto;
+
+  &[data-step="1"] {
+    max-width: 67rem;
+  }
 
   @media (max-width: 1024px) {
     flex-direction: column;
@@ -210,9 +219,7 @@ const getStepOpacity = (item, index) => {
     flex: 0 0 320px;
     position: sticky;
     height: fit-content;
-    // max-height: calc(100vh - 170px);
     overflow-y: auto;
-    // margin-top: 5rem;
 
     @media (max-width: 1024px) {
       position: static;

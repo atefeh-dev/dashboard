@@ -3,25 +3,27 @@
     <!-- Editor Toolbar -->
     <div v-if="editor" class="editor-toolbar">
       <!-- Font Family Dropdown -->
-      <select
-        class="editor-toolbar__select"
-        @change="setFontFamily($event.target.value)"
-      >
-        <option value="">Font Family</option>
-        <option value="Inter">Inter</option>
-        <option value="Arial">Arial</option>
-        <option value="Georgia">Georgia</option>
-        <option value="'Times New Roman'">Times New Roman</option>
-        <option value="'Courier New'">Courier New</option>
-        <option value="Verdana">Verdana</option>
-      </select>
+      <div class="toolbar-select-group">
+        <Type class="toolbar-select-icon" />
+        <select
+          v-model="currentFont"
+          @change="applyFont"
+          class="toolbar-select"
+        >
+          <option value="Inter">Inter</option>
+          <option value="Arial">Arial</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Verdana">Verdana</option>
+        </select>
+      </div>
 
       <!-- Font Size Dropdown -->
       <select
         class="editor-toolbar__select"
         @change="setFontSize($event.target.value)"
       >
-        <option value="">Size</option>
         <option value="12px">12px</option>
         <option value="14px">14px</option>
         <option value="16px">16px</option>
@@ -381,12 +383,13 @@
             </label>
 
             <div class="popover-form__actions">
-              <button
+              <AppButton
+                variant="primary"
+                size="md"
                 @click="insertImageFromUrl"
-                class="popover-form__btn popover-form__btn--primary"
               >
                 Insert URL
-              </button>
+              </AppButton>
             </div>
           </div>
         </div>
@@ -399,7 +402,7 @@
         class="editor-toolbar__btn has-tooltip"
         data-tooltip="More Options"
       >
-        <MoreVertical class="editor-toolbar__icon" />
+        <Sparkles class="editor-toolbar__icon" />
       </button>
     </div>
 
@@ -591,6 +594,9 @@ import {
   Image as ImageIcon,
   MoreVertical,
   Upload,
+  Type,
+  TypeIcon,
+  Sparkles,
 } from "lucide-vue-next";
 import { useEditor, EditorContent } from "@tiptap/vue-3";
 import { Extension, Node } from "@tiptap/core";
@@ -602,6 +608,7 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import { FontFamily } from "@tiptap/extension-font-family";
 import Placeholder from "@tiptap/extension-placeholder";
+import AppButton from "./AppButton.vue";
 
 const props = defineProps({
   modelValue: {
@@ -631,6 +638,7 @@ const showLinkPopover = ref(false);
 const linkUrl = ref("");
 const showImagePopover = ref(false);
 const imageUrl = ref("");
+const currentFont = ref("Inter"); // Default font is Inter
 
 // Bubble menu state
 const showBubbleMenu = ref(false);
@@ -1173,10 +1181,10 @@ onMounted(() => {
     }, 100);
   }
 
-  onBeforeUnmount(() => {
+  return () => {
     document.removeEventListener("click", handleClickOutside);
     window.removeEventListener("scroll", handleScroll, true);
-  });
+  };
 });
 
 // Watch for external content changes
@@ -1226,6 +1234,12 @@ function setTextColor(color) {
 
     currentColor.value = color;
     showColorPicker.value = false;
+  }
+}
+
+function applyFont() {
+  if (editor.value && currentFont.value) {
+    editor.value.chain().focus().setFontFamily(currentFont.value).run();
   }
 }
 
@@ -1439,7 +1453,7 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 
-/* show tooltip on hover */
+// show tooltip on hover
 .editor-btn:hover .tooltip {
   opacity: 1;
 }
@@ -1490,6 +1504,60 @@ onBeforeUnmount(() => {
 
     &:active {
       transform: scale(0.98);
+    }
+  }
+  // Font Family Select with Icon
+  .toolbar-select-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px; // Changed from 0.5rem to match font size box
+    padding-left: 0.5rem; // Reduced padding
+    min-width: 10rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      border-color: #d1d5db;
+      background-color: #fafafa;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    &:focus-within {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      transform: translateY(0);
+    }
+  }
+
+  .toolbar-select-icon {
+    width: 1rem; // Reduced from 1.25rem
+    height: 1rem;
+    color: #6b7280; // Darker color to match the design
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+
+  .toolbar-select {
+    flex: 1;
+    padding: 6px 10px; // Match font size padding
+    padding-right: 28px;
+    background: transparent;
+    border: none;
+    font-size: 13px;
+    color: #374151;
+    font-weight: 500;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+
+    &:focus {
+      outline: none;
     }
   }
 
