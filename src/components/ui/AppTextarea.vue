@@ -25,11 +25,10 @@ defineEmits(["update:modelValue"]);
 <style scoped lang="scss">
 .app-textarea {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d5d1d7;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid #d5d7da;
   border-radius: 0.5rem;
-  font-size: 0.875rem;
-  color: #111827;
+  font-size: 1rem;
   font-family: inherit;
   line-height: 1.5;
   resize: vertical;
@@ -42,15 +41,15 @@ defineEmits(["update:modelValue"]);
   }
 
   &:focus {
-    border: 2px dashed #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border: 1px solid #4539cc;
+    // box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   }
 
   &--error {
     border-color: #d5d1d7;
 
     &:focus {
-      border: 2px dashed #ef4444;
+      border: 2px dashed #d92d20;
       box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
     }
   }

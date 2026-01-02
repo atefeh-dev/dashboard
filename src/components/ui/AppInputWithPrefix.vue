@@ -77,10 +77,11 @@ const isFocused = ref(false);
 
   &__field {
     flex: 1;
-    padding: 0.625rem 1rem;
+    padding: 0.625rem 0.875rem;
     border: none;
-    font-size: 0.875rem;
-    color: #111827;
+    font-size: 1rem;
+    color: #717680;
+    font-weight: 400;
     background: transparent;
     outline: none;
     min-width: 0;
