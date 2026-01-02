@@ -154,7 +154,6 @@
           >
             {{ isSaving ? "Saving..." : "Continue" }}
             <Loader v-if="isSaving" class="form-actions__icon animate-spin" />
-            <ChevronRight v-else class="form-actions__icon" />
           </AppButton>
         </div>
 
@@ -425,19 +424,22 @@ function handleRecover() {
 </script>
 
 <style scoped lang="scss">
+// ====================================
+// REVIEW STEP SPECIFIC STYLES
+// ====================================
 @use "./stepStyles.scss";
 
 .review-sections {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .review-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   overflow: hidden;
   transition: all 0.2s ease;
 
@@ -457,10 +459,10 @@ function handleRecover() {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    padding: 20px 24px;
+    padding: 1.25rem 1.5rem;
     background: #f9fafb;
     border-bottom: 1px solid #e5e7eb;
-    gap: 16px;
+    gap: 1rem;
 
     @media (max-width: 640px) {
       flex-direction: column;
@@ -475,19 +477,19 @@ function handleRecover() {
   &__title-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
   }
 
   &__title {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 600;
     color: #111827;
     line-height: 1.4;
   }
 
   &__subtitle {
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #6b7280;
     line-height: 1.5;
   }
@@ -495,12 +497,12 @@ function handleRecover() {
   &__toggle-btn {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;
     background: #ffffff;
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
     color: #374151;
     font-weight: 500;
     cursor: pointer;
@@ -519,20 +521,20 @@ function handleRecover() {
   }
 
   &__icon {
-    width: 16px;
-    height: 16px;
+    width: 1rem;
+    height: 1rem;
     color: #6b7280;
   }
 
   // Summary view (collapsed)
   &__summary {
-    padding: 20px 24px;
+    padding: 1.25rem 1.5rem;
     background: #ffffff;
   }
 
   // Edit view (expanded)
   &__body {
-    padding: 24px;
+    padding: 1.5rem;
     background: #ffffff;
   }
 }
@@ -540,20 +542,20 @@ function handleRecover() {
 .edited-badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  font-size: 11px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   color: #1e40af;
   background: #dbeafe;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .summary-field {
   display: flex;
-  gap: 8px;
-  padding: 10px 0;
+  gap: 0.5rem;
+  padding: 0.625rem 0;
   border-bottom: 1px solid #f3f4f6;
 
   &:last-child {
@@ -561,15 +563,15 @@ function handleRecover() {
   }
 
   &__label {
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 500;
     color: #6b7280;
-    min-width: 140px;
+    min-width: 8.75rem;
     flex-shrink: 0;
   }
 
   &__value {
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #111827;
     flex: 1;
     word-break: break-word;
@@ -577,7 +579,7 @@ function handleRecover() {
 }
 
 .review-field {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 
   &:last-child {
     margin-bottom: 0;
@@ -585,82 +587,21 @@ function handleRecover() {
 
   &__label {
     display: block;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 600;
     color: #374151;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
     line-height: 1.4;
   }
 
   &__required {
-    color: #ef4444;
-    margin-left: 2px;
+    color: #7f56d9;
+    margin-left: 0.125rem;
   }
 }
 
+// Override form-actions for Review step (space between layout)
 .form-actions {
-  display: flex;
-  gap: 0.75rem;
   justify-content: space-between;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
-
-  &__icon {
-    width: 1rem;
-    height: 1rem;
-
-    &.animate-spin {
-      animation: spin 1s linear infinite;
-    }
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.keyboard-hints {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-  margin-top: 1rem;
-  padding: 0.75rem;
-  font-size: 0.75rem;
-  color: #6b7280;
-  background-color: #f9fafb;
-  border-radius: 0.375rem;
-
-  &__separator {
-    margin: 0 0.5rem;
-    color: #d1d5db;
-  }
-}
-
-.kbd {
-  display: inline-block;
-  padding: 0.125rem 0.375rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #374151;
-  background-color: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  min-width: 1.5rem;
-  text-align: center;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 </style>

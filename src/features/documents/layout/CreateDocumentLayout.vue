@@ -227,7 +227,7 @@ function completeDocument() {
 .create-document-layout {
   min-height: 100vh;
   margin: 0 auto;
-  padding-top: 130px;
+  margin-top: 10rem;
 
   @media (max-width: 768px) {
     padding-top: 120px;

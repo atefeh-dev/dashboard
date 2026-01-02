@@ -304,8 +304,8 @@
                   v-if="isSaving"
                   class="form-actions__icon animate-spin"
                 />
-                <ExportFilePlus v-else />
                 {{ isSaving ? "Creating..." : "Create" }}
+                <ExportFilePlus />
               </AppButton>
             </div>
 
@@ -685,6 +685,10 @@ function handleRecover() {
 <style scoped lang="scss">
 @use "./stepStyles.scss";
 
+// ====================================
+// DETAILS STEP SPECIFIC STYLES
+// ====================================
+
 // Section Divider with Text
 .section-divider {
   position: relative;
@@ -715,18 +719,16 @@ function handleRecover() {
   }
 }
 
-// Update section spacing
+// Form section adjustment
 .section {
   &--form {
     margin-top: 0;
   }
 }
 
+// Custom filters grid for Details step
 .filters {
-  display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
 
   @media (max-width: 1024px) {
     grid-template-columns: repeat(2, 1fr);
@@ -736,172 +738,8 @@ function handleRecover() {
     grid-template-columns: 1fr;
   }
 
-  &__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
   &__label {
-    font-size: 0.875rem;
     font-weight: 600;
-    color: #374151;
   }
-}
-
-.input-error {
-  border-color: #dc2626 !important;
-
-  &:focus {
-    border-color: #dc2626 !important;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
-  }
-}
-
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.75rem;
-  color: #dc2626;
-  margin-top: 0.375rem;
-  font-weight: 500;
-}
-
-.form-summary {
-  display: flex;
-  gap: 0.75rem;
-  padding: 1rem;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 0.5rem;
-  margin-top: 1.5rem;
-
-  &__icon {
-    width: 1.25rem;
-    height: 1.25rem;
-    flex-shrink: 0;
-    color: #dc2626;
-    margin-top: 0.125rem;
-  }
-
-  &__content {
-    flex: 1;
-  }
-
-  &__title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #991b1b;
-    margin-bottom: 0.5rem;
-  }
-
-  &__list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    font-size: 0.8125rem;
-    color: #991b1b;
-
-    li {
-      margin-bottom: 0.25rem;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-
-      strong {
-        font-weight: 600;
-      }
-    }
-  }
-}
-
-// Updated form-actions to extend border full width
-.form-actions {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
-  margin-top: 2rem;
-  margin-left: -2rem;
-  margin-right: -2rem;
-  padding-top: 1.5rem;
-  padding-left: 2rem;
-  padding-right: 2rem;
-  border-top: 1px solid #e5e7eb;
-
-  &__icon {
-    width: 1rem;
-    height: 1rem;
-
-    &.animate-spin {
-      animation: spin 1s linear infinite;
-    }
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.keyboard-hints {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-  margin-left: -2rem;
-  margin-right: -2rem;
-  margin-bottom: -2rem;
-  padding: 1rem 2rem;
-  font-size: 0.75rem;
-  color: #6b7280;
-  background-color: #fafafa;
-  border-top: 1px solid #e5e7eb;
-  border-radius: 0;
-
-  &__separator {
-    margin: 0 0.25rem;
-    color: #d1d5db;
-  }
-}
-
-.kbd {
-  display: inline-block;
-  padding: 0.125rem 0.375rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #374151;
-  background-color: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.fade-enter-from {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 </style>

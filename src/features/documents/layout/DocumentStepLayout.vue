@@ -200,6 +200,7 @@ const getStepOpacity = (item, index) => {
   gap: 2rem;
   max-width: 67rem;
   margin: 0 auto;
+  padding-top: 5rem;
 
   @media (max-width: 1024px) {
     flex-direction: column;
@@ -208,10 +209,10 @@ const getStepOpacity = (item, index) => {
   &__sidebar {
     flex: 0 0 320px;
     position: sticky;
-    top: 150px;
     height: fit-content;
-    max-height: calc(100vh - 170px);
+    // max-height: calc(100vh - 170px);
     overflow-y: auto;
+    // margin-top: 5rem;
 
     @media (max-width: 1024px) {
       position: static;

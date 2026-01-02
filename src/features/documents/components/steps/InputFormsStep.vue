@@ -108,7 +108,7 @@
             <div class="form-actions">
               <AppButton
                 type="button"
-                variant="ghost"
+                variant="blank"
                 size="md"
                 :disabled="isSaving"
                 @click="handleBack(formValues)"
@@ -117,7 +117,7 @@
                   v-if="isSaving"
                   class="form-actions__icon animate-spin"
                 />
-                <ChevronLeft v-else class="form-actions__icon" />
+                <ArrowNarrowLetIcon v-else class="form-actions__icon" />
                 {{ isSaving ? "Saving..." : "Back" }}
               </AppButton>
               <AppButton
@@ -131,7 +131,6 @@
                   v-if="isSaving"
                   class="form-actions__icon animate-spin"
                 />
-                <ChevronRight v-else class="form-actions__icon" />
               </AppButton>
             </div>
 
@@ -203,6 +202,7 @@ import {
   useKeyboardShortcuts,
   getShortcutLabels,
 } from "@/composables/useKeyboardShortcuts";
+import ArrowNarrowLetIcon from "@/assets/icons/common/arrow-narrow-left.svg";
 
 const props = defineProps({
   stepTitle: {
@@ -250,9 +250,7 @@ const {
   }
 );
 
-// ============================================
 // VALIDATION RULES (FIXED)
-// ============================================
 function createFieldValidation(field) {
   let validation;
 
@@ -319,9 +317,7 @@ const validationSchema = computed(() => {
   return yup.object(schema);
 });
 
-// ============================================
 // FORM SETUP WITH DATA RESTORATION
-// ============================================
 const initialFormValues = computed(() => {
   const values = {};
   props.formFields.forEach((field) => {
@@ -502,182 +498,7 @@ function handleReset() {
 <style scoped lang="scss">
 @use "./stepStyles.scss";
 
-.form-field {
-  position: relative;
-  margin-bottom: 1.5rem;
-
-  &.has-error {
-    .form-field__label {
-      color: #dc2626;
-    }
-  }
-
-  &__label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 0.5rem;
-    transition: color 0.2s ease;
-  }
-
-  &__required {
-    color: #dc2626;
-  }
-
-  &__hint {
-    font-size: 0.75rem;
-    color: #6b7280;
-    margin-top: 0.375rem;
-  }
-}
-
-.input-error {
-  border-color: #dc2626 !important;
-
-  &:focus {
-    border-color: #dc2626 !important;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
-  }
-}
-
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.75rem;
-  color: #dc2626;
-  margin-top: 0.375rem;
-  font-weight: 500;
-}
-
-.form-summary {
-  display: flex;
-  gap: 0.75rem;
-  padding: 1rem;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 0.5rem;
-  margin-top: 1.5rem;
-
-  &__icon {
-    width: 1.25rem;
-    height: 1.25rem;
-    flex-shrink: 0;
-    color: #dc2626;
-    margin-top: 0.125rem;
-  }
-
-  &__content {
-    flex: 1;
-  }
-
-  &__title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #991b1b;
-    margin-bottom: 0.5rem;
-  }
-
-  &__list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    font-size: 0.8125rem;
-    color: #991b1b;
-
-    li {
-      margin-bottom: 0.25rem;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-
-      strong {
-        font-weight: 600;
-      }
-    }
-  }
-}
-
 .form-actions {
-  display: flex;
-  gap: 0.75rem;
   justify-content: space-between;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
-
-  &__icon {
-    width: 1rem;
-    height: 1rem;
-
-    &.animate-spin {
-      animation: spin 1s linear infinite;
-    }
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.keyboard-hints {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-  margin-top: 1rem;
-  padding: 0.75rem;
-  font-size: 0.75rem;
-  color: #6b7280;
-  background-color: #f9fafb;
-  border-radius: 0.375rem;
-
-  &__separator {
-    margin: 0 0.5rem;
-    color: #d1d5db;
-  }
-}
-
-.kbd {
-  display: inline-block;
-  padding: 0.125rem 0.375rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #374151;
-  background-color: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  min-width: 1.5rem;
-  text-align: center;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.fade-enter-from {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 </style>
