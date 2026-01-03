@@ -666,6 +666,8 @@ useKeyboardShortcuts({
 </script>
 
 <style scoped lang="scss">
+@use "./stepStyles.scss";
+
 .document-step {
   // Header section
   &__header {
@@ -817,7 +819,8 @@ useKeyboardShortcuts({
 
   &__label {
     font-size: 0.875rem;
-    color: #6b7280;
+    font-weight: 500;
+    color: #414651;
     margin: 0 0 0.5rem 0;
   }
 
@@ -830,7 +833,7 @@ useKeyboardShortcuts({
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin: 1.5rem 0;
+  margin: 1rem 0;
 
   &__checkbox {
     width: 1.25rem;
@@ -853,7 +856,7 @@ useKeyboardShortcuts({
   &__label {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #111827;
+    color: #414651;
     cursor: pointer;
     user-select: none;
     transition: color 0.2s ease;
@@ -865,121 +868,10 @@ useKeyboardShortcuts({
 
   &__address {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: #535862;
     font-weight: 400;
     margin-left: 0.25rem;
   }
-}
-
-.validation-errors {
-  display: flex;
-  gap: 0.75rem;
-  padding: 1rem;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-left: 4px solid #ef4444;
-  border-radius: 0.5rem;
-  margin-top: 1.5rem;
-  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  &__icon {
-    width: 1.25rem;
-    height: 1.25rem;
-    flex-shrink: 0;
-    color: #ef4444;
-    margin-top: 0.125rem;
-  }
-
-  &__content {
-    flex: 1;
-  }
-
-  &__title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #991b1b;
-    margin: 0 0 0.5rem 0;
-  }
-
-  &__list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    font-size: 0.8125rem;
-    color: #991b1b;
-
-    li {
-      margin-bottom: 0.25rem;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-
-      &::before {
-        content: "• ";
-        margin-right: 0.25rem;
-      }
-    }
-  }
-}
-
-.keyboard-hints {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-  margin-top: 1rem;
-  padding: 0.75rem;
-  font-size: 0.75rem;
-  color: #6b7280;
-  background-color: #f9fafb;
-  border-radius: 0.375rem;
-
-  &__separator {
-    margin: 0 0.5rem;
-    color: #d1d5db;
-  }
-}
-
-.kbd {
-  display: inline-block;
-  padding: 0.125rem 0.375rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #374151;
-  background-color: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  min-width: 1.5rem;
-  text-align: center;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.fade-enter-from {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
 }
 
 button:disabled {

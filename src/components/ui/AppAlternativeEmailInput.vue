@@ -248,14 +248,13 @@ defineExpose({
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-bottom: 0.75rem;
   }
 
   &__checkbox {
     width: 1.25rem;
     height: 1.25rem;
     cursor: pointer;
-    accent-color: #6366f1;
+    accent-color: #4539cc;
     flex-shrink: 0;
     transition: all 0.2s ease;
 
@@ -272,13 +271,13 @@ defineExpose({
   &__label {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #111827;
+    color: #414651;
     cursor: pointer;
     user-select: none;
     transition: color 0.2s ease;
 
     &:hover {
-      color: #6366f1;
+      color: #4539cc;
     }
   }
 
@@ -315,11 +314,11 @@ defineExpose({
     }
 
     &:focus {
-      border-color: #6366f1;
+      border-color: #4539cc;
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 
       ~ .alternative-email__icon {
-        color: #6366f1;
+        color: #4539cc;
       }
     }
 
@@ -334,16 +333,16 @@ defineExpose({
     }
 
     &--error {
-      border-color: #ef4444;
+      border-color: #d92d20;
       background-color: #fef2f2;
 
       &:focus {
-        border-color: #ef4444;
+        border-color: #d92d20;
         box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
       }
 
       ~ .alternative-email__icon {
-        color: #ef4444;
+        color: #d92d20;
       }
     }
   }
@@ -353,7 +352,7 @@ defineExpose({
     align-items: center;
     gap: 0.375rem;
     font-size: 0.75rem;
-    color: #ef4444;
+    color: #d92d20;
     font-weight: 500;
     margin-top: 0.5rem;
     padding: 0.5rem 0.75rem;

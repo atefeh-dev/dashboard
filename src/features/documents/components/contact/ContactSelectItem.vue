@@ -34,15 +34,13 @@ defineEmits(["toggle"]);
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  margin-bottom: 0.75rem;
   background-color: #ffffff;
   border: 2px solid #e5e7eb;
   border-radius: 0.5rem;
   transition: all 0.2s ease;
 
   &--checked {
-    border-color: #6366f1;
-    background-color: #f5f6ff;
+    border-color: #4539cc;
   }
 
   &__checkbox {
@@ -64,12 +62,15 @@ defineEmits(["toggle"]);
   &__name {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #111827;
+    color: #414651;
   }
 
   &__role {
-    font-size: 0.75rem;
-    color: #6b7280;
+    font-size: 0.875rem;
+    color: #535862;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
   }
 }
 </style>
