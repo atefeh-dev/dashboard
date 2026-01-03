@@ -8,17 +8,24 @@
       class="contact-item__checkbox"
     />
     <label :for="`contact-${contact.id}`" class="contact-item__label">
-      <span class="contact-item__name">
-        {{ contact.name }}
+      <span class="contact-item__check-wrapper">
+        <CheckIcon v-if="checked" class="contact-item__check-icon" />
       </span>
-      <span class="contact-item__role">
-        {{ !isexternal ? contact.role : "Added from contacts" }}
+      <span class="contact-item__text">
+        <span class="contact-item__name">
+          {{ contact.name }}
+        </span>
+        <span class="contact-item__role">
+          {{ !isexternal ? contact.role : "Added from contacts" }}
+        </span>
       </span>
     </label>
   </div>
 </template>
 
 <script setup>
+import CheckIcon from "@/assets/icons/common/check.svg"; // Update path to your icon
+
 defineProps({
   contact: { type: Object, required: true },
   checked: { type: Boolean, default: false },
@@ -43,20 +50,79 @@ defineEmits(["toggle"]);
     border-color: #4539cc;
   }
 
+  // Hide the default checkbox
   &__checkbox {
-    cursor: pointer;
-    appearance: auto;
-    -webkit-appearance: checkbox;
-    -moz-appearance: checkbox;
-    width: 16px;
-    height: 16px;
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
   }
 
   &__label {
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    align-items: center;
+    gap: 0.75rem;
     cursor: pointer;
+    flex: 1;
+  }
+
+  // Custom checkbox wrapper
+  &__check-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+
+    // When checked, change background
+    .contact-item__checkbox:checked + .contact-item__label & {
+      background-color: #4539cc;
+      border-color: #4539cc;
+    }
+
+    // Hover effect
+    .contact-item__label:hover & {
+      border-color: #9ca3af;
+    }
+
+    .contact-item__checkbox:checked + .contact-item__label:hover & {
+      background-color: #5145d4;
+      border-color: #5145d4;
+    }
+  }
+
+  // Custom check icon
+  &__check-icon {
+    width: 12px;
+    height: 12px;
+    color: #ffffff;
+    animation: checkAppear 0.2s ease;
+  }
+
+  @keyframes checkAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    flex: 1;
   }
 
   &__name {

@@ -125,8 +125,13 @@
               :disabled="isSending"
             />
             <label for="my-email" class="my-email__label">
-              Send to my email
-              <span class="my-email__address">{{ userEmail }}</span>
+              <span class="my-email__check-box">
+                <CheckIcon v-if="sendToMyEmail" class="my-email__check-icon" />
+              </span>
+              <span class="my-email__text">
+                Send to my email
+                <span class="my-email__address">{{ userEmail }}</span>
+              </span>
             </label>
           </div>
         </div>
@@ -209,6 +214,7 @@ import AppButton from "@/components/ui/AppButton.vue";
 import AppSelect from "@/components/ui/AppSelect.vue";
 import ErrorBoundary from "./ErrorBoundary.vue";
 import ContactSelectItem from "../contact/ContactSelectItem.vue";
+import CheckIcon from "@/assets/icons/common/check.svg"; // Update path to your icon
 import { useContactsStore } from "@/stores/useContactsStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useFormPersistence } from "@/composables/useFormPersistence";
@@ -282,14 +288,14 @@ const generatedDocuments = computed(() => {
       status: "completed",
       format: "pdf",
     },
-    {
-      id: 2,
-      name: `${baseFilename}.docx`,
-      displayName: `${documentName} (Word)`,
-      size: calculateEstimatedSize("docx"),
-      status: "completed",
-      format: "docx",
-    },
+    // {
+    //   id: 2,
+    //   name: `${baseFilename}.docx`,
+    //   displayName: `${documentName} (Word)`,
+    //   size: calculateEstimatedSize("docx"),
+    //   status: "completed",
+    //   format: "docx",
+    // },
   ];
 
   if (props.template?.supportsHTML) {
@@ -733,7 +739,7 @@ useKeyboardShortcuts({
     font-size: 0.875rem;
     font-weight: 600;
     color: #111827;
-    margin: 0 0 0 0;
+    margin: 0;
     line-height: 1.4;
   }
 
@@ -742,7 +748,6 @@ useKeyboardShortcuts({
     color: #535862;
     margin: 0;
     font-weight: 400;
-    /* line-height: 1.5; */
   }
 
   &__actions {
@@ -770,15 +775,6 @@ useKeyboardShortcuts({
     &.animate-spin {
       animation: spin 1s linear infinite;
     }
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
   }
 }
 
@@ -832,37 +828,94 @@ useKeyboardShortcuts({
 .my-email {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   margin: 1rem 0;
 
+  // Hide native checkbox
   &__checkbox {
-    width: 1.25rem;
-    height: 1.25rem;
-    cursor: pointer;
-    accent-color: #6366f1;
-    flex-shrink: 0;
-    transition: all 0.2s ease;
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
-
-    &:hover:not(:disabled) {
-      transform: scale(1.05);
-    }
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
   }
 
   &__label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
+
+  // Custom checkbox
+  &__check-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+
+    // When checked
+    .my-email__checkbox:checked + .my-email__label & {
+      background-color: #4539cc;
+      border-color: #4539cc;
+    }
+
+    // Hover effect
+    .my-email__label:hover & {
+      border-color: #9ca3af;
+    }
+
+    .my-email__checkbox:checked + .my-email__label:hover & {
+      background-color: #5145d4;
+      border-color: #5145d4;
+    }
+
+    // Disabled state
+    .my-email__checkbox:disabled + .my-email__label & {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  // Check icon
+  &__check-icon {
+    width: 12px;
+    height: 12px;
+    color: #ffffff;
+    animation: checkAppear 0.2s ease;
+  }
+
+  @keyframes checkAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  &__text {
     font-size: 0.875rem;
     font-weight: 500;
     color: #414651;
-    cursor: pointer;
     user-select: none;
     transition: color 0.2s ease;
 
-    &:hover {
-      color: #6366f1;
+    .my-email__label:hover & {
+      color: #4539cc;
+    }
+
+    .my-email__checkbox:disabled + .my-email__label & {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   }
 
@@ -874,9 +927,66 @@ useKeyboardShortcuts({
   }
 }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
+.validation-errors {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #ef4444;
+  border-radius: 0.5rem;
+  margin-top: 1.5rem;
+  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  &__icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    color: #ef4444;
+    margin-top: 0.125rem;
+  }
+
+  &__content {
+    flex: 1;
+  }
+
+  &__title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #991b1b;
+    margin: 0 0 0.5rem 0;
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #991b1b;
+
+    li {
+      margin-bottom: 0.25rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      &::before {
+        content: "• ";
+        margin-right: 0.25rem;
+      }
+    }
+  }
 }
 </style>

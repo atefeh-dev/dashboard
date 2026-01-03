@@ -11,7 +11,12 @@
         @change="handleToggle"
       />
       <label :for="checkboxId" class="alternative-email__label">
-        Send to an alternative email
+        <span class="alternative-email__check-box">
+          <CheckIcon v-if="isEnabled" class="alternative-email__check-icon" />
+        </span>
+        <span class="alternative-email__label-text">
+          Send to an alternative email
+        </span>
       </label>
     </div>
 
@@ -55,6 +60,7 @@
 <script setup>
 import { ref, computed, watch, nextTick } from "vue";
 import { Mail } from "lucide-vue-next";
+import CheckIcon from "@/assets/icons/common/check.svg"; // Update path to your icon
 
 const props = defineProps({
   modelValue: {
@@ -247,37 +253,95 @@ defineExpose({
   &__checkbox-wrapper {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    margin-bottom: 1rem;
   }
 
+  // Hide native checkbox
   &__checkbox {
-    width: 1.25rem;
-    height: 1.25rem;
-    cursor: pointer;
-    accent-color: #4539cc;
-    flex-shrink: 0;
-    transition: all 0.2s ease;
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
-
-    &:hover:not(:disabled) {
-      transform: scale(1.05);
-    }
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
   }
 
   &__label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
+
+  // Custom checkbox
+  &__check-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+
+    // When checked
+    .alternative-email__checkbox:checked + .alternative-email__label & {
+      background-color: #4539cc;
+      border-color: #4539cc;
+    }
+
+    // Hover effect
+    .alternative-email__label:hover & {
+      border-color: #9ca3af;
+    }
+
+    .alternative-email__checkbox:checked + .alternative-email__label:hover & {
+      background-color: #5145d4;
+      border-color: #5145d4;
+    }
+
+    // Disabled state
+    .alternative-email__checkbox:disabled + .alternative-email__label & {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  // Check icon
+  &__check-icon {
+    width: 12px;
+    height: 12px;
+    color: #ffffff;
+    animation: checkAppear 0.2s ease;
+  }
+
+  @keyframes checkAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  &__label-text {
     font-size: 0.875rem;
     font-weight: 500;
     color: #414651;
-    cursor: pointer;
     user-select: none;
     transition: color 0.2s ease;
 
-    &:hover {
+    .alternative-email__label:hover & {
       color: #4539cc;
+    }
+
+    .alternative-email__checkbox:disabled + .alternative-email__label & {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   }
 
@@ -366,21 +430,5 @@ defineExpose({
       flex-shrink: 0;
     }
   }
-}
-
-// Error slide transition
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.slide-fade-enter-from {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.slide-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
 }
 </style>
