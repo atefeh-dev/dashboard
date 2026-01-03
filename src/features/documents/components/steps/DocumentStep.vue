@@ -699,7 +699,7 @@ useKeyboardShortcuts({
   &__section-row {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 3rem;
+    gap: 2rem;
     align-items: start;
 
     @media (max-width: 1024px) {
