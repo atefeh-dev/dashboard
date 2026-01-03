@@ -7,7 +7,6 @@
       @change="$emit('toggle', contact.id)"
       class="contact-item__checkbox"
     />
-
     <label :for="`contact-${contact.id}`" class="contact-item__label">
       <span class="contact-item__name">
         {{ contact.name }}
@@ -20,16 +19,15 @@
 </template>
 
 <script setup>
-import { boolean } from "yup";
-
 defineProps({
   contact: { type: Object, required: true },
   checked: { type: Boolean, default: false },
-  isexternal: { type: boolean, default: false },
+  isexternal: { type: Boolean, default: false },
 });
 
 defineEmits(["toggle"]);
 </script>
+
 <style scoped lang="scss">
 .contact-item {
   display: flex;
@@ -37,7 +35,6 @@ defineEmits(["toggle"]);
   gap: 0.75rem;
   padding: 1rem;
   margin-bottom: 0.75rem;
-
   background-color: #ffffff;
   border: 2px solid #e5e7eb;
   border-radius: 0.5rem;
@@ -50,11 +47,9 @@ defineEmits(["toggle"]);
 
   &__checkbox {
     cursor: pointer;
-
     appearance: auto;
     -webkit-appearance: checkbox;
     -moz-appearance: checkbox;
-
     width: 16px;
     height: 16px;
   }

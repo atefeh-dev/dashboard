@@ -973,7 +973,10 @@ const ResizableImage = Node.create({
 // Tiptap Editor
 const editor = useEditor({
   extensions: [
-    StarterKit,
+    StarterKit.configure({
+      link: false,
+      underline: false,
+    }),
     UnderlineExtension,
     TextStyle,
     Color,

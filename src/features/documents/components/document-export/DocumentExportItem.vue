@@ -2,8 +2,7 @@
   <div class="document-list__item">
     <div class="document-list__info">
       <div class="document-list__icon">
-        <FileText class="document-list__icon-svg" />
-        <span class="document-list__badge">PDF</span>
+        <PdfIcon />
       </div>
 
       <div class="document-list__details">
@@ -11,7 +10,7 @@
         <div class="document-list__meta">
           <span class="document-list__size">{{ document.size }}</span>
           <div class="document-list__status">
-            <Check class="document-list__status-icon" />
+            <CheckCircleIcon />
             <span>{{ document.status }}</span>
           </div>
         </div>
@@ -19,7 +18,7 @@
     </div>
 
     <AppButton variant="ghost" size="sm" @click="$emit('download', document)">
-      <Download class="document-list__download-icon" />
+      <ExportIcon />
       Download
     </AppButton>
   </div>
@@ -27,7 +26,10 @@
 
 <script setup>
 import { Check, FileText, Download } from "lucide-vue-next";
+import PdfIcon from "@/assets/icons/common/pdf-icon.svg";
 import AppButton from "@/components/ui/AppButton.vue";
+import CheckCircleIcon from "@/assets/icons/common/check-circle.svg";
+import ExportIcon from "@/assets/icons/common/export-icon.svg";
 
 defineProps({
   document: {
@@ -46,8 +48,8 @@ defineEmits(["download"]);
     align-items: center;
     padding: 1rem;
     background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
+    border: 1px solid #e9eaeb;
+    border-radius: 0.75rem;
     transition: box-shadow 0.2s;
 
     &:hover {
@@ -63,15 +65,16 @@ defineEmits(["download"]);
 
   &__icon {
     position: relative;
-    width: 2.5rem;
-    height: 2.5rem;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #fef2f2;
-    border-radius: 0.375rem;
   }
-
+  &__size {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #535862;
+  }
   &__icon-svg {
     width: 1.25rem;
     height: 1.25rem;
@@ -97,14 +100,14 @@ defineEmits(["download"]);
   &__name {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #111827;
+    color: #414651;
     margin: 0 0 0.25rem 0;
   }
 
   &__meta {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
     font-size: 0.75rem;
     color: #6b7280;
   }
@@ -113,7 +116,9 @@ defineEmits(["download"]);
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    color: #10b981;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #535862;
   }
 
   &__status-icon {

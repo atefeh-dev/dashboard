@@ -6,19 +6,25 @@
       @error="handleError"
       @recover="handleRecover"
     >
-      <!-- Documents Export Section -->
-      <div class="document-step__section">
+      <!-- Header Section -->
+      <div class="document-step__header">
         <h2 class="document-step__heading">Here are your documents</h2>
-        <p class="document-step__subheading">
-          Generated from your template and ready to send
-        </p>
+        <p class="document-step__subheading">They need you action</p>
+      </div>
 
-        <div class="document-step__subsection">
+      <!-- Horizontal Divider -->
+      <div class="document-step__divider"></div>
+
+      <!-- ROW 1: Export Documents Section -->
+      <div class="document-step__section-row">
+        <div class="document-step__section-header">
           <h3 class="document-step__subsection-title">Export documents</h3>
           <p class="document-step__subsection-subtitle">
-            You can download them here
+            You can download it here
           </p>
+        </div>
 
+        <div class="document-step__section-content">
           <div v-if="generatedDocuments.length > 0" class="document-list">
             <DocumentExportList
               :documents="generatedDocuments"
@@ -34,102 +40,112 @@
         </div>
       </div>
 
-      <!-- Email Section -->
-      <div class="document-step__section">
-        <h3 class="document-step__subsection-title">
-          Email
-          {{ generatedDocuments.length > 1 ? "these" : "this" }} document{{
-            generatedDocuments.length > 1 ? "s" : ""
-          }}
-        </h3>
-        <p class="document-step__subsection-subtitle">
-          Send to contacts or alternative email
-        </p>
+      <!-- Horizontal Divider Between Sections -->
+      <div class="document-step__divider"></div>
 
-        <!-- Selected Recipients (Internal Contacts) -->
-        <div v-if="internalContacts.length > 0" class="email-recipients">
-          <ContactSelectItem
-            v-for="recipient in internalContacts"
-            :key="recipient.id"
-            :contact="recipient"
-            :checked="isRecipientSelected(recipient.id)"
-            @toggle="toggleRecipient"
-          />
+      <!-- ROW 2: Email Section -->
+      <div class="document-step__section-row">
+        <div class="document-step__section-header">
+          <h3 class="document-step__subsection-title">
+            Email this
+            {{ generatedDocuments.length > 1 ? "(these)" : "" }} document{{
+              generatedDocuments.length > 1 ? "s" : ""
+            }}
+          </h3>
+          <p class="document-step__subsection-subtitle">
+            You can send them to contacts
+          </p>
         </div>
 
-        <!-- Selected External Contacts -->
-        <div
-          v-if="selectedExternalContacts.length > 0"
-          class="email-recipients"
-        >
-          <ContactSelectItem
-            v-for="contact in selectedExternalContacts"
-            :key="contact.id"
-            :contact="contact"
-            :checked="isRecipientSelected(contact.id)"
-            @toggle="toggleRecipient"
-            :isexternal="true"
-          />
-        </div>
-
-        <!-- Add External Contact Dropdown -->
-        <div class="add-contact">
-          <p class="add-contact__label">Add from your contacts</p>
-          <AppSelect
-            v-model="selectedContactId"
-            class="add-contact__select"
-            @update:model-value="handleContactSelect"
-            :disabled="isSending"
-          >
-            <option value="" selected hidden>Select from People</option>
-            <option
-              v-for="contact in availableExternalContacts"
-              :key="contact.id"
-              :value="contact.id"
-            >
-              {{ contact.name }} ({{ contact.email }})
-            </option>
-          </AppSelect>
-        </div>
-
-        <!-- Alternative Email Component -->
-        <AppAlternativeEmailInput
-          v-model="alternativeEmail"
-          v-model:enabled="sendToAlternativeEmail"
-          :disabled="isSending"
-          @error="handleAlternativeEmailError"
-        />
-
-        <!-- Send to My Email -->
-        <div class="my-email">
-          <input
-            type="checkbox"
-            id="my-email"
-            v-model="sendToMyEmail"
-            class="my-email__checkbox"
-            :disabled="isSending"
-          />
-          <label for="my-email" class="my-email__label">
-            Send to my email
-            <span class="my-email__address">{{ userEmail }}</span>
-          </label>
-        </div>
-
-        <!-- Validation Error Summary -->
-        <transition name="fade">
-          <div v-if="validationErrors.length > 0" class="validation-errors">
-            <AlertCircle class="validation-errors__icon" />
-            <div class="validation-errors__content">
-              <p class="validation-errors__title">Please fix the following:</p>
-              <ul class="validation-errors__list">
-                <li v-for="(error, index) in validationErrors" :key="index">
-                  {{ error }}
-                </li>
-              </ul>
-            </div>
+        <div class="document-step__section-content">
+          <!-- Selected Recipients (Internal Contacts) -->
+          <div v-if="internalContacts.length > 0" class="email-recipients">
+            <ContactSelectItem
+              v-for="recipient in internalContacts"
+              :key="recipient.id"
+              :contact="recipient"
+              :checked="isRecipientSelected(recipient.id)"
+              :is-external="false"
+              @toggle="toggleRecipient"
+            />
           </div>
-        </transition>
+
+          <!-- Selected External Contacts -->
+          <div
+            v-if="selectedExternalContacts.length > 0"
+            class="email-recipients"
+          >
+            <ContactSelectItem
+              v-for="contact in selectedExternalContacts"
+              :key="contact.id"
+              :contact="contact"
+              :checked="isRecipientSelected(contact.id)"
+              :is-external="true"
+              @toggle="toggleRecipient"
+            />
+          </div>
+
+          <!-- Add External Contact Dropdown -->
+          <div class="add-contact">
+            <p class="add-contact__label">
+              You can add from your contacts here
+            </p>
+            <AppSelect
+              v-model="selectedContactId"
+              class="add-contact__select"
+              @update:model-value="handleContactSelect"
+              :disabled="isSending"
+            >
+              <option value="" selected hidden>Select from People</option>
+              <option
+                v-for="contact in availableExternalContacts"
+                :key="contact.id"
+                :value="contact.id"
+              >
+                {{ contact.name }} ({{ contact.email }})
+              </option>
+            </AppSelect>
+          </div>
+
+          <!-- Alternative Email Component -->
+          <AppAlternativeEmailInput
+            v-model="alternativeEmail"
+            v-model:enabled="sendToAlternativeEmail"
+            :disabled="isSending"
+            @error="handleAlternativeEmailError"
+          />
+
+          <!-- Send to My Email -->
+          <div class="my-email">
+            <input
+              type="checkbox"
+              id="my-email"
+              v-model="sendToMyEmail"
+              class="my-email__checkbox"
+              :disabled="isSending"
+            />
+            <label for="my-email" class="my-email__label">
+              Send to my email
+              <span class="my-email__address">{{ userEmail }}</span>
+            </label>
+          </div>
+        </div>
       </div>
+
+      <!-- Validation Error Summary -->
+      <transition name="fade">
+        <div v-if="validationErrors.length > 0" class="validation-errors">
+          <AlertCircle class="validation-errors__icon" />
+          <div class="validation-errors__content">
+            <p class="validation-errors__title">Please fix the following:</p>
+            <ul class="validation-errors__list">
+              <li v-for="(error, index) in validationErrors" :key="index">
+                {{ error }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </transition>
 
       <!-- Action Buttons -->
       <div class="document-step__actions">
@@ -146,7 +162,7 @@
         >
           <Loader v-if="isSending" class="document-step__icon animate-spin" />
           <Send v-else class="document-step__icon" />
-          {{ isSending ? "Sending..." : "Send Documents" }}
+          {{ isSending ? "Sending..." : "Send" }}
         </AppButton>
       </div>
 
@@ -651,38 +667,80 @@ useKeyboardShortcuts({
 
 <style scoped lang="scss">
 .document-step {
-  &__section {
-    margin-bottom: 3rem;
+  // Header section
+  &__header {
+    margin-bottom: 1.5rem;
   }
 
   &__heading {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
-    color: #111827;
-    margin: 0 0 0.25rem 0;
+    color: #181d27;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
   }
 
   &__subheading {
     font-size: 0.875rem;
-    color: #6b7280;
-    margin: 0 0 2rem 0;
+    color: #535862;
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.5;
   }
 
-  &__subsection {
-    margin-bottom: 2rem;
+  // Horizontal divider line
+  &__divider {
+    height: 1px;
+    background-color: #e5e7eb;
+    margin: 1.5rem 0;
+  }
+
+  // Each section row (Export or Email)
+  &__section-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3rem;
+    align-items: start;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__section-header {
+    min-width: 200px;
+    padding-top: 0.25rem;
+    flex-shrink: 0;
+
+    @media (max-width: 1024px) {
+      min-width: auto;
+    }
+  }
+
+  &__section-content {
+    flex: 1;
+    min-width: 0;
   }
 
   &__subsection-title {
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: #111827;
-    margin: 0 0 0.25rem 0;
+    margin: 0 0 0 0;
+    line-height: 1.4;
   }
 
   &__subsection-subtitle {
     font-size: 0.875rem;
-    color: #6b7280;
-    margin: 0 0 1.5rem 0;
+    color: #535862;
+    margin: 0;
+    font-weight: 400;
+    /* line-height: 1.5; */
   }
 
   &__actions {
@@ -693,6 +751,14 @@ useKeyboardShortcuts({
     padding-top: 2rem;
     margin-top: 2rem;
     border-top: 1px solid #e5e7eb;
+
+    @media (max-width: 640px) {
+      flex-direction: column-reverse;
+
+      button {
+        width: 100%;
+      }
+    }
   }
 
   &__icon {
