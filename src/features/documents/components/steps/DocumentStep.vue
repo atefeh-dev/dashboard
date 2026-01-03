@@ -154,19 +154,18 @@
 
       <!-- Action Buttons -->
       <div class="document-step__actions">
-        <AppButton variant="ghost" @click="handleBack" :disabled="isSending">
+        <AppButton variant="blank" @click="handleBack" :disabled="isSending">
           <Loader v-if="isSaving" class="document-step__icon animate-spin" />
-          <ChevronLeft v-else class="document-step__icon" />
+          <ArrowNarrowLetIcon />
           {{ isSaving ? "Saving..." : "Back" }}
         </AppButton>
         <AppButton
           variant="primary"
-          size="lg"
+          size="md"
           @click="sendDocuments"
           :disabled="isSending || generatedDocuments.length === 0"
         >
           <Loader v-if="isSending" class="document-step__icon animate-spin" />
-          <Send v-else class="document-step__icon" />
           {{ isSending ? "Sending..." : "Send" }}
         </AppButton>
       </div>
@@ -218,6 +217,8 @@ import CheckIcon from "@/assets/icons/common/check.svg"; // Update path to your 
 import { useContactsStore } from "@/stores/useContactsStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useFormPersistence } from "@/composables/useFormPersistence";
+import ArrowNarrowLetIcon from "@/assets/icons/common/arrow-narrow-left.svg";
+
 import {
   useKeyboardShortcuts,
   getShortcutLabels,
@@ -755,7 +756,7 @@ useKeyboardShortcuts({
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    padding-top: 2rem;
+    padding-top: 1.25rem;
     margin-top: 2rem;
     border-top: 1px solid #e5e7eb;
 

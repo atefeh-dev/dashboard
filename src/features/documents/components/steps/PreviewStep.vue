@@ -62,9 +62,9 @@
 
         <!-- Actions -->
         <div class="form-actions">
-          <AppButton variant="ghost" @click="handleBack" :disabled="isSaving">
+          <AppButton variant="blank" @click="handleBack" :disabled="isSaving">
             <Loader v-if="isSaving" class="form-actions__icon animate-spin" />
-            <ArrowNarrowLetIcon v-else class="form-actions__icon" />
+            <ArrowNarrowLetIcon v-else />
             {{ isSaving ? "Saving..." : "Back" }}
           </AppButton>
 

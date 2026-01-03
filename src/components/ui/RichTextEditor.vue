@@ -2544,7 +2544,7 @@ onBeforeUnmount(() => {
     &.is-editor-empty:first-child::before {
       content: attr(data-placeholder);
       float: left;
-      color: #9ca3af;
+      color: #fafafa;
       pointer-events: none;
       height: 0;
     }
@@ -2553,12 +2553,12 @@ onBeforeUnmount(() => {
 
 /* Text selection highlight */
 :deep(.ProseMirror ::selection) {
-  background: #7f56d9;
+  background: #9e77e5;
   color: #ffffff;
 }
 
 :deep(.ProseMirror ::-moz-selection) {
-  background: #7f56d9;
+  background: #9e77e5;
   color: #ffffff;
 }
 </style>
