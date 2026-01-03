@@ -208,7 +208,7 @@ const getStepOpacity = (item, index) => {
   margin: 0 auto;
 
   &[data-step="1"] {
-    max-width: 67rem;
+    max-width: 69rem;
   }
 
   @media (max-width: 1024px) {
@@ -260,7 +260,7 @@ const getStepOpacity = (item, index) => {
   flex-direction: column;
   gap: 0;
   max-width: 20rem;
-  padding: 1.5rem;
+  padding: 1rem 1.5rem;
   background-color: #ffffff;
   border: 1px solid #d5d7da;
   border-radius: 0.75rem;

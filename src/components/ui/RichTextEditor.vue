@@ -316,12 +316,9 @@
               >
                 Remove
               </button>
-              <button
-                @click="insertLink"
-                class="popover-form__btn popover-form__btn--primary"
-              >
+              <AppButton @click="insertLink" variant="primary" size="sm">
                 Insert
-              </button>
+              </AppButton>
             </div>
           </div>
         </div>
@@ -385,7 +382,7 @@
             <div class="popover-form__actions">
               <AppButton
                 variant="primary"
-                size="md"
+                size="sm"
                 @click="insertImageFromUrl"
               >
                 Insert URL
@@ -939,7 +936,7 @@ const ResizableImage = Node.create({
           img.src = updatedNode.attrs.src;
           if (updatedNode.attrs.width) {
             img.style.width = updatedNode.attrs.width;
-            container.style.width = updatedNode.attrs.width; // ← ADD THIS
+            container.style.width = updatedNode.attrs.width; // ← ADD THIS LINE
           }
           if (updatedNode.attrs.height) {
             img.style.height = updatedNode.attrs.height;
@@ -1689,27 +1686,13 @@ onBeforeUnmount(() => {
   left: 0;
   z-index: 50;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 12px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #d5d7da;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
   min-width: 280px;
   max-width: 320px;
   white-space: normal;
-  animation: popoverFadeIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  transform-origin: top left;
-
-  @keyframes popoverFadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95) translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
 
   &--wide {
     min-width: 300px;
@@ -1726,10 +1709,10 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 13px;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e9eaeb;
+    font-size: 0.875rem;
     font-weight: 600;
     color: #111827;
   }
@@ -1738,25 +1721,22 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     background: transparent;
     border: none;
-    border-radius: 4px;
-    font-size: 18px;
+    border-radius: 0.375rem;
+    font-size: 20px;
     color: #6b7280;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-origin: center;
+    transition: background 0.15s ease, color 0.15s ease;
 
     &:hover {
       background: #f3f4f6;
       color: #111827;
-      transform: scale(1.1) rotate(90deg);
     }
 
     &:active {
-      transform: scale(0.95) rotate(90deg);
       background: #e5e7eb;
     }
   }
@@ -1764,78 +1744,44 @@ onBeforeUnmount(() => {
   &__colors {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 0.75rem;
   }
 
   &__color {
     width: 28px;
     height: 28px;
-    border-radius: 50%; // Make circles
-    border: none;
+    border-radius: 0.375rem;
+    border: 1px solid #e5e7eb;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: border-color 0.15s ease, transform 0.1s ease;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    transform-origin: center;
 
     &:hover {
-      transform: scale(1.25) rotate(5deg);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-      z-index: 10;
+      border-color: #9ca3af;
+      transform: scale(1.05);
     }
 
     &:active {
-      transform: scale(1.15) rotate(0deg);
-      transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: scale(0.95);
     }
 
     &--active {
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
-      transform: scale(1.1);
-
-      &:hover {
-        transform: scale(1.3) rotate(5deg);
-      }
+      border: 2px solid #111827;
+      box-shadow: 0 0 0 2px #e5e7eb;
     }
   }
 
   &__color-check {
     pointer-events: none;
-    animation: checkmarkPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-
-    @keyframes checkmarkPop {
-      0% {
-        transform: scale(0);
-        opacity: 0;
-      }
-      50% {
-        transform: scale(1.2);
-      }
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
   }
 
   &__custom {
-    padding-top: 12px;
-    border-top: 1px solid #e5e7eb;
-    animation: customColorSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    @keyframes customColorSlideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-4px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+    padding-top: 0.75rem;
+    border-top: 1px solid #e9eaeb;
   }
 
   &__custom-label {
@@ -1843,42 +1789,31 @@ onBeforeUnmount(() => {
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 4px;
-    border-radius: 4px;
+    padding: 0.375rem;
+    border-radius: 0.375rem;
+    transition: background 0.15s ease;
 
     &:hover {
       background: #f9fafb;
     }
 
     span {
-      font-size: 13px;
+      font-size: 0.875rem;
       color: #374151;
       font-weight: 500;
-      transition: color 0.2s ease;
-    }
-
-    &:hover span {
-      color: #111827;
     }
   }
 
   &__input {
-    width: 50px;
+    width: 48px;
     height: 32px;
-    border: 2px solid #e5e7eb;
-    border-radius: 6px;
+    border: 1px solid #d5d7da;
+    border-radius: 0.375rem;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: border-color 0.15s ease;
 
     &:hover {
-      border-color: #3b82f6;
-      transform: scale(1.05);
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-    }
-
-    &:active {
-      transform: scale(0.98);
+      border-color: #9ca3af;
     }
 
     &::-webkit-color-swatch-wrapper {
@@ -1887,7 +1822,7 @@ onBeforeUnmount(() => {
 
     &::-webkit-color-swatch {
       border: none;
-      border-radius: 4px;
+      border-radius: 0.25rem;
     }
   }
 }
@@ -1895,97 +1830,61 @@ onBeforeUnmount(() => {
 // Popover Form (for Link and Image)
 .popover-form {
   &__hint {
-    padding: 10px 12px;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    border-left: 3px solid #3b82f6;
-    border-radius: 6px;
-    font-size: 12px;
-    color: #1e40af;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    line-height: 1.5;
+    padding: 0.75rem;
+    background: #fafafa;
+    border: 1px solid #e9eaeb;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+    line-height: 1.4;
     font-weight: 500;
-    animation: hintSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
-
-    @keyframes hintSlideIn {
-      from {
-        opacity: 0;
-        transform: translateX(-8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
   }
 
   &__input {
     width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 14px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d5d7da;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
     color: #111827;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-bottom: 12px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    margin-bottom: 0.75rem;
+    background: #ffffff;
 
     &:hover {
-      border-color: #d1d5db;
-      background: #fafafa;
+      border-color: #9ca3af;
     }
 
     &:focus {
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      border-color: #111827;
       background: #ffffff;
-      transform: translateY(-1px);
     }
 
     &::placeholder {
       color: #9ca3af;
-      transition: color 0.2s ease;
-    }
-
-    &:focus::placeholder {
-      color: #cbd5e1;
     }
   }
 
   &__divider {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin: 16px 0;
-    animation: dividerSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    @keyframes dividerSlideIn {
-      from {
-        opacity: 0;
-        transform: scaleX(0.8);
-      }
-      to {
-        opacity: 1;
-        transform: scaleX(1);
-      }
-    }
+    gap: 0.75rem;
+    margin: 1rem 0;
 
     &::before,
     &::after {
       content: "";
       flex: 1;
       height: 1px;
-      background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+      background: #e9eaeb;
     }
 
     span {
-      font-size: 12px;
-      color: #6b7280;
+      font-size: 0.75rem;
+      color: #9ca3af;
       font-weight: 500;
-      padding: 0 4px;
     }
   }
 
@@ -1993,68 +1892,45 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 14px 16px;
-    border: 2px dashed #cbd5e1;
-    border-radius: 8px;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d5d7da;
+    border-radius: 0.5rem;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-bottom: 12px;
-    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-    position: relative;
-    overflow: hidden;
-
-    &::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        135deg,
-        rgba(59, 130, 246, 0.05) 0%,
-        rgba(219, 234, 254, 0.05) 100%
-      );
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
+    transition: background 0.15s ease, border-color 0.15s ease;
+    margin-bottom: 0.75rem;
+    background: #fafafa;
 
     &:hover {
-      border-color: #3b82f6;
-      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-
-      &::before {
-        opacity: 1;
-      }
+      background: #f3f4f6;
+      border-color: #9ca3af;
 
       .popover-form__upload-icon {
-        color: #3b82f6;
-        transform: scale(1.2) rotate(10deg);
+        color: #111827;
       }
 
       span {
-        color: #1e40af;
+        color: #111827;
       }
     }
 
     &:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+      background: #e5e7eb;
     }
 
     span {
-      font-size: 13px;
-      color: #374151;
-      font-weight: 600;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 0.875rem;
+      color: #6b7280;
+      font-weight: 500;
+      transition: color 0.15s ease;
     }
   }
 
   &__upload-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     color: #6b7280;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: color 0.15s ease;
   }
 
   &__file-input {
@@ -2063,71 +1939,48 @@ onBeforeUnmount(() => {
 
   &__actions {
     display: flex;
-    gap: 8px;
+    gap: 0.5rem;
     justify-content: flex-end;
   }
 
   &__btn {
-    padding: 6px 14px;
-    border: none;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid #d5d7da;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-
-    &::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.2),
-        rgba(255, 255, 255, 0)
-      );
-      opacity: 0;
-      transition: opacity 0.2s ease;
-    }
-
-    &:hover::before {
-      opacity: 1;
-    }
+    transition: all 0.15s ease;
+    background: #ffffff;
+    color: #374151;
 
     &--primary {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      background: #111827;
       color: #ffffff;
-      box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+      border-color: #111827;
 
       &:hover {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        background: #1f2937;
+        border-color: #1f2937;
       }
 
       &:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        background: #374151;
       }
     }
 
     &--danger {
       background: #ffffff;
       color: #ef4444;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      border-color: #d5d7da;
 
       &:hover {
         background: #fef2f2;
         border-color: #fecaca;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.1);
       }
 
       &:active {
         background: #fee2e2;
-        transform: translateY(0);
       }
     }
   }
