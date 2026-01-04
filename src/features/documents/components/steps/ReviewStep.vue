@@ -36,6 +36,14 @@
                   >
                     Edited
                   </span>
+                  <!-- Repeated items count badge -->
+                  <span
+                    v-if="isRepeatedSection(section.key)"
+                    class="repeat-count-badge"
+                    :title="`${getItemsCount(section.key)} items`"
+                  >
+                    {{ getItemsCount(section.key) }} items
+                  </span>
                 </div>
                 <p class="review-card__subtitle">{{ section.subtitle }}</p>
               </div>
@@ -62,73 +70,195 @@
               v-if="!expandedSections.includes(sectionIndex)"
               class="review-card__summary"
             >
-              <div
-                v-for="(field, fieldIndex) in section.fields"
-                :key="fieldIndex"
-                class="summary-field"
-              >
-                <span class="summary-field__label">{{ field.label }}:</span>
-                <span class="summary-field__value">
-                  {{ formatFieldValue(section.key, field) }}
-                </span>
+              <!-- For repeated items -->
+              <div v-if="isRepeatedSection(section.key)">
+                <div
+                  v-for="(item, itemIndex) in getRepeatedItems(section.key)"
+                  :key="itemIndex"
+                  class="repeated-item-summary"
+                >
+                  <div class="repeated-item-summary__header">
+                    <strong>{{ section.title }} {{ itemIndex + 1 }}</strong>
+                  </div>
+                  <div
+                    v-for="(field, fieldIndex) in section.fields"
+                    :key="fieldIndex"
+                    class="summary-field"
+                  >
+                    <span class="summary-field__label">{{ field.label }}:</span>
+                    <span class="summary-field__value">
+                      {{ formatRepeatedFieldValue(item, field) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- For non-repeated items -->
+              <div v-else>
+                <div
+                  v-for="(field, fieldIndex) in section.fields"
+                  :key="fieldIndex"
+                  class="summary-field"
+                >
+                  <span class="summary-field__label">{{ field.label }}:</span>
+                  <span class="summary-field__value">
+                    {{ formatFieldValue(section.key, field) }}
+                  </span>
+                </div>
               </div>
             </div>
 
             <!-- Card Body - Editable Fields (when expanded) -->
             <div v-else class="review-card__body">
-              <div
-                v-for="(field, fieldIndex) in section.fields"
-                :key="fieldIndex"
-                class="review-field"
-              >
-                <label class="review-field__label">
-                  {{ field.label }}
-                  <span v-if="field.required" class="review-field__required"
-                    >*</span
+              <!-- For repeated items -->
+              <div v-if="isRepeatedSection(section.key)">
+                <!-- Tabs for each repeated item -->
+                <div class="review-items-tabs">
+                  <button
+                    v-for="(item, itemIndex) in localData[section.key].items"
+                    :key="itemIndex"
+                    class="review-items-tabs__tab"
+                    :class="{
+                      'review-items-tabs__tab--active':
+                        currentEditItemIndex[section.key] === itemIndex,
+                    }"
+                    @click="switchEditItem(section.key, itemIndex)"
                   >
-                </label>
+                    {{ section.title }} {{ itemIndex + 1 }}
+                  </button>
+                </div>
 
-                <!-- Text/Email Input -->
-                <AppInput
-                  v-if="field.type === 'text' || field.type === 'email'"
-                  v-model="localData[section.key][field.name]"
-                  :type="field.type"
-                  :placeholder="field.placeholder"
-                  @update:model-value="handleFieldChange(section.key)"
-                />
+                <!-- Edit fields for current item -->
+                <div class="review-fields">
+                  <div
+                    v-for="(field, fieldIndex) in section.fields"
+                    :key="fieldIndex"
+                    class="review-field"
+                  >
+                    <label class="review-field__label">
+                      {{ field.label }}
+                      <span v-if="field.required" class="review-field__required"
+                        >*</span
+                      >
+                    </label>
 
-                <!-- Input with Prefix -->
-                <AppInputWithPrefix
-                  v-else-if="field.type === 'text-prefix'"
-                  v-model="localData[section.key][field.name]"
-                  :prefix="field.prefix"
-                  :placeholder="field.placeholder"
-                  @update:model-value="handleFieldChange(section.key)"
-                />
+                    <!-- Text/Email Input -->
+                    <AppInput
+                      v-if="field.type === 'text' || field.type === 'email'"
+                      v-model="
+                        localData[section.key].items[
+                          currentEditItemIndex[section.key]
+                        ][field.name]
+                      "
+                      :type="field.type"
+                      :placeholder="field.placeholder"
+                      @update:model-value="handleFieldChange(section.key)"
+                    />
 
-                <!-- Textarea -->
-                <AppTextarea
-                  v-else-if="field.type === 'textarea'"
-                  v-model="localData[section.key][field.name]"
-                  :placeholder="field.placeholder"
-                  :rows="field.rows || 4"
-                  @update:model-value="handleFieldChange(section.key)"
-                />
+                    <!-- Input with Prefix -->
+                    <AppInputWithPrefix
+                      v-else-if="field.type === 'text-prefix'"
+                      v-model="
+                        localData[section.key].items[
+                          currentEditItemIndex[section.key]
+                        ][field.name]
+                      "
+                      :prefix="field.prefix"
+                      :placeholder="field.placeholder"
+                      @update:model-value="handleFieldChange(section.key)"
+                    />
 
-                <!-- Select -->
-                <AppSelect
-                  v-else-if="field.type === 'select'"
-                  v-model="localData[section.key][field.name]"
-                  @update:model-value="handleFieldChange(section.key)"
+                    <!-- Textarea -->
+                    <AppTextarea
+                      v-else-if="field.type === 'textarea'"
+                      v-model="
+                        localData[section.key].items[
+                          currentEditItemIndex[section.key]
+                        ][field.name]
+                      "
+                      :placeholder="field.placeholder"
+                      :rows="field.rows || 4"
+                      @update:model-value="handleFieldChange(section.key)"
+                    />
+
+                    <!-- Select -->
+                    <AppSelect
+                      v-else-if="field.type === 'select'"
+                      v-model="
+                        localData[section.key].items[
+                          currentEditItemIndex[section.key]
+                        ][field.name]
+                      "
+                      @update:model-value="handleFieldChange(section.key)"
+                    >
+                      <option
+                        v-for="option in field.options"
+                        :key="option.value"
+                        :value="option.value"
+                      >
+                        {{ option.label }}
+                      </option>
+                    </AppSelect>
+                  </div>
+                </div>
+              </div>
+
+              <!-- For non-repeated items -->
+              <div v-else class="review-fields">
+                <div
+                  v-for="(field, fieldIndex) in section.fields"
+                  :key="fieldIndex"
+                  class="review-field"
                 >
-                  <option
-                    v-for="option in field.options"
-                    :key="option.value"
-                    :value="option.value"
+                  <label class="review-field__label">
+                    {{ field.label }}
+                    <span v-if="field.required" class="review-field__required"
+                      >*</span
+                    >
+                  </label>
+
+                  <!-- Text/Email Input -->
+                  <AppInput
+                    v-if="field.type === 'text' || field.type === 'email'"
+                    v-model="localData[section.key][field.name]"
+                    :type="field.type"
+                    :placeholder="field.placeholder"
+                    @update:model-value="handleFieldChange(section.key)"
+                  />
+
+                  <!-- Input with Prefix -->
+                  <AppInputWithPrefix
+                    v-else-if="field.type === 'text-prefix'"
+                    v-model="localData[section.key][field.name]"
+                    :prefix="field.prefix"
+                    :placeholder="field.placeholder"
+                    @update:model-value="handleFieldChange(section.key)"
+                  />
+
+                  <!-- Textarea -->
+                  <AppTextarea
+                    v-else-if="field.type === 'textarea'"
+                    v-model="localData[section.key][field.name]"
+                    :placeholder="field.placeholder"
+                    :rows="field.rows || 4"
+                    @update:model-value="handleFieldChange(section.key)"
+                  />
+
+                  <!-- Select -->
+                  <AppSelect
+                    v-else-if="field.type === 'select'"
+                    v-model="localData[section.key][field.name]"
+                    @update:model-value="handleFieldChange(section.key)"
                   >
-                    {{ option.label }}
-                  </option>
-                </AppSelect>
+                    <option
+                      v-for="option in field.options"
+                      :key="option.value"
+                      :value="option.value"
+                    >
+                      {{ option.label }}
+                    </option>
+                  </AppSelect>
+                </div>
               </div>
             </div>
           </div>
@@ -143,7 +273,7 @@
             :disabled="isSaving"
           >
             <Loader v-if="isSaving" class="form-actions__icon animate-spin" />
-            <ArrowNarrowLetIcon />
+            <ArrowNarrowLetIcon v-else />
             {{ isSaving ? "Saving..." : "Back" }}
           </AppButton>
           <AppButton
@@ -209,11 +339,14 @@ const emit = defineEmits(["continue", "back", "update:data"]);
 
 const shortcutLabels = getShortcutLabels();
 
-// Track which sections are expanded (start with all collapsed for clean review)
+// Track which sections are expanded
 const expandedSections = ref([]);
 
 // Track which sections have been edited
 const editedSections = ref(new Set());
+
+// Track current edit item index for repeated sections
+const currentEditItemIndex = ref({});
 
 // Form persistence with auto-save
 const {
@@ -235,22 +368,32 @@ const {
   }
 );
 
-// Initialize local data structure properly
+// Initialize local data structure
 const initializeData = () => {
   const data = {};
   props.reviewSections.forEach((section) => {
-    data[section.key] = {};
+    // Check if this section has repeated items
+    const sectionData = props.stepData[section.key];
 
-    section.fields.forEach((field) => {
-      data[section.key][field.name] = "";
-    });
-
-    // Populate with existing data from stepData
-    if (props.stepData[section.key]) {
+    if (sectionData?.items && Array.isArray(sectionData.items)) {
+      // This is a repeated section
       data[section.key] = {
-        ...data[section.key],
-        ...props.stepData[section.key],
+        items: sectionData.items.map((item) => ({ ...item })),
       };
+      currentEditItemIndex.value[section.key] = 0;
+    } else {
+      // Normal section
+      data[section.key] = {};
+      section.fields.forEach((field) => {
+        data[section.key][field.name] = "";
+      });
+
+      if (sectionData) {
+        data[section.key] = {
+          ...data[section.key],
+          ...sectionData,
+        };
+      }
     }
   });
   return data;
@@ -273,7 +416,6 @@ watch(
 onMounted(() => {
   console.log("[Review Step] Mounted, restoring data...");
 
-  // Try to restore from emergency backup
   const backup = restoreEmergencyBackup();
   if (backup) {
     console.warn("[Review Step] Restored from emergency backup");
@@ -281,7 +423,6 @@ onMounted(() => {
     clearEmergencyBackup();
   }
 
-  // Start auto-save watching
   startWatching(() => localData.value);
 });
 
@@ -314,14 +455,35 @@ useKeyboardShortcuts({
   },
 });
 
+// Check if section is repeated
+function isRepeatedSection(sectionKey) {
+  return (
+    localData.value[sectionKey]?.items &&
+    Array.isArray(localData.value[sectionKey].items)
+  );
+}
+
+// Get repeated items
+function getRepeatedItems(sectionKey) {
+  return localData.value[sectionKey]?.items || [];
+}
+
+// Get items count
+function getItemsCount(sectionKey) {
+  return localData.value[sectionKey]?.items?.length || 0;
+}
+
+// Switch edit item for repeated sections
+function switchEditItem(sectionKey, index) {
+  currentEditItemIndex.value[sectionKey] = index;
+}
+
 // Toggle section expansion
 function toggleSection(index) {
   const idx = expandedSections.value.indexOf(index);
   if (idx > -1) {
-    // Collapse
     expandedSections.value.splice(idx, 1);
   } else {
-    // Expand
     expandedSections.value.push(index);
   }
 }
@@ -336,26 +498,23 @@ function isEdited(sectionKey) {
   return editedSections.value.has(sectionKey);
 }
 
-// Format field value for display in summary
+// Format field value for display in summary (non-repeated)
 function formatFieldValue(sectionKey, field) {
   const value = localData.value[sectionKey]?.[field.name];
 
   if (!value) {
-    return "—"; // Em dash for empty values
+    return "—";
   }
 
-  // Format select options
   if (field.type === "select" && field.options) {
     const option = field.options.find((opt) => opt.value === value);
     return option?.label || value;
   }
 
-  // Format text-prefix fields
   if (field.type === "text-prefix") {
     return `${field.prefix}${value}`;
   }
 
-  // Truncate long text
   if (value.length > 100) {
     return value.substring(0, 100) + "...";
   }
@@ -363,7 +522,31 @@ function formatFieldValue(sectionKey, field) {
   return value;
 }
 
-// Navigation handlers with proper saving
+// Format field value for repeated items
+function formatRepeatedFieldValue(item, field) {
+  const value = item[field.name];
+
+  if (!value) {
+    return "—";
+  }
+
+  if (field.type === "select" && field.options) {
+    const option = field.options.find((opt) => opt.value === value);
+    return option?.label || value;
+  }
+
+  if (field.type === "text-prefix") {
+    return `${field.prefix}${value}`;
+  }
+
+  if (value.length > 100) {
+    return value.substring(0, 100) + "...";
+  }
+
+  return value;
+}
+
+// Navigation handlers
 async function handleBack() {
   try {
     console.log("[Review Step] Back clicked, saving...");
@@ -425,9 +608,6 @@ function handleRecover() {
 </script>
 
 <style scoped lang="scss">
-// ====================================
-// REVIEW STEP SPECIFIC STYLES
-// ====================================
 @use "./stepStyles.scss";
 
 .review-sections {
@@ -480,6 +660,7 @@ function handleRecover() {
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.25rem;
+    flex-wrap: wrap;
   }
 
   &__title {
@@ -527,13 +708,11 @@ function handleRecover() {
     color: #6b7280;
   }
 
-  // Summary view (collapsed)
   &__summary {
     padding: 1.25rem 1.5rem;
     background: #ffffff;
   }
 
-  // Edit view (expanded)
   &__body {
     padding: 1.5rem;
     background: #ffffff;
@@ -551,6 +730,39 @@ function handleRecover() {
   border-radius: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.repeat-count-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #7c3aed;
+  background: #ede9fe;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.repeated-item-summary {
+  padding: 1rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &__header {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.875rem;
+    color: #4539cc;
+  }
 }
 
 .summary-field {
@@ -579,13 +791,46 @@ function handleRecover() {
   }
 }
 
-.review-field {
-  margin-bottom: 1.25rem;
+.review-items-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e5e7eb;
+  overflow-x: auto;
 
-  &:last-child {
-    margin-bottom: 0;
+  &__tab {
+    padding: 0.5rem 1rem;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: #f3f4f6;
+      border-color: #d1d5db;
+    }
+
+    &--active {
+      background-color: #4539cc;
+      border-color: #4539cc;
+      color: #ffffff;
+    }
   }
+}
 
+.review-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.review-field {
   &__label {
     display: block;
     font-size: 0.875rem;
@@ -601,7 +846,6 @@ function handleRecover() {
   }
 }
 
-// Override form-actions for Review step (space between layout)
 .form-actions {
   justify-content: space-between;
   margin-left: unset;
