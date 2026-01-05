@@ -36,14 +36,6 @@
                   >
                     Edited
                   </span>
-                  <!-- Repeated items count badge -->
-                  <span
-                    v-if="isRepeatedSection(section.key)"
-                    class="repeat-count-badge"
-                    :title="`${getItemsCount(section.key)} items`"
-                  >
-                    {{ getItemsCount(section.key) }} items
-                  </span>
                 </div>
                 <p class="review-card__subtitle">{{ section.subtitle }}</p>
               </div>
@@ -70,141 +62,21 @@
               v-if="!expandedSections.includes(sectionIndex)"
               class="review-card__summary"
             >
-              <!-- For repeated items -->
-              <div v-if="isRepeatedSection(section.key)">
-                <div
-                  v-for="(item, itemIndex) in getRepeatedItems(section.key)"
-                  :key="itemIndex"
-                  class="repeated-item-summary"
-                >
-                  <div class="repeated-item-summary__header">
-                    <strong>{{ section.title }} {{ itemIndex + 1 }}</strong>
-                  </div>
-                  <div
-                    v-for="(field, fieldIndex) in section.fields"
-                    :key="fieldIndex"
-                    class="summary-field"
-                  >
-                    <span class="summary-field__label">{{ field.label }}:</span>
-                    <span class="summary-field__value">
-                      {{ formatRepeatedFieldValue(item, field) }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- For non-repeated items -->
-              <div v-else>
-                <div
-                  v-for="(field, fieldIndex) in section.fields"
-                  :key="fieldIndex"
-                  class="summary-field"
-                >
-                  <span class="summary-field__label">{{ field.label }}:</span>
-                  <span class="summary-field__value">
-                    {{ formatFieldValue(section.key, field) }}
-                  </span>
-                </div>
+              <div
+                v-for="(field, fieldIndex) in section.fields"
+                :key="fieldIndex"
+                class="summary-field"
+              >
+                <span class="summary-field__label">{{ field.label }}:</span>
+                <span class="summary-field__value">
+                  {{ formatFieldValue(section.key, field) }}
+                </span>
               </div>
             </div>
 
             <!-- Card Body - Editable Fields (when expanded) -->
             <div v-else class="review-card__body">
-              <!-- For repeated items -->
-              <div v-if="isRepeatedSection(section.key)">
-                <!-- Tabs for each repeated item -->
-                <div class="review-items-tabs">
-                  <button
-                    v-for="(item, itemIndex) in localData[section.key].items"
-                    :key="itemIndex"
-                    class="review-items-tabs__tab"
-                    :class="{
-                      'review-items-tabs__tab--active':
-                        currentEditItemIndex[section.key] === itemIndex,
-                    }"
-                    @click="switchEditItem(section.key, itemIndex)"
-                  >
-                    {{ section.title }} {{ itemIndex + 1 }}
-                  </button>
-                </div>
-
-                <!-- Edit fields for current item -->
-                <div class="review-fields">
-                  <div
-                    v-for="(field, fieldIndex) in section.fields"
-                    :key="fieldIndex"
-                    class="review-field"
-                  >
-                    <label class="review-field__label">
-                      {{ field.label }}
-                      <span v-if="field.required" class="review-field__required"
-                        >*</span
-                      >
-                    </label>
-
-                    <!-- Text/Email Input -->
-                    <AppInput
-                      v-if="field.type === 'text' || field.type === 'email'"
-                      v-model="
-                        localData[section.key].items[
-                          currentEditItemIndex[section.key]
-                        ][field.name]
-                      "
-                      :type="field.type"
-                      :placeholder="field.placeholder"
-                      @update:model-value="handleFieldChange(section.key)"
-                    />
-
-                    <!-- Input with Prefix -->
-                    <AppInputWithPrefix
-                      v-else-if="field.type === 'text-prefix'"
-                      v-model="
-                        localData[section.key].items[
-                          currentEditItemIndex[section.key]
-                        ][field.name]
-                      "
-                      :prefix="field.prefix"
-                      :placeholder="field.placeholder"
-                      @update:model-value="handleFieldChange(section.key)"
-                    />
-
-                    <!-- Textarea -->
-                    <AppTextarea
-                      v-else-if="field.type === 'textarea'"
-                      v-model="
-                        localData[section.key].items[
-                          currentEditItemIndex[section.key]
-                        ][field.name]
-                      "
-                      :placeholder="field.placeholder"
-                      :rows="field.rows || 4"
-                      @update:model-value="handleFieldChange(section.key)"
-                    />
-
-                    <!-- Select -->
-                    <AppSelect
-                      v-else-if="field.type === 'select'"
-                      v-model="
-                        localData[section.key].items[
-                          currentEditItemIndex[section.key]
-                        ][field.name]
-                      "
-                      @update:model-value="handleFieldChange(section.key)"
-                    >
-                      <option
-                        v-for="option in field.options"
-                        :key="option.value"
-                        :value="option.value"
-                      >
-                        {{ option.label }}
-                      </option>
-                    </AppSelect>
-                  </div>
-                </div>
-              </div>
-
-              <!-- For non-repeated items -->
-              <div v-else class="review-fields">
+              <div class="review-fields">
                 <div
                   v-for="(field, fieldIndex) in section.fields"
                   :key="fieldIndex"
@@ -223,6 +95,14 @@
                     v-model="localData[section.key][field.name]"
                     :type="field.type"
                     :placeholder="field.placeholder"
+                    @update:model-value="handleFieldChange(section.key)"
+                  />
+
+                  <!-- Date Input -->
+                  <AppInput
+                    v-else-if="field.type === 'date'"
+                    v-model="localData[section.key][field.name]"
+                    type="date"
                     @update:model-value="handleFieldChange(section.key)"
                   />
 
@@ -304,13 +184,7 @@
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  Edit2,
-  Loader,
-} from "lucide-vue-next";
+import { ChevronUp, Edit2, Loader } from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
 import AppInput from "@/components/ui/AppInput.vue";
 import AppInputWithPrefix from "@/components/ui/AppInputWithPrefix.vue";
@@ -345,9 +219,6 @@ const expandedSections = ref([]);
 // Track which sections have been edited
 const editedSections = ref(new Set());
 
-// Track current edit item index for repeated sections
-const currentEditItemIndex = ref({});
-
 // Form persistence with auto-save
 const {
   isSaving,
@@ -370,32 +241,45 @@ const {
 
 // Initialize local data structure
 const initializeData = () => {
+  console.log("[Review Step] Initializing data from stepData:", props.stepData);
+  console.log("[Review Step] Review sections:", props.reviewSections);
+
   const data = {};
+
   props.reviewSections.forEach((section) => {
-    // Check if this section has repeated items
     const sectionData = props.stepData[section.key];
 
-    if (sectionData?.items && Array.isArray(sectionData.items)) {
-      // This is a repeated section
-      data[section.key] = {
-        items: sectionData.items.map((item) => ({ ...item })),
-      };
-      currentEditItemIndex.value[section.key] = 0;
-    } else {
-      // Normal section
-      data[section.key] = {};
-      section.fields.forEach((field) => {
-        data[section.key][field.name] = "";
-      });
+    console.log(
+      `[Review Step] Processing section "${section.key}":`,
+      sectionData
+    );
 
-      if (sectionData) {
-        data[section.key] = {
-          ...data[section.key],
-          ...sectionData,
-        };
+    // Initialize with empty values
+    data[section.key] = {};
+    section.fields.forEach((field) => {
+      data[section.key][field.name] = "";
+    });
+
+    // Populate with actual data if available
+    if (sectionData && typeof sectionData === "object") {
+      // Handle different data structures
+      if (Array.isArray(sectionData)) {
+        // If it's an array, take the first item
+        if (sectionData.length > 0) {
+          Object.assign(data[section.key], sectionData[0]);
+        }
+      } else {
+        // If it's an object, merge it
+        Object.assign(data[section.key], sectionData);
       }
     }
+
+    console.log(
+      `[Review Step] Initialized section "${section.key}":`,
+      data[section.key]
+    );
   });
+
   return data;
 };
 
@@ -405,6 +289,7 @@ const localData = ref(initializeData());
 watch(
   () => props.stepData,
   (newData) => {
+    console.log("[Review Step] stepData changed:", newData);
     if (newData && Object.keys(newData).length > 0) {
       localData.value = initializeData();
     }
@@ -414,7 +299,10 @@ watch(
 
 // Lifecycle
 onMounted(() => {
-  console.log("[Review Step] Mounted, restoring data...");
+  console.log("[Review Step] Mounted");
+  console.log("[Review Step] stepData:", props.stepData);
+  console.log("[Review Step] reviewSections:", props.reviewSections);
+  console.log("[Review Step] localData:", localData.value);
 
   const backup = restoreEmergencyBackup();
   if (backup) {
@@ -455,29 +343,6 @@ useKeyboardShortcuts({
   },
 });
 
-// Check if section is repeated
-function isRepeatedSection(sectionKey) {
-  return (
-    localData.value[sectionKey]?.items &&
-    Array.isArray(localData.value[sectionKey].items)
-  );
-}
-
-// Get repeated items
-function getRepeatedItems(sectionKey) {
-  return localData.value[sectionKey]?.items || [];
-}
-
-// Get items count
-function getItemsCount(sectionKey) {
-  return localData.value[sectionKey]?.items?.length || 0;
-}
-
-// Switch edit item for repeated sections
-function switchEditItem(sectionKey, index) {
-  currentEditItemIndex.value[sectionKey] = index;
-}
-
 // Toggle section expansion
 function toggleSection(index) {
   const idx = expandedSections.value.indexOf(index);
@@ -491,6 +356,7 @@ function toggleSection(index) {
 // Handle field changes
 function handleFieldChange(sectionKey) {
   editedSections.value.add(sectionKey);
+  console.log(`[Review Step] Field changed in section "${sectionKey}"`);
 }
 
 // Check if section has been edited
@@ -498,48 +364,41 @@ function isEdited(sectionKey) {
   return editedSections.value.has(sectionKey);
 }
 
-// Format field value for display in summary (non-repeated)
+// Format field value for display in summary
 function formatFieldValue(sectionKey, field) {
   const value = localData.value[sectionKey]?.[field.name];
 
-  if (!value) {
+  if (!value || value === "") {
     return "—";
   }
 
+  // Handle select fields
   if (field.type === "select" && field.options) {
     const option = field.options.find((opt) => opt.value === value);
     return option?.label || value;
   }
 
+  // Handle text-prefix fields
   if (field.type === "text-prefix") {
     return `${field.prefix}${value}`;
   }
 
-  if (value.length > 100) {
-    return value.substring(0, 100) + "...";
+  // Handle date fields - format nicely
+  if (field.type === "date") {
+    try {
+      const date = new Date(value);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return value;
+    }
   }
 
-  return value;
-}
-
-// Format field value for repeated items
-function formatRepeatedFieldValue(item, field) {
-  const value = item[field.name];
-
-  if (!value) {
-    return "—";
-  }
-
-  if (field.type === "select" && field.options) {
-    const option = field.options.find((opt) => opt.value === value);
-    return option?.label || value;
-  }
-
-  if (field.type === "text-prefix") {
-    return `${field.prefix}${value}`;
-  }
-
-  if (value.length > 100) {
+  // Truncate long values
+  if (typeof value === "string" && value.length > 100) {
     return value.substring(0, 100) + "...";
   }
 
@@ -550,6 +409,7 @@ function formatRepeatedFieldValue(item, field) {
 async function handleBack() {
   try {
     console.log("[Review Step] Back clicked, saving...");
+    console.log("[Review Step] Local data to save:", localData.value);
 
     await saveNow(localData.value);
     await nextTick();
@@ -566,6 +426,7 @@ async function handleBack() {
 async function handleContinue() {
   try {
     console.log("[Review Step] Continue clicked, saving...");
+    console.log("[Review Step] Local data to save:", localData.value);
 
     await saveNow(localData.value);
     await nextTick();
@@ -732,39 +593,6 @@ function handleRecover() {
   letter-spacing: 0.5px;
 }
 
-.repeat-count-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.125rem 0.5rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: #7c3aed;
-  background: #ede9fe;
-  border-radius: 0.25rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.repeated-item-summary {
-  padding: 1rem;
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  &__header {
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 0.875rem;
-    color: #4539cc;
-  }
-}
-
 .summary-field {
   display: flex;
   gap: 0.5rem;
@@ -779,8 +607,12 @@ function handleRecover() {
     font-size: 0.875rem;
     font-weight: 500;
     color: #6b7280;
-    min-width: 8.75rem;
+    min-width: 10rem;
     flex-shrink: 0;
+
+    @media (max-width: 640px) {
+      min-width: 7rem;
+    }
   }
 
   &__value {
@@ -788,39 +620,6 @@ function handleRecover() {
     color: #111827;
     flex: 1;
     word-break: break-word;
-  }
-}
-
-.review-items-tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid #e5e7eb;
-  overflow-x: auto;
-
-  &__tab {
-    padding: 0.5rem 1rem;
-    background-color: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #6b7280;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-
-    &:hover {
-      background-color: #f3f4f6;
-      border-color: #d1d5db;
-    }
-
-    &--active {
-      background-color: #4539cc;
-      border-color: #4539cc;
-      color: #ffffff;
-    }
   }
 }
 
@@ -850,5 +649,14 @@ function handleRecover() {
   justify-content: space-between;
   margin-left: unset;
   margin-right: unset;
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+
+  @media (max-width: 640px) {
+    flex-direction: column-reverse;
+  }
 }
 </style>

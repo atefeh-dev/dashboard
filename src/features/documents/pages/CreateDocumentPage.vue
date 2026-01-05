@@ -32,6 +32,7 @@
       v-if="currentStep === 'input'"
       :step-title="steps[1].title"
       :step-description="steps[1].subtitle"
+      :template="selectedTemplate"
       :form-fields="inputFormFields"
       :step-data="stepData.input"
       @continue="completeStep"
@@ -44,6 +45,7 @@
       v-if="currentStep === 'review'"
       :step-data="allStepData"
       :review-sections="reviewSections"
+      :selected-template="selectedTemplate"
       @continue="completeStep"
       @back="previousStep"
       @update:data="updateReviewData"
@@ -54,6 +56,7 @@
       v-if="currentStep === 'preview'"
       :step-data="stepData.preview"
       :template="selectedTemplate"
+      :all-step-data="allStepDataForPreview"
       @continue="completeStep"
       @back="previousStep"
       @update:data="updateStepData('preview', $event)"
@@ -223,82 +226,72 @@ const checklistItems = computed(() => {
 // ========================================
 // FORM FIELDS CONFIGURATION (Step 2)
 // ========================================
-const inputFormFields = [
-  {
-    name: "yourName",
-    label: "Name of your document",
-    type: "text",
-    placeholder: "For example Accelerator Contract 2025",
-    required: true,
-    hint: "This is a hint text to help user.",
-  },
-  {
-    name: "yourEmail",
-    label: "Your email address",
-    type: "email",
-    placeholder: "john.doe@example.com",
-    required: true,
-    hint: "We'll send confirmation to this email",
-  },
-  {
-    name: "companyName",
-    label: "Company name",
-    type: "text",
-    placeholder: "Acme Corporation",
-    required: false,
-  },
-  {
-    type: "select",
-    name: "role",
-    label: "Your role",
-    required: true,
-    placeholder: "Select your role",
-    options: [
-      { value: "ceo", label: "CEO" },
-      { value: "manager", label: "Manager" },
-      { value: "employee", label: "Employee" },
-    ],
-  },
-  {
-    name: "additionalInfo",
-    label: "Description",
-    type: "textarea",
-    placeholder: "Provide some details about what this document for ...",
-    rows: 5,
-    required: false,
-  },
-];
+const inputFormFields = computed(() => {
+  if (!selectedTemplate.value) {
+    console.warn("[Parent] No template selected for input fields");
+    return [];
+  }
 
+  // Get template from store to ensure we have the latest field definitions
+  const template = selectedTemplate.value;
+
+  if (!template.fields || template.fields.length === 0) {
+    console.warn("[Parent] Template has no fields defined:", template.name);
+    return [];
+  }
+
+  console.log("[Parent] Generating input fields from template:", template.name);
+  console.log("[Parent] Template fields:", template.fields);
+
+  // Return template fields directly
+  return template.fields;
+});
 // ========================================
 // REVIEW SECTIONS CONFIGURATION (Step 3)
 // ========================================
-const reviewSections = [
-  {
+// ========================================
+// DATA FOR PREVIEW STEP
+// ========================================
+const allStepDataForPreview = computed(() => {
+  console.log("[Parent] Preparing preview data");
+  return {
+    details: documentForm.value,
+    inputForms: stepData.value.input,
+    template: selectedTemplate.value,
+  };
+});
+const reviewSections = computed(() => {
+  console.log("[Parent] Generating review sections");
+
+  const sections = [];
+
+  // SECTION 1: Document Details (always present)
+  sections.push({
     key: "details",
     title: "Document Details",
-    subtitle: "Template and information",
+    subtitle: "Basic information about your document",
     fields: [
       {
         name: "name",
-        label: "Name of your document",
+        label: "Document Name",
         type: "text",
-        placeholder: "For example Accelerator Contract 2025",
         required: true,
+        placeholder: "Enter document name",
       },
       {
         name: "filename",
-        label: "File name to save",
+        label: "File Name",
         type: "text-prefix",
         prefix: "doclast-",
-        placeholder: "accelerator-contract-2025",
         required: true,
+        placeholder: "file-name",
       },
       {
         name: "description",
         label: "Description",
         type: "textarea",
-        placeholder: "Provide some details about what this document for ...",
-        rows: 4,
+        rows: 5,
+        placeholder: "Describe your document",
       },
       {
         name: "status",
@@ -311,53 +304,36 @@ const reviewSections = [
         ],
       },
     ],
-  },
-  {
-    key: "input",
-    title: "Your details",
-    subtitle: "Please provide your name and email",
-    fields: [
-      {
-        name: "yourName",
-        label: "Name of your document",
-        type: "text",
-        placeholder: "For example Accelerator Contract 2025",
-        required: true,
-      },
-      {
-        name: "yourEmail",
-        label: "Your email address",
-        type: "email",
-        placeholder: "john.doe@example.com",
-        required: true,
-      },
-      {
-        name: "companyName",
-        label: "Company name",
-        type: "text",
-        placeholder: "Acme Corporation",
-        required: false,
-      },
-      {
-        name: "role",
-        label: "Your role",
-        type: "select",
-        options: [
-          { value: "ceo", label: "CEO" },
-          { value: "manager", label: "Manager" },
-          { value: "employee", label: "Employee" },
-        ],
-      },
-      {
-        name: "additionalInfo",
-        label: "Description",
-        type: "textarea",
-        placeholder: "Provide some details about what this document for ...",
-        rows: 4,
-      },
-    ],
-  },
-];
+  });
+
+  // SECTION 2: Template-specific fields (dynamic)
+  if (selectedTemplate.value && selectedTemplate.value.fields) {
+    console.log(
+      "[Parent] Adding template fields section for:",
+      selectedTemplate.value.name
+    );
+
+    sections.push({
+      key: "input",
+      title: selectedTemplate.value.name,
+      subtitle: `Information for your ${selectedTemplate.value.name.toLowerCase()}`,
+      fields: selectedTemplate.value.fields.map((field) => ({
+        name: field.name,
+        label: field.label,
+        type: field.type,
+        required: field.required,
+        placeholder: field.placeholder || `Enter ${field.label.toLowerCase()}`,
+        options: field.options,
+        rows: field.rows,
+      })),
+    });
+  } else {
+    console.warn("[Parent] No template selected or template has no fields");
+  }
+
+  console.log("[Parent] Generated review sections:", sections);
+  return sections;
+});
 
 const allStepData = computed(() => ({
   details: documentForm.value,
@@ -563,26 +539,45 @@ async function goToStep(index) {
   }
 }
 
-async function completeStep() {
-  const currentStepId = steps[currentStepIndex.value].id;
-  console.log(`[Parent] Completing step: ${currentStepId}`);
+function completeStep(data) {
+  const stepId = steps[currentStepIndex.value].id;
 
-  // Mark step as completed
+  if (data) {
+    if (stepId === "details") {
+      if (data.template) {
+        selectedTemplate.value = data.template;
+      }
+
+      const { template, ...formData } = data;
+      documentForm.value = { ...documentForm.value, ...formData };
+      stepData.value.details = data;
+
+      // Pass template data to preview
+      stepData.value.preview = {
+        template: data.template,
+        templateName: data.template?.name,
+        templateId: data.template?.id,
+      };
+    } else if (stepId === "input") {
+      // 🔥 CRITICAL: Store input form data for preview
+      stepData.value.input = data;
+      stepData.value.preview = {
+        ...stepData.value.preview,
+        input: data,
+      };
+    } else {
+      stepData.value[stepId] = { ...stepData.value[stepId], ...data };
+    }
+  }
+
   if (!completedSteps.value.includes(currentStepIndex.value)) {
     completedSteps.value.push(currentStepIndex.value);
   }
 
-  // Mark step as properly completed
-  stepCompletionStatus.value[currentStepId] = true;
-
-  // FIXED: Wait for save to complete
-  await forceSave();
-  await nextTick();
-  await new Promise((resolve) => setTimeout(resolve, 50));
+  forceSave();
 
   if (currentStepIndex.value < steps.length - 1) {
     currentStepIndex.value++;
-    console.log(`[Parent] Moved to step ${currentStepIndex.value}`);
   }
 }
 
