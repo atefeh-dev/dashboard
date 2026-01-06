@@ -7,52 +7,21 @@
         You can see your answers in action with template and generated content.
       </p>
 
-      <!-- Info Banner -->
-      <div class="info-banner">
-        <svg
-          class="info-banner__icon"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="16" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
-        <div class="info-banner__content">
-          <p class="info-banner__title">Editing Guidelines</p>
-          <ul class="info-banner__list">
-            <li>
-              🔒 <strong>Your data fields</strong> (highlighted in yellow) are
-              protected and cannot be edited
-            </li>
-            <li>
-              🎨 You can <strong>change colors</strong> of protected fields for
-              visual emphasis
-            </li>
-            <li>
-              ✏️ All other <strong>template content</strong> can be freely
-              edited and styled
-            </li>
-          </ul>
+      <!-- export banner-->
+      <div class="export-banner">
+        <div class="export-banner__content">
+          <AppButton size="md" variant="secondary ">Export 1</AppButton>
+          <AppButton size="md" variant="transparent">Export 2</AppButton>
         </div>
       </div>
-
-      <!-- Locked Fields Legend -->
-      <div class="legend">
-        <div class="legend__item">
-          <span class="legend__sample locked-field-sample">
-            Your Protected Data
-            <span class="lock-icon">🔒</span>
-          </span>
-          <span class="legend__label">Read-only (from previous steps)</span>
-        </div>
-        <div class="legend__item">
-          <span class="legend__sample editable-sample">Template Text</span>
-          <span class="legend__label">Fully editable</span>
+      <!-- Info Banner -->
+      <div class="info-banner">
+        <WarningIcon />
+        <div class="info-banner__content">
+          <p class="info-banner__title">
+            You can edit and style the generated content but you can’t save your
+            new changed content
+          </p>
         </div>
       </div>
 
@@ -95,13 +64,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from "vue";
+import { ref, computed, watch } from "vue";
 import { ChevronLeft, ChevronRight, AlertCircle } from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
 import RichTextEditor from "@/components/ui/RichTextEditor.vue";
 import { useTemplatesStore } from "@/stores/useTemplatesStore";
+import WarningIcon from "@/assets/icons/common/warning.svg";
 
-// Props
 const props = defineProps({
   stepData: {
     type: Object,
@@ -109,16 +78,13 @@ const props = defineProps({
   },
 });
 
-// Emits
 const emit = defineEmits(["continue", "back", "update:data"]);
 
-// Store
 const templatesStore = useTemplatesStore();
-
-// State
 const editorContent = ref("");
 const hasInitialized = ref(false);
 const editorInstance = ref(null);
+const insertLockedFieldFn = ref(null);
 
 // Determine which template to use
 const templateToUse = computed(() => {
@@ -145,194 +111,147 @@ const templateToUse = computed(() => {
   return defaultTemplate || null;
 });
 
-// Extract field data from input forms (from stepData.input)
+// Extract field data from input forms
 const fieldData = computed(() => {
   const data = {};
-
-  // Get data from input step
   const inputData = props.stepData?.input || {};
 
-  // If inputData has an 'items' array (from your InputFormsStep structure)
   if (inputData.items && Array.isArray(inputData.items)) {
-    // Merge all items into one object
     inputData.items.forEach((item) => {
       Object.assign(data, item);
     });
   } else if (Array.isArray(inputData)) {
-    // If it's directly an array
     inputData.forEach((item) => {
       Object.assign(data, item);
     });
   } else {
-    // If it's a direct object
     Object.assign(data, inputData);
   }
 
-  console.log("📊 Field data extracted:", data);
+  console.log("📊 Field data:", data);
   return data;
 });
 
-// Get list of field names that should be locked (from template definition)
+// Get locked field names from template
 const lockedFieldNames = computed(() => {
   if (!templateToUse.value?.fields) return [];
-
   const names = templateToUse.value.fields.map((field) => field.name);
-  console.log("🔒 Locked field names:", names);
+  console.log("🔒 Locked fields:", names);
   return names;
 });
 
-// Replace placeholders with locked field HTML
-function replaceWithLockedFields(content, fields, lockedNames) {
-  let updatedContent = content;
+// Replace placeholders with locked field nodes
+function processTemplateWithLockedFields() {
+  if (
+    !templateToUse.value?.content ||
+    !insertLockedFieldFn.value ||
+    !editorInstance.value
+  ) {
+    console.warn("⚠️ Not ready to process");
+    return;
+  }
 
-  // Replace each placeholder
-  Object.entries(fields).forEach(([fieldName, fieldValue]) => {
-    // Only lock if this field is in the template's field definitions
-    if (!lockedNames.includes(fieldName)) {
-      console.log(`⏭️ Skipping ${fieldName} - not in template fields`);
-      return;
-    }
+  console.log("🚀 Processing template with locked fields");
 
-    const placeholder = `{{${fieldName}}}`;
+  const template = templateToUse.value.content;
+  const fields = fieldData.value;
+  const lockedNames = lockedFieldNames.value;
 
-    // Check if placeholder exists in content
-    if (!updatedContent.includes(placeholder)) {
-      console.log(`⚠️ Placeholder {{${fieldName}}} not found in template`);
-      return;
-    }
+  // Set initial template content
+  editorInstance.value.commands.setContent(template, false);
 
-    // Create locked field HTML
-    const lockedFieldHTML = `<span class="locked-field" contenteditable="false" data-field-name="${fieldName}" data-field-value="${fieldValue}" title="Protected field: ${fieldName} (Read-only)">${fieldValue}<span class="lock-icon">🔒</span></span>`;
+  // Wait for content to render, then replace placeholders
+  setTimeout(() => {
+    const { state } = editorInstance.value;
+    const { doc } = state;
+    const { tr } = state;
+    let modified = false;
 
-    // Replace all occurrences
-    updatedContent = updatedContent.replaceAll(placeholder, lockedFieldHTML);
-    console.log(`✅ Replaced {{${fieldName}}} with locked field:`, fieldValue);
-  });
+    // Find all placeholders and build replacement list
+    const replacements = [];
+    doc.descendants((node, pos) => {
+      if (node.isText && node.text) {
+        const regex = /\{\{(\w+)\}\}/g;
+        let match;
 
-  return updatedContent;
-}
+        while ((match = regex.exec(node.text)) !== null) {
+          const fieldName = match[1];
+          const fieldValue = fields[fieldName];
+          const isLocked = lockedNames.includes(fieldName);
 
-// Protect locked fields from editing
-function protectLockedFields() {
-  nextTick(() => {
-    const lockedFields = document.querySelectorAll(".locked-field");
-
-    console.log(`🛡️ Protecting ${lockedFields.length} locked fields`);
-
-    lockedFields.forEach((field) => {
-      // Make absolutely sure it's not editable
-      field.contentEditable = "false";
-      field.setAttribute("contenteditable", "false");
-
-      // Prevent any modification
-      field.addEventListener("keydown", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      });
-
-      field.addEventListener("paste", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      });
-
-      field.addEventListener("cut", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      });
-
-      field.addEventListener("drop", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      });
-
-      // Allow selection for color change only
-      field.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.selectNode(field);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      });
+          if (fieldValue && isLocked) {
+            replacements.push({
+              from: pos + match.index,
+              to: pos + match.index + match[0].length,
+              fieldName,
+              fieldValue: String(fieldValue),
+            });
+          }
+        }
+      }
     });
-  });
+
+    console.log(`Found ${replacements.length} placeholders to replace`);
+
+    // Apply replacements in reverse order (to maintain positions)
+    replacements.reverse().forEach((replacement) => {
+      const { from, to, fieldName, fieldValue } = replacement;
+
+      // Delete placeholder
+      tr.delete(from, to);
+
+      // Insert locked field node
+      const lockedNode = editorInstance.value.schema.nodes.lockedField.create({
+        fieldName,
+        fieldValue,
+      });
+
+      tr.insert(from, lockedNode);
+      modified = true;
+
+      console.log(`✅ Replaced {{${fieldName}}} with locked field`);
+    });
+
+    if (modified) {
+      editorInstance.value.view.dispatch(tr);
+      console.log("✅ All locked fields inserted successfully");
+    }
+  }, 150);
 }
 
-// Initialize editor with template content and locked fields
+// Handle editor mounted
+function handleEditorMounted({ editor, insertLockedField }) {
+  console.log("🎯 Editor mounted");
+
+  editorInstance.value = editor;
+  insertLockedFieldFn.value = insertLockedField;
+
+  if (!hasInitialized.value && templateToUse.value) {
+    hasInitialized.value = true;
+    processTemplateWithLockedFields();
+  }
+}
+
+// Watch for changes
 watch(
   [templateToUse, fieldData, lockedFieldNames],
-  ([template, fields, lockedNames]) => {
-    if (!template?.content) {
-      console.warn("⚠️ No template content available");
-      return;
+  () => {
+    if (
+      insertLockedFieldFn.value &&
+      !hasInitialized.value &&
+      templateToUse.value
+    ) {
+      hasInitialized.value = true;
+      processTemplateWithLockedFields();
     }
-
-    if (hasInitialized.value) {
-      console.log("⏭️ Already initialized, skipping");
-      return;
-    }
-
-    console.log("📝 Initializing editor with locked fields");
-    console.log("Template:", template.name);
-    console.log("Field data:", fields);
-    console.log("Locked field names:", lockedNames);
-
-    // Replace placeholders with locked fields
-    const contentWithLockedFields = replaceWithLockedFields(
-      template.content,
-      fields,
-      lockedNames
-    );
-
-    editorContent.value = contentWithLockedFields;
-    hasInitialized.value = true;
-
-    // Protect fields after content is set
-    setTimeout(() => {
-      protectLockedFields();
-      console.log("✅ Editor initialized with locked fields");
-    }, 200);
   },
-  { immediate: true }
+  { immediate: false }
 );
 
-// Re-protect fields when content changes
 watch(editorContent, (value) => {
-  protectLockedFields();
   emit("update:data", { content: value });
 });
 
-// Handle editor mounted
-function handleEditorMounted(editor) {
-  editorInstance.value = editor;
-  protectLockedFields();
-}
-
-// Fallback initialization
-onMounted(() => {
-  setTimeout(() => {
-    if (!hasInitialized.value && templateToUse.value?.content) {
-      console.log("🔄 Force initializing...");
-      const contentWithLockedFields = replaceWithLockedFields(
-        templateToUse.value.content,
-        fieldData.value,
-        lockedFieldNames.value
-      );
-      editorContent.value = contentWithLockedFields;
-      hasInitialized.value = true;
-
-      setTimeout(() => {
-        protectLockedFields();
-      }, 100);
-    }
-  }, 300);
-});
-
-// Event handlers
 function handleBack() {
   emit("back");
 }
@@ -343,6 +262,8 @@ function handleContinue() {
     emit("back");
     return;
   }
+
+  emit("update:data", { content: editorContent.value });
   emit("continue");
 }
 </script>
@@ -362,47 +283,37 @@ function handleContinue() {
     margin-bottom: 24px;
   }
 }
+.export-banner {
+  display: flex;
+  background-color: #fafafa;
+  border: 1px solid #e9eaeb;
+  padding: 0.25rem;
+  border-radius: 0.75rem;
+
+  margin-bottom: 1.5rem;
+  &__content {
+    display: flex;
+  }
+}
 
 .info-banner {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   padding: 16px;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border: 1px solid #bfdbfe;
-  border-left: 4px solid #3b82f6;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  animation: bannerSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-  @keyframes bannerSlideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  &__icon {
-    width: 20px;
-    height: 20px;
-    color: #3b82f6;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
+  background: transparent;
+  border: 1px solid #d5d7da;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
 
   &__content {
     flex: 1;
   }
 
   &__title {
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 600;
-    color: #1e40af;
-    margin-bottom: 8px;
+    color: #414651;
   }
 
   &__list {
@@ -415,9 +326,6 @@ function handleContinue() {
 
     li {
       margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
 
       &:last-child {
         margin-bottom: 0;
@@ -438,7 +346,6 @@ function handleContinue() {
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   margin-bottom: 20px;
-  flex-wrap: wrap;
 
   &__item {
     display: flex;
@@ -452,9 +359,6 @@ function handleContinue() {
     font-size: 13px;
     font-weight: 500;
     white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
   }
 
   &__label {
@@ -467,11 +371,6 @@ function handleContinue() {
   background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
   border: 2px solid #fbbf24;
   color: #92400e;
-
-  .lock-icon {
-    font-size: 10px;
-    opacity: 0.7;
-  }
 }
 
 .editable-sample {
@@ -518,18 +417,6 @@ function handleContinue() {
 
 .editor-wrapper {
   margin-bottom: 32px;
-  animation: editorFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s backwards;
-
-  @keyframes editorFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 }
 
 .form-actions {
@@ -537,53 +424,5 @@ function handleContinue() {
   justify-content: space-between;
   gap: 12px;
   margin-top: 32px;
-}
-
-// Global styles for locked fields in editor
-:deep(.locked-field) {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
-  border: 2px solid #fbbf24 !important;
-  border-radius: 4px !important;
-  padding: 2px 8px !important;
-  margin: 0 2px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-  font-weight: 600 !important;
-  color: #92400e !important;
-  cursor: not-allowed !important;
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  position: relative !important;
-  transition: all 0.2s ease !important;
-  white-space: nowrap !important;
-
-  // Prevent any formatting changes while keeping inherited styles
-  text-decoration: none !important;
-  font-style: normal !important;
-
-  &:hover {
-    background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%) !important;
-    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3) !important;
-  }
-
-  .lock-icon {
-    font-size: 10px;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
-  }
-
-  &:hover .lock-icon {
-    opacity: 1;
-  }
-}
-
-// Prevent selection styling from breaking the locked field appearance
-:deep(.ProseMirror) {
-  .locked-field::selection {
-    background: rgba(251, 191, 36, 0.3) !important;
-  }
 }
 </style>
