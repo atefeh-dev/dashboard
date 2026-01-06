@@ -10,7 +10,7 @@ export const useContactsStore = defineStore("contacts", () => {
       email: "pouriya@example.com",
       role: "Seller",
       avatar: "/av.png",
-      type: "internal",
+      type: "external",
       addedFrom: "workspace",
     },
     {
@@ -19,7 +19,7 @@ export const useContactsStore = defineStore("contacts", () => {
       email: "mohammad@example.com",
       role: "Buyer",
       avatar: "/av.png",
-      type: "internal",
+      type: "external",
       addedFrom: "workspace",
     },
     {

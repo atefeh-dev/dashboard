@@ -97,8 +97,21 @@
         </div>
 
         <div class="document-step__section-content">
-          <!-- Email options remain the same as original -->
+          <!-- Email Recipients from Input Step -->
+          <div v-if="inputRecipients.length > 0" class="email-recipients">
+            <ContactSelectItem
+              v-for="recipient in inputRecipients"
+              :key="recipient.id"
+              :contact="recipient"
+              :checked="isRecipientSelected(recipient.id)"
+              :is-external="false"
+              @toggle="toggleRecipient"
+            />
+          </div>
+
+          <!-- Internal Contacts -->
           <div v-if="internalContacts.length > 0" class="email-recipients">
+            <div class="recipient-section-label">Your contacts:</div>
             <ContactSelectItem
               v-for="recipient in internalContacts"
               :key="recipient.id"
@@ -109,6 +122,7 @@
             />
           </div>
 
+          <!-- Selected External Contacts -->
           <div
             v-if="selectedExternalContacts.length > 0"
             class="email-recipients"
@@ -123,6 +137,7 @@
             />
           </div>
 
+          <!-- Add Contact Dropdown -->
           <div class="add-contact">
             <p class="add-contact__label">Add from your contacts</p>
             <AppSelect
@@ -142,6 +157,7 @@
             </AppSelect>
           </div>
 
+          <!-- Alternative Email -->
           <AppAlternativeEmailInput
             v-model="alternativeEmail"
             v-model:enabled="sendToAlternativeEmail"
@@ -149,6 +165,7 @@
             @error="handleAlternativeEmailError"
           />
 
+          <!-- My Email Checkbox -->
           <div class="my-email">
             <input
               type="checkbox"
@@ -247,6 +264,7 @@ import {
   downloadPDF,
   generatePDFPrintFallback,
 } from "@/composables/pdfGenerator";
+import { cleanContentForPDF } from "@/composables/pdfContentCleaner";
 import ArrowNarrowLetIcon from "@/assets/icons/common/arrow-narrow-left.svg";
 import {
   useKeyboardShortcuts,
@@ -300,15 +318,88 @@ const validationErrors = ref([]);
 // Computed
 const userEmail = computed(() => authStore.user?.email || "user@doclast.com");
 
+// Get document content from preview step
 const documentContent = computed(() => {
-  // Get the populated content from the preview step or generate it
   if (props.allStepData?.preview?.content) {
     return props.allStepData.preview.content;
   }
-
-  // Fallback: generate from template store
   return templatesStore.populatedDocumentContent || "";
 });
+
+// Extract recipients from input step (emails entered in forms)
+const inputRecipients = computed(() => {
+  const recipients = [];
+  const inputData = props.allStepData?.input || {};
+
+  // Extract email fields from input data
+  const extractEmails = (data) => {
+    if (Array.isArray(data)) {
+      data.forEach((item) => extractEmails(item));
+    } else if (typeof data === "object" && data !== null) {
+      Object.entries(data).forEach(([key, value]) => {
+        // Check if this is an email field
+        if (
+          key.toLowerCase().includes("email") &&
+          typeof value === "string" &&
+          value.includes("@")
+        ) {
+          // Create a recipient from the email
+          const id = `input-${key}-${value}`;
+          const name = extractNameForEmail(key, data);
+
+          recipients.push({
+            id,
+            name: name || value.split("@")[0], // Use part before @ if no name
+            email: value,
+            role: extractRoleForEmail(key),
+            source: "input",
+          });
+        } else if (typeof value === "object") {
+          extractEmails(value);
+        }
+      });
+    }
+  };
+
+  extractEmails(inputData);
+
+  console.log("📧 Input recipients extracted:", recipients);
+  return recipients;
+});
+
+// Helper to extract name for an email field
+function extractNameForEmail(emailKey, data) {
+  // Try to find a corresponding name field
+  const nameKey = emailKey.replace("Email", "Name").replace("email", "name");
+  if (data[nameKey]) {
+    return data[nameKey];
+  }
+
+  // Try common patterns
+  const patterns = ["Name", "name", "PartyName", "partyName"];
+  for (const pattern of patterns) {
+    const key = emailKey.replace(/Email|email/, pattern);
+    if (data[key]) {
+      return data[key];
+    }
+  }
+
+  return "";
+}
+
+// Helper to extract role for an email field
+function extractRoleForEmail(emailKey) {
+  const lower = emailKey.toLowerCase();
+  if (lower.includes("disclosing")) return "Disclosing Party";
+  if (lower.includes("receiving")) return "Receiving Party";
+  if (lower.includes("employer")) return "Employer";
+  if (lower.includes("employee")) return "Employee";
+  if (lower.includes("provider")) return "Provider";
+  if (lower.includes("client")) return "Client";
+  if (lower.includes("consultant")) return "Consultant";
+  if (lower.includes("partner")) return "Partner";
+  return "Recipient";
+}
 
 const generatedDocuments = computed(() => {
   if (!documentContent.value) return [];
@@ -372,7 +463,7 @@ function restoreState(data) {
   }
 }
 
-// PDF Download Function
+// PDF Download Function with Content Cleaning
 async function downloadDocument(doc) {
   if (!documentContent.value) {
     alert("No document content available. Please complete previous steps.");
@@ -381,12 +472,22 @@ async function downloadDocument(doc) {
 
   try {
     console.log("[Document Step] Starting PDF download for:", doc.name);
-
     isDownloading.value[doc.id] = true;
 
-    // Use the PDF generator utility
+    // CRITICAL: Clean the content before PDF export
+    // This removes lock icons (🔒) and locked field styling
+    const cleanedContent = cleanContentForPDF(documentContent.value);
+
+    console.log("[Document Step] Content cleaned for PDF export");
+    console.log(
+      "[Document Step] Original length:",
+      documentContent.value.length
+    );
+    console.log("[Document Step] Cleaned length:", cleanedContent.length);
+
+    // Use the cleaned content for PDF generation
     await downloadPDF(
-      documentContent.value,
+      cleanedContent,
       props.documentMetadata?.filename || "document",
       {
         margin: [15, 15, 15, 15],
@@ -398,14 +499,15 @@ async function downloadDocument(doc) {
   } catch (error) {
     console.error("[Document Step] PDF download failed:", error);
 
-    // Show user-friendly error message
     const retry = confirm(
       `Failed to download PDF: ${error.message}\n\nWould you like to try the print dialog method instead?`
     );
 
     if (retry) {
+      // Also clean content for fallback method
+      const cleanedContent = cleanContentForPDF(documentContent.value);
       generatePDFPrintFallback(
-        documentContent.value,
+        cleanedContent,
         props.documentMetadata?.filename || "document"
       );
     }
@@ -527,16 +629,24 @@ async function sendDocuments() {
 
   try {
     isSending.value = true;
-    const recipients = contactsStore.getContactsByIds(
-      selectedRecipientIds.value
-    );
+
+    // Combine all recipients (from input, internal contacts, and external)
+    const allRecipients = [
+      ...inputRecipients.value.filter((r) =>
+        selectedRecipientIds.value.includes(r.id)
+      ),
+      ...contactsStore.getContactsByIds(
+        selectedRecipientIds.value.filter((id) => typeof id === "number")
+      ),
+    ];
 
     const emailData = {
-      recipients: recipients.map((r) => ({
+      recipients: allRecipients.map((r) => ({
         id: r.id,
         name: r.name,
         email: r.email,
-        role: r.role,
+        role: r.role || "Recipient",
+        source: r.source || "contacts",
       })),
       alternativeEmail: sendToAlternativeEmail.value
         ? alternativeEmail.value
@@ -559,8 +669,15 @@ async function sendDocuments() {
         id: props.template?.id,
         name: props.template?.name,
       },
+      // Include cleaned content for email attachments
+      cleanedContent: cleanContentForPDF(documentContent.value),
       allStepData: props.allStepData,
     };
+
+    console.log(
+      "[Document Step] Sending with recipients:",
+      emailData.recipients
+    );
 
     await nextTick();
     emit("finish", emailData);
@@ -606,8 +723,18 @@ onMounted(async () => {
   if (props.stepData && Object.keys(props.stepData).length > 0) {
     restoreState(props.stepData);
   } else {
-    selectedRecipientIds.value = internalContacts.value.map((c) => c.id);
+    // Auto-select input recipients and internal contacts
+    const autoSelectIds = [
+      ...inputRecipients.value.map((r) => r.id),
+      ...internalContacts.value.map((c) => c.id),
+    ];
+    selectedRecipientIds.value = autoSelectIds;
   }
+
+  console.log(
+    "[Document Step] Mounted with input recipients:",
+    inputRecipients.value
+  );
 });
 
 onBeforeUnmount(() => {
@@ -664,7 +791,17 @@ useKeyboardShortcuts({
 </script>
 
 <style scoped lang="scss">
+// Keep all existing styles, just add:
 @use "./stepStyles.scss";
+
+.recipient-section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
 
 .document-card {
   display: flex;
@@ -766,7 +903,7 @@ useKeyboardShortcuts({
   }
 }
 
-// Rest of the styles remain the same...
+// All other existing styles remain the same...
 .document-step {
   &__header {
     margin-bottom: 1.5rem;
@@ -881,7 +1018,7 @@ useKeyboardShortcuts({
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .add-contact {
