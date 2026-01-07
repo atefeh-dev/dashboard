@@ -1,0 +1,196 @@
+<div
+  style="
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: 'Georgia', serif;
+    line-height: 1.8;
+    color: #1a1a1a;
+  "
+>
+  <h1
+    style="
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 15px;
+    "
+  >
+    Non-Disclosure Agreement
+  </h1>
+
+  <p style="margin-bottom: 20px; text-align: justify">
+    This Non-Disclosure Agreement (the "<strong>Agreement</strong>") is entered
+    into as of
+    <strong>{{effectiveDate}}</strong> (the "<strong>Effective Date</strong>")
+    by and between:
+  </p>
+
+  <div
+    style="
+      margin: 30px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+      border-left: 5px solid #2563eb;
+      border-radius: 8px;
+    "
+  >
+    <h3
+      style="
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: #1e40af;
+      "
+    >
+      DISCLOSING PARTY
+    </h3>
+    <p><strong>Name:</strong> {{disclosingPartyName}}</p>
+    <p><strong>Address:</strong> {{disclosingPartyAddress}}</p>
+    <p><strong>Email:</strong> {{disclosingPartyEmail}}</p>
+  </div>
+
+  <div
+    style="
+      margin: 30px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%);
+      border-left: 5px solid #10b981;
+      border-radius: 8px;
+    "
+  >
+    <h3
+      style="
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: #047857;
+      "
+    >
+      RECEIVING PARTY
+    </h3>
+    <p><strong>Name:</strong> {{receivingPartyName}}</p>
+    <p><strong>Address:</strong> {{receivingPartyAddress}}</p>
+    <p><strong>Email:</strong> {{receivingPartyEmail}}</p>
+  </div>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 35px; color: #1e40af"
+  >
+    1. Purpose
+  </h2>
+  <p style="background-color: #f9fafb; padding: 15px; border-radius: 6px">
+    {{purpose}}
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #1e40af"
+  >
+    2. Confidential Information
+  </h2>
+  <p>
+    "Confidential Information" means any non-public information disclosed by the
+    Disclosing Party, whether orally, visually, electronically, or in writing,
+    that is designated as confidential or that reasonably should be understood
+    to be confidential given its nature and the circumstances of disclosure.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #1e40af"
+  >
+    3. Exclusions
+  </h2>
+  <p>Confidential Information does not include information that:</p>
+  <ul style="margin-left: 25px">
+    <li>
+      Is or becomes publicly available through no breach of this Agreement
+    </li>
+    <li>Was lawfully known by the Receiving Party prior to disclosure</li>
+    <li>
+      Is independently developed without reference to the Confidential
+      Information
+    </li>
+    <li>Is lawfully obtained from a third party without restriction</li>
+  </ul>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #1e40af"
+  >
+    4. Obligations of Receiving Party
+  </h2>
+  <ul style="margin-left: 25px">
+    <li>Maintain the Confidential Information in strict confidence</li>
+    <li>Use the Confidential Information solely for the stated Purpose</li>
+    <li>
+      Not disclose the Confidential Information without prior written consent
+    </li>
+    <li>
+      Apply at least the same degree of care used to protect its own
+      confidential information
+    </li>
+  </ul>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #1e40af"
+  >
+    5. Term
+  </h2>
+  <p>
+    This Agreement shall remain in effect for three (3) years from the Effective
+    Date. Confidentiality obligations shall survive termination with respect to
+    Confidential Information disclosed during the term.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #1e40af"
+  >
+    6. No License
+  </h2>
+  <p>
+    Nothing in this Agreement grants the Receiving Party any rights, by license
+    or otherwise, to the Confidential Information except as expressly stated
+    herein.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #1e40af"
+  >
+    7. Remedies
+  </h2>
+  <p>
+    The Receiving Party acknowledges that unauthorized disclosure may cause
+    irreparable harm, and that the Disclosing Party may seek equitable relief in
+    addition to any other remedies.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #1e40af"
+  >
+    8. Governing Law
+  </h2>
+  <p>
+    This Agreement shall be governed and construed in accordance with applicable
+    laws, without regard to conflict of law principles.
+  </p>
+
+  <div
+    style="margin-top: 50px; border-top: 2px solid #e5e7eb; padding-top: 30px"
+  >
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px">
+      <div>
+        <strong>DISCLOSING PARTY</strong>
+        <div style="border-bottom: 2px solid #000; margin: 20px 0"></div>
+        {{disclosingPartyName}}
+      </div>
+      <div>
+        <strong>RECEIVING PARTY</strong>
+        <div style="border-bottom: 2px solid #000; margin: 20px 0"></div>
+        {{receivingPartyName}}
+      </div>
+    </div>
+  </div>
+</div>

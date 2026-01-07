@@ -1,0 +1,192 @@
+<div
+  style="
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: 'Georgia', serif;
+    line-height: 1.8;
+    color: #1a1a1a;
+  "
+>
+  <h1
+    style="
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 3px solid #7c3aed;
+      padding-bottom: 15px;
+    "
+  >
+    Employment Contract
+  </h1>
+
+  <p style="margin-bottom: 20px; text-align: justify">
+    This Employment Contract (the "<strong>Agreement</strong>") is entered into
+    as of
+    <strong>{{effectiveDate}}</strong> (the "<strong>Effective Date</strong>")
+    by and between:
+  </p>
+
+  <div
+    style="
+      margin: 30px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%);
+      border-left: 5px solid #7c3aed;
+      border-radius: 8px;
+    "
+  >
+    <h3
+      style="
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: #6b21a8;
+      "
+    >
+      EMPLOYER
+    </h3>
+    <p><strong>Name:</strong> {{employerName}}</p>
+    <p><strong>Email:</strong> {{employerEmail}}</p>
+  </div>
+
+  <div
+    style="
+      margin: 30px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+      border-left: 5px solid #f59e0b;
+      border-radius: 8px;
+    "
+  >
+    <h3
+      style="
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: #92400e;
+      "
+    >
+      EMPLOYEE
+    </h3>
+    <p><strong>Name:</strong> {{employeeName}}</p>
+    <p><strong>Email:</strong> {{employeeEmail}}</p>
+  </div>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 35px; color: #6b21a8"
+  >
+    1. Position and Duties
+  </h2>
+  <p style="text-align: justify">
+    The Employer hereby employs the Employee in the position of
+    <strong>{{position}}</strong>. The Employee agrees to perform all duties and
+    responsibilities associated with this role in a professional, diligent, and
+    lawful manner, and in accordance with the Employer’s policies.
+  </p>
+  <p><strong>Work Location:</strong> {{workLocation}}</p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
+  >
+    2. Compensation
+  </h2>
+  <p style="text-align: justify">
+    The Employee shall receive an annual salary of
+    <strong>{{salary}}</strong>, payable in accordance with the Employer’s
+    standard payroll practices and subject to applicable deductions and taxes.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
+  >
+    3. Working Hours
+  </h2>
+  <p style="text-align: justify">
+    The Employee’s standard working hours shall be forty (40) hours per week,
+    Monday through Friday. The Employer may reasonably require additional hours
+    as necessary to fulfill job responsibilities.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
+  >
+    4. Benefits
+  </h2>
+  <p style="text-align: justify">
+    The Employee shall be eligible to participate in any benefit plans or
+    programs offered by the Employer, subject to the terms and conditions of
+    such plans. Benefits may include, but are not limited to:
+  </p>
+  <ul style="margin-left: 25px">
+    <li>Health or medical insurance</li>
+    <li>Paid time off, vacation, and holidays</li>
+    <li>Retirement or pension plans</li>
+    <li>Professional development opportunities</li>
+  </ul>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
+  >
+    5. Confidentiality
+  </h2>
+  <p style="text-align: justify">
+    During and after the term of employment, the Employee agrees to maintain the
+    confidentiality of all proprietary, confidential, or non-public information
+    relating to the Employer, including trade secrets, business strategies,
+    customer data, and financial information.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
+  >
+    6. Intellectual Property
+  </h2>
+  <p style="text-align: justify">
+    Any inventions, works, materials, or intellectual property created by the
+    Employee in the course of employment shall be the exclusive property of the
+    Employer, to the extent permitted by law.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
+  >
+    7. Termination
+  </h2>
+  <p style="text-align: justify">
+    Either party may terminate this Agreement by providing thirty (30) days
+    written notice. The Employer may terminate the Employee immediately for
+    cause, including misconduct, breach of this Agreement, or violation of
+    company policies.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
+  >
+    8. Governing Law
+  </h2>
+  <p style="text-align: justify">
+    This Agreement shall be governed and interpreted in accordance with
+    applicable employment laws, without regard to conflict of law principles.
+  </p>
+
+  <div
+    style="margin-top: 50px; padding-top: 30px; border-top: 2px solid #e5e7eb"
+  >
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px">
+      <div>
+        <p><strong>EMPLOYER</strong></p>
+        <div style="border-bottom: 2px solid #000; margin: 20px 0"></div>
+        <p>{{employerName}}</p>
+      </div>
+      <div>
+        <p><strong>EMPLOYEE</strong></p>
+        <div style="border-bottom: 2px solid #000; margin: 20px 0"></div>
+        <p>{{employeeName}}</p>
+      </div>
+    </div>
+  </div>
+</div>
