@@ -934,11 +934,7 @@ useKeyboardShortcuts({
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    background-color: #eff6ff;
-    border-radius: 0.5rem;
-    color: #3b82f6;
+
     flex-shrink: 0;
   }
 

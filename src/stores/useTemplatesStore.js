@@ -4,7 +4,6 @@ import NdaTemplate from "../templates/nda.html?raw";
 import EmploymentContractTemplate from "../templates/employment-contract.html?raw";
 import ServiceAgreementTemplate from "../templates/service-agreement.html?raw";
 import PartnershipAgreementTemplate from "../templates/partnership-agreement.html?raw";
-import ConsultingAgreementTemplate from "../templates/consulting-agreement.html?raw";
 export const useTemplatesStore = defineStore("document", () => {
   const templates = ref([
     {

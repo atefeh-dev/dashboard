@@ -2,7 +2,7 @@
  * @file pdfGenerator.js
  * @location src/composables/pdfGenerator.js
  *
- * Robust PDF generation using multiple fallback methods
+ * Professional PDF generation with improved formatting
  */
 
 /**
@@ -22,6 +22,113 @@ async function loadScript(src, globalName) {
     };
     script.onerror = () => reject(new Error(`Failed to load ${globalName}`));
     document.head.appendChild(script);
+  });
+}
+
+/**
+ * Apply professional formatting to content for PDF
+ */
+function applyProfessionalFormatting(container) {
+  // Apply base styling to container
+  container.style.cssText = `
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    width: 794px;
+    padding: 60px;
+    background: white;
+    font-family: Georgia, serif;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #000;
+  `;
+
+  // Style all headings
+  const headings = container.querySelectorAll("h1, h2, h3, h4, h5, h6");
+  headings.forEach((heading) => {
+    const tag = heading.tagName.toLowerCase();
+
+    if (tag === "h1") {
+      heading.style.fontSize = "20px";
+      heading.style.fontWeight = "bold";
+      heading.style.marginTop = "0";
+      heading.style.marginBottom = "30px";
+      heading.style.paddingBottom = "15px";
+      heading.style.lineHeight = "1.3";
+    } else if (tag === "h2") {
+      heading.style.fontSize = "18px";
+      heading.style.fontWeight = "bold";
+      heading.style.marginTop = "35px";
+      heading.style.marginBottom = "18px";
+      heading.style.paddingBottom = "8px";
+      heading.style.lineHeight = "1.4";
+    } else if (tag === "h3") {
+      heading.style.fontSize = "16px";
+      heading.style.fontWeight = "bold";
+      heading.style.marginTop = "25px";
+      heading.style.marginBottom = "12px";
+      heading.style.lineHeight = "1.4";
+    }
+  });
+
+  // Style all paragraphs
+  const paragraphs = container.querySelectorAll("p");
+  paragraphs.forEach((p) => {
+    p.style.marginBottom = "16px";
+    p.style.lineHeight = "1.8";
+    p.style.textAlign = "justify";
+  });
+
+  // Style lists
+  const lists = container.querySelectorAll("ul, ol");
+  lists.forEach((list) => {
+    list.style.marginTop = "12px";
+    list.style.marginBottom = "20px";
+    list.style.paddingLeft = "30px";
+    list.style.lineHeight = "1.5";
+  });
+
+  const listItems = container.querySelectorAll("li");
+  listItems.forEach((li) => {
+    li.style.marginBottom = "10px";
+    li.style.lineHeight = "1.5";
+  });
+
+  // Style divs with padding/margin
+  const divs = container.querySelectorAll("div");
+  divs.forEach((div) => {
+    // If div has background color, ensure proper spacing
+    const bgColor = window.getComputedStyle(div).backgroundColor;
+    if (
+      bgColor &&
+      bgColor !== "rgba(0, 0, 0, 0)" &&
+      bgColor !== "transparent"
+    ) {
+      div.style.marginTop = "25px";
+      div.style.marginBottom = "25px";
+      div.style.padding = "20px";
+    }
+  });
+
+  // Style strong/bold text
+  const strongElements = container.querySelectorAll("strong, b");
+  strongElements.forEach((el) => {
+    el.style.fontWeight = "bold";
+    el.style.color = "#000";
+  });
+
+  // Ensure all text is visible
+  const allElements = container.querySelectorAll("*");
+  allElements.forEach((el) => {
+    // Ensure text color is visible
+    const color = window.getComputedStyle(el).color;
+    if (color === "rgba(0, 0, 0, 0)" || color === "transparent") {
+      el.style.color = "#000";
+    }
+
+    // Remove problematic styles
+    el.style.userSelect = "auto";
+    el.style.webkitUserSelect = "auto";
   });
 }
 
@@ -46,20 +153,12 @@ async function generatePDFWithJsPDF(htmlContent, filename) {
 
     // Create container
     const container = document.createElement("div");
-    container.style.cssText = `
-      position: absolute;
-      left: -9999px;
-      top: 0;
-      width: 794px;
-      padding: 40px;
-      background: white;
-      font-family: Georgia, serif;
-      font-size: 14px;
-      line-height: 1.6;
-      color: #000;
-    `;
-
     container.innerHTML = htmlContent;
+
+    // Apply professional formatting
+    applyProfessionalFormatting(container);
+
+    // Append to body temporarily
     document.body.appendChild(container);
 
     // Wait for images to load
@@ -76,12 +175,21 @@ async function generatePDFWithJsPDF(htmlContent, filename) {
 
     console.log("[PDF Generator] Capturing content as canvas...");
 
-    // Capture as canvas
+    // Capture as canvas with high quality
     const canvas = await window.html2canvas(container, {
       scale: 2,
       useCORS: true,
       logging: false,
       backgroundColor: "#ffffff",
+      windowWidth: container.scrollWidth,
+      windowHeight: container.scrollHeight,
+      onclone: (clonedDoc) => {
+        // Additional formatting on cloned document
+        const clonedContainer = clonedDoc.querySelector("div");
+        if (clonedContainer) {
+          applyProfessionalFormatting(clonedContainer);
+        }
+      },
     });
 
     // Create PDF
@@ -90,6 +198,7 @@ async function generatePDFWithJsPDF(htmlContent, filename) {
       orientation: "portrait",
       unit: "mm",
       format: "a4",
+      compress: true,
     });
 
     const imgWidth = 210; // A4 width in mm
@@ -159,9 +268,10 @@ function generatePDFWithPrint(htmlContent, filename) {
           body {
             font-family: Georgia, serif;
             font-size: 12pt;
-            line-height: 1.6;
+            line-height: 1.8;
             color: #000;
             background: white;
+            padding: 20mm;
           }
           
           * {
@@ -169,15 +279,53 @@ function generatePDFWithPrint(htmlContent, filename) {
             print-color-adjust: exact !important;
           }
           
-          h1, h2, h3, h4, h5, h6 {
+          h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 30px 0;
+            padding-bottom: 15px;
+            line-height: 1.3;
             page-break-after: avoid;
-            color: #000;
           }
           
-          p, div {
-            page-break-inside: avoid;
+          h2 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 35px 0 18px 0;
+            padding-bottom: 8px;
+            line-height: 1.4;
+            page-break-after: avoid;
+          }
+          
+          h3 {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 25px 0 12px 0;
+            line-height: 1.4;
+            page-break-after: avoid;
+          }
+          
+          p {
+            margin: 0 0 16px 0;
+            line-height: 1.8;
+            text-align: justify;
             orphans: 3;
             widows: 3;
+          }
+          
+          ul, ol {
+            margin: 12px 0 20px 0;
+            padding-left: 30px;
+            line-height: 1.8;
+          }
+          
+          li {
+            margin-bottom: 10px;
+            line-height: 1.8;
+          }
+          
+          div {
+            margin: 15px 0;
           }
           
           img {
@@ -187,6 +335,11 @@ function generatePDFWithPrint(htmlContent, filename) {
           
           table {
             page-break-inside: avoid;
+          }
+          
+          strong, b {
+            font-weight: bold;
+            color: #000;
           }
         </style>
       </head>
@@ -226,13 +379,19 @@ function downloadAsHTML(htmlContent, filename) {
           body {
             font-family: Georgia, serif;
             font-size: 12pt;
-            line-height: 1.6;
+            line-height: 1.8;
             color: #000;
             max-width: 800px;
             margin: 40px auto;
-            padding: 20px;
+            padding: 40px;
             background: white;
           }
+          h1 { margin: 0 0 30px 0; font-size: 24px; }
+          h2 { margin: 35px 0 18px 0; font-size: 18px; }
+          h3 { margin: 25px 0 12px 0; font-size: 16px; }
+          p { margin: 0 0 16px 0; line-height: 1.8; }
+          ul, ol { margin: 12px 0 20px 0; padding-left: 30px; }
+          li { margin-bottom: 10px; }
         </style>
       </head>
       <body>
@@ -330,7 +489,7 @@ export function previewContent(htmlContent) {
           body {
             font-family: Georgia, serif;
             font-size: 12pt;
-            line-height: 1.6;
+            line-height: 1.8;
             color: #000;
             max-width: 800px;
             margin: 20px auto;
@@ -340,7 +499,7 @@ export function previewContent(htmlContent) {
           
           .content {
             background: white;
-            padding: 40px;
+            padding: 60px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
           }
           
@@ -373,6 +532,14 @@ export function previewContent(htmlContent) {
           button:hover {
             background: #2563eb;
           }
+          
+          /* Professional formatting */
+          h1 { margin: 0 0 30px 0; font-size: 24px; line-height: 1.3; }
+          h2 { margin: 35px 0 18px 0; font-size: 18px; line-height: 1.4; }
+          h3 { margin: 25px 0 12px 0; font-size: 16px; }
+          p { margin: 0 0 16px 0; line-height: 1.8; }
+          ul, ol { margin: 12px 0 20px 0; padding-left: 30px; }
+          li { margin-bottom: 10px; }
         </style>
       </head>
       <body>
@@ -398,25 +565,4 @@ export function previewContent(htmlContent) {
   `);
 
   previewWindow.document.close();
-}
-
-/**
- * Test if content will render properly
- */
-export function testContentRendering(htmlContent) {
-  const testDiv = document.createElement("div");
-  testDiv.style.cssText = "position: absolute; left: -9999px; width: 800px;";
-  testDiv.innerHTML = htmlContent;
-  document.body.appendChild(testDiv);
-
-  const hasContent = testDiv.textContent.trim().length > 0;
-  const hasElements = testDiv.children.length > 0;
-
-  document.body.removeChild(testDiv);
-
-  return {
-    valid: hasContent && hasElements,
-    textLength: testDiv.textContent.trim().length,
-    elementCount: testDiv.children.length,
-  };
 }
