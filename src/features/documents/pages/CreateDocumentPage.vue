@@ -75,52 +75,6 @@
 </template>
 
 <script setup>
-/**
- * CREATE DOCUMENT PAGE - MULTI-STEP WORKFLOW
- *
- * This component manages a 5-step document creation workflow with auto-save:
- *
- * STEP 1 - DETAILS:
- *   User enters: name, filename, description, status
- *   Selects: template
- *   → Stored in: documentForm, selectedTemplate
- *
- * STEP 2 - INPUT FORMS:
- *   User fills: dynamic form fields based on template
- *   → Stored in: stepData.input
- *
- * STEP 3 - REVIEW:
- *   User reviews and edits all previous data
- *   → Updates: documentForm, stepData.input
- *
- * STEP 4 - PREVIEW:
- *   User edits document content in rich text editor
- *   → Stored in: stepData.preview.content
- *
- * STEP 5 - DOCUMENT:
- *   User selects recipients and sends documents
- *   Documents use filename from Step 1 (e.g., "accelerator-contract-2025.pdf")
- *   → Triggers API submission with complete payload
- *
- * API PAYLOAD STRUCTURE (sent via handleSendDocuments):
- * {
- *   document: { name, filename, description, status },
- *   template: { id, name },
- *   inputData: { ...form fields from step 2... },
- *   reviewData: { details, input },
- *   previewContent: "...rich text HTML content...",
- *   emailSettings: {
- *     recipients: [...],
- *     alternativeEmail: string | null,
- *     sendToSelf: boolean,
- *     documents: [
- *       { name: "accelerator-contract-2025.pdf", format: "pdf" },
- *       { name: "accelerator-contract-2025.docx", format: "docx" }
- *     ]
- *   },
- *   metadata: { createdAt, userId, draftId }
- * }
- */
 import { ref, computed, watch, onMounted, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useDocumentsStore } from "@/stores/useDocumentsStore";
@@ -140,9 +94,7 @@ const documentsStore = useDocumentsStore();
 const authStore = useAuthStore();
 const contactsStore = useContactsStore();
 
-// ========================================
-// STEP CONFIGURATION
-// ========================================
+// Step configuration
 const steps = [
   { id: "details", title: "Details", subtitle: "Template and information" },
   { id: "input", title: "Input forms", subtitle: "Based on template needs" },
@@ -181,18 +133,13 @@ const stepData = ref({
   preview: {},
 });
 
-// ========================================
-// SIDEBAR CONFIGURATION
-// ========================================
+// Sidebar configuration
 const showSidebarForCurrentStep = computed(() => {
   return currentStepIndex.value !== 0;
 });
 
 const sidebarData = computed(() => {
-  // Determine display status based on document state
   let displayStatus = documentForm.value.status || "Draft";
-
-  // When documents are sent, show "Sent" status
   if (documentsSent.value) {
     displayStatus = "Sent";
   }
@@ -223,16 +170,13 @@ const checklistItems = computed(() => {
   }));
 });
 
-// ========================================
-// FORM FIELDS CONFIGURATION (Step 2)
-// ========================================
+// Form fields configuration
 const inputFormFields = computed(() => {
   if (!selectedTemplate.value) {
     console.warn("[Parent] No template selected for input fields");
     return [];
   }
 
-  // Get template from store to ensure we have the latest field definitions
   const template = selectedTemplate.value;
 
   if (!template.fields || template.fields.length === 0) {
@@ -241,31 +185,24 @@ const inputFormFields = computed(() => {
   }
 
   console.log("[Parent] Generating input fields from template:", template.name);
-  console.log("[Parent] Template fields:", template.fields);
-
-  // Return template fields directly
   return template.fields;
 });
-// ========================================
-// REVIEW SECTIONS CONFIGURATION (Step 3)
-// ========================================
-// ========================================
-// DATA FOR PREVIEW STEP
-// ========================================
+
+// Data for preview step
 const allStepDataForPreview = computed(() => {
   console.log("[Parent] Preparing preview data");
   return {
     details: documentForm.value,
-    inputForms: stepData.value.input,
+    input: stepData.value.input,
     template: selectedTemplate.value,
   };
 });
+
+// Review sections configuration
 const reviewSections = computed(() => {
   console.log("[Parent] Generating review sections");
-
   const sections = [];
 
-  // SECTION 1: Document Details (always present)
   sections.push({
     key: "details",
     title: "Document Details",
@@ -306,7 +243,6 @@ const reviewSections = computed(() => {
     ],
   });
 
-  // SECTION 2: Template-specific fields (dynamic)
   if (selectedTemplate.value && selectedTemplate.value.fields) {
     console.log(
       "[Parent] Adding template fields section for:",
@@ -327,34 +263,38 @@ const reviewSections = computed(() => {
         rows: field.rows,
       })),
     });
-  } else {
-    console.warn("[Parent] No template selected or template has no fields");
   }
 
-  console.log("[Parent] Generated review sections:", sections);
   return sections;
 });
 
-const allStepData = computed(() => ({
-  details: documentForm.value,
-  input: stepData.value.input,
-  review: {
+const allStepData = computed(() => {
+  const data = {
     details: documentForm.value,
     input: stepData.value.input,
-  },
-  preview: stepData.value.preview,
-}));
+    review: {
+      details: documentForm.value,
+      input: stepData.value.input,
+    },
+    preview: stepData.value.preview,
+  };
 
-// ========================================
-// AUTOSAVE SETUP (FIXED - FASTER CONFIG)
-// ========================================
+  console.log("[Parent] allStepData computed:", {
+    hasPreviewContent: !!data.preview?.content,
+    previewContentLength: data.preview?.content?.length || 0,
+  });
+
+  return data;
+});
+
+// Autosave setup
 const { timeSinceLastSave, scheduleAutosave, forceSave } = useAutosave(
   async () => {
     await saveDraftToStore();
   },
   {
-    debounceMs: 500, // FIXED: Faster (was 2000)
-    updateIntervalMs: 1000, // Update every second for navbar display
+    debounceMs: 500,
+    updateIntervalMs: 1000,
   }
 );
 
@@ -372,13 +312,15 @@ async function saveDraftToStore() {
       documentsSent: documentsSent.value,
     };
 
-    console.log("[Parent] Saving draft:", draftData);
+    console.log(
+      "[Parent] Saving draft with preview content length:",
+      stepData.value.preview?.content?.length || 0
+    );
     await documentsStore.saveDraft(draftData);
     console.log("[Parent] Draft saved successfully");
   } catch (error) {
     console.error("[Parent] Failed to save draft:", error);
 
-    // Emergency backup to localStorage
     try {
       const backup = {
         documentForm: documentForm.value,
@@ -396,9 +338,7 @@ async function saveDraftToStore() {
   }
 }
 
-// ========================================
-// INITIALIZATION
-// ========================================
+// Initialization
 const draftId = route.query.draftId;
 
 if (draftId) {
@@ -416,14 +356,12 @@ if (draftId) {
 } else {
   documentsStore.createDraft();
 
-  // Try to restore from emergency backup
   try {
     const backupStr = localStorage.getItem("emergency-backup-document");
     if (backupStr) {
       const backup = JSON.parse(backupStr);
       const age = Date.now() - backup.timestamp;
       if (age < 24 * 60 * 60 * 1000) {
-        // 24 hours
         console.warn("[Parent] Restoring from emergency backup");
         setTimeout(() => {
           if (
@@ -455,10 +393,7 @@ onMounted(async () => {
   }
 });
 
-// ========================================
-// OPTIMIZED WATCH FOR CHANGES (FIXED)
-// ========================================
-// Watch individual objects with JSON stringify for better performance
+// Watch for changes
 watch(
   () => JSON.stringify(documentForm.value),
   () => {
@@ -480,24 +415,19 @@ watch([currentStepIndex, documentsSent], () => {
   scheduleAutosave();
 });
 
-// Debug logging in development
 if (import.meta.env.DEV) {
   watch(
-    () => stepData.value.input,
+    () => stepData.value.preview?.content,
     (newValue) => {
-      console.log("[Parent] Input step data changed:", newValue);
-    },
-    { deep: true }
+      console.log(
+        "[Parent] Preview content changed, length:",
+        newValue?.length || 0
+      );
+    }
   );
-
-  watch(currentStepIndex, (newIndex, oldIndex) => {
-    console.log(`[Parent] Navigation: Step ${oldIndex} → Step ${newIndex}`);
-  });
 }
 
-// ========================================
-// FORM DATA UPDATES
-// ========================================
+// Form data updates
 function updateFormData(updates) {
   console.log("[Parent] Updating form data:", updates);
   documentForm.value = { ...documentForm.value, ...updates };
@@ -520,18 +450,13 @@ function updateReviewData(data) {
   });
 }
 
-// ========================================
-// STEP NAVIGATION (FIXED - ASYNC/AWAIT)
-// ========================================
+// Step navigation
 async function goToStep(index) {
   if (index <= currentStepIndex.value || completedSteps.value.includes(index)) {
     console.log(`[Parent] Navigating to step ${index}, saving first...`);
 
-    // FIXED: Wait for save to complete
     await forceSave();
     await nextTick();
-
-    // Small delay to ensure store updates
     await new Promise((resolve) => setTimeout(resolve, 50));
 
     currentStepIndex.value = index;
@@ -541,6 +466,8 @@ async function goToStep(index) {
 
 function completeStep(data) {
   const stepId = steps[currentStepIndex.value].id;
+
+  console.log(`[Parent] Completing step: ${stepId}`, data);
 
   if (data) {
     if (stepId === "details") {
@@ -552,19 +479,34 @@ function completeStep(data) {
       documentForm.value = { ...documentForm.value, ...formData };
       stepData.value.details = data;
 
-      // Pass template data to preview
       stepData.value.preview = {
         template: data.template,
         templateName: data.template?.name,
         templateId: data.template?.id,
       };
     } else if (stepId === "input") {
-      // 🔥 CRITICAL: Store input form data for preview
       stepData.value.input = data;
       stepData.value.preview = {
         ...stepData.value.preview,
         input: data,
       };
+    } else if (stepId === "preview") {
+      // 🔥 CRITICAL FIX: Store preview content from the continue event
+      console.log(
+        "[Parent] Storing preview content, length:",
+        data?.content?.length || 0
+      );
+      stepData.value.preview = {
+        ...stepData.value.preview,
+        ...data,
+      };
+
+      // Debug log to verify content is stored
+      console.log("[Parent] Preview content stored:", {
+        hasContent: !!stepData.value.preview?.content,
+        contentLength: stepData.value.preview?.content?.length || 0,
+        contentPreview: stepData.value.preview?.content?.substring(0, 100),
+      });
     } else {
       stepData.value[stepId] = { ...stepData.value[stepId], ...data };
     }
@@ -573,6 +515,8 @@ function completeStep(data) {
   if (!completedSteps.value.includes(currentStepIndex.value)) {
     completedSteps.value.push(currentStepIndex.value);
   }
+
+  stepCompletionStatus.value[stepId] = true;
 
   forceSave();
 
@@ -585,7 +529,6 @@ async function previousStep() {
   if (currentStepIndex.value > 0) {
     console.log("[Parent] Going to previous step, saving first...");
 
-    // FIXED: Wait for save to complete
     await forceSave();
     await nextTick();
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -595,36 +538,28 @@ async function previousStep() {
   }
 }
 
-// ========================================
-// TEMPLATE SELECTION
-// ========================================
+// Template selection
 function selectTemplate(template) {
   console.log("[Parent] Template selected:", template);
   selectedTemplate.value = template;
-  scheduleAutosave(); // Changed from forceSave to scheduleAutosave
+  scheduleAutosave();
 }
 
-// ========================================
-// UTILITY FUNCTIONS
-// ========================================
+// Utility functions
 function getStatusVariant(status) {
   const variants = {
     draft: "ghost",
     active: "success",
     archived: "secondary",
-    sent: "success", // ← Add support for "Sent" status
-    completed: "success", // ← Add support for "Completed" status
+    sent: "success",
+    completed: "success",
   };
   return variants[status?.toLowerCase()] || "ghost";
 }
 
-// ========================================
-// ACTION BUTTONS
-// ========================================
+// Action buttons
 async function handleGoBack() {
   await forceSave();
-
-  // Wait a bit to ensure save completes
   await new Promise((resolve) => setTimeout(resolve, 100));
 
   const confirmed = confirm(
@@ -638,10 +573,7 @@ async function handleGoBack() {
 
 async function saveAndExit() {
   await forceSave();
-
-  // Wait to ensure save completes
   await new Promise((resolve) => setTimeout(resolve, 200));
-
   router.push("/documents");
 }
 
@@ -663,48 +595,37 @@ function discard() {
 async function handleEditInfo() {
   await forceSave();
   await nextTick();
-
   currentStepIndex.value = 0;
 }
 
-// ========================================
-// SEND DOCUMENTS
-// ========================================
+// Send documents
 async function handleSendDocuments(emailData) {
   try {
     isSaving.value = true;
 
-    // Prepare complete data payload for API
     const apiPayload = {
-      // Document metadata from Details step
       document: {
         name: documentForm.value.name,
         filename: documentForm.value.filename,
         description: documentForm.value.description,
         status: documentForm.value.status,
       },
-      // Template information
       template: {
         id: selectedTemplate.value?.id,
         name: selectedTemplate.value?.name,
       },
-      // Input form data (Step 2)
       inputData: stepData.value.input || {},
-      // Review data (Step 3)
       reviewData: {
         details: documentForm.value,
         input: stepData.value.input,
       },
-      // Preview content (Step 4) - the edited document content
       previewContent: stepData.value.preview?.content || "",
-      // Email recipients and settings (Step 5)
       emailSettings: {
         recipients: emailData.recipients,
         alternativeEmail: emailData.alternativeEmail,
         sendToSelf: emailData.sendToSelf,
         documents: emailData.documents,
       },
-      // Metadata
       metadata: {
         createdAt: new Date().toISOString(),
         userId: authStore.user?.id,
@@ -712,17 +633,11 @@ async function handleSendDocuments(emailData) {
       },
     };
 
-    console.log("📤 Sending complete data to API:", apiPayload);
+    console.log("📤 Sending complete data to API:", {
+      ...apiPayload,
+      previewContentLength: apiPayload.previewContent?.length || 0,
+    });
 
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/documents/send', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(apiPayload)
-    // });
-    // const result = await response.json();
-
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     console.log("✅ Documents sent successfully!");
@@ -741,9 +656,7 @@ async function handleSendDocuments(emailData) {
   }
 }
 
-// ========================================
-// COMPLETE DOCUMENT
-// ========================================
+// Complete document
 async function completeDocument() {
   if (!documentsSent.value) {
     alert("Please send the documents first before completing.");
@@ -755,7 +668,6 @@ async function completeDocument() {
 
     documentForm.value.status = "completed";
 
-    // Log the complete document data structure for reference
     console.log("📋 COMPLETE DOCUMENT DATA STRUCTURE:");
     console.log("=====================================");
     console.log("Document Metadata:", {
@@ -796,7 +708,3 @@ async function completeDocument() {
   }
 }
 </script>
-
-<style scoped>
-/* No styles needed */
-</style>

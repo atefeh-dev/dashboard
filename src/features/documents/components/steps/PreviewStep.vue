@@ -6,8 +6,6 @@
       <p class="section__description">
         You can see your answers in action with template and generated content.
       </p>
-
-      <!-- export banner-->
       <div class="export-banner">
         <div class="export-banner__content">
           <AppButton size="md" variant="secondary ">Export 1</AppButton>
@@ -18,10 +16,31 @@
       <div class="info-banner">
         <WarningIcon />
         <div class="info-banner__content">
-          <p class="info-banner__title">
-            You can edit and style the generated content but you can’t save your
-            new changed content
-          </p>
+          <p class="info-banner__title">Editing Guidelines</p>
+          <ul class="info-banner__list">
+            <li>
+              🔒 <strong>Your data fields</strong> (highlighted in yellow) are
+              protected and cannot be edited or deleted
+            </li>
+            <li>
+              ✏️ All other <strong>template content</strong> can be freely
+              edited and styled
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Locked Fields Legend -->
+      <div class="legend">
+        <div class="legend__item">
+          <span class="legend__sample locked-field-sample">
+            Your Protected Data 🔒
+          </span>
+          <span class="legend__label">Read-only (from previous steps)</span>
+        </div>
+        <div class="legend__item">
+          <span class="legend__sample editable-sample">Template Text</span>
+          <span class="legend__label">Fully editable</span>
         </div>
       </div>
 
@@ -54,7 +73,7 @@
         <AppButton
           variant="primary"
           @click="handleContinue"
-          :disabled="!templateToUse"
+          :disabled="!templateToUse || !editorContent"
         >
           Continue <ChevronRight />
         </AppButton>
@@ -64,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, nextTick } from "vue";
 import { ChevronLeft, ChevronRight, AlertCircle } from "lucide-vue-next";
 import AppButton from "@/components/ui/AppButton.vue";
 import RichTextEditor from "@/components/ui/RichTextEditor.vue";
@@ -157,17 +176,14 @@ function processTemplateWithLockedFields() {
   const fields = fieldData.value;
   const lockedNames = lockedFieldNames.value;
 
-  // Set initial template content
   editorInstance.value.commands.setContent(template, false);
 
-  // Wait for content to render, then replace placeholders
   setTimeout(() => {
     const { state } = editorInstance.value;
     const { doc } = state;
     const { tr } = state;
     let modified = false;
 
-    // Find all placeholders and build replacement list
     const replacements = [];
     doc.descendants((node, pos) => {
       if (node.isText && node.text) {
@@ -193,14 +209,11 @@ function processTemplateWithLockedFields() {
 
     console.log(`Found ${replacements.length} placeholders to replace`);
 
-    // Apply replacements in reverse order (to maintain positions)
     replacements.reverse().forEach((replacement) => {
       const { from, to, fieldName, fieldValue } = replacement;
 
-      // Delete placeholder
       tr.delete(from, to);
 
-      // Insert locked field node
       const lockedNode = editorInstance.value.schema.nodes.lockedField.create({
         fieldName,
         fieldValue,
@@ -248,23 +261,48 @@ watch(
   { immediate: false }
 );
 
+// Watch editor content changes and emit updates
 watch(editorContent, (value) => {
+  console.log("📝 Editor content changed, length:", value?.length || 0);
   emit("update:data", { content: value });
 });
 
 function handleBack() {
+  // Ensure content is saved before going back
+  emit("update:data", { content: editorContent.value });
   emit("back");
 }
 
-function handleContinue() {
+async function handleContinue() {
   if (!templateToUse.value) {
     alert("Please select a template first");
     emit("back");
     return;
   }
 
+  if (
+    !editorContent.value ||
+    editorContent.value.trim() === "" ||
+    editorContent.value === "<p></p>"
+  ) {
+    alert("Please wait for the document to load or add some content");
+    return;
+  }
+
+  console.log(
+    "✅ Continuing with content, length:",
+    editorContent.value.length
+  );
+
+  // CRITICAL: Emit the content with the continue event
+  // This ensures the parent receives the content immediately
   emit("update:data", { content: editorContent.value });
-  emit("continue");
+
+  // Wait for the update to propagate
+  await nextTick();
+
+  // Now emit continue WITH the content data
+  emit("continue", { content: editorContent.value });
 }
 </script>
 

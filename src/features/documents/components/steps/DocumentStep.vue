@@ -27,6 +27,25 @@
         </div>
 
         <div class="document-step__section-content">
+          <!-- Debug Info (Development Only) -->
+          <div v-if="showDebugInfo" class="debug-info">
+            <details>
+              <summary>🔍 Debug Info</summary>
+              <div class="debug-info__content">
+                <p><strong>Has Content:</strong> {{ !!documentContent }}</p>
+                <p>
+                  <strong>Content Length:</strong>
+                  {{ documentContent?.length || 0 }}
+                </p>
+                <p><strong>Content Preview:</strong></p>
+                <pre>{{ documentContent?.substring(0, 200) }}...</pre>
+                <button @click="previewContentInBrowser" class="debug-btn">
+                  Preview Content
+                </button>
+              </div>
+            </details>
+          </div>
+
           <div
             v-if="!isGenerating && generatedDocuments.length > 0"
             class="document-list"
@@ -263,6 +282,7 @@ import { useTemplatesStore } from "@/stores/useTemplatesStore";
 import {
   downloadPDF,
   generatePDFPrintFallback,
+  previewContent,
 } from "@/composables/pdfGenerator";
 import { cleanContentForPDF } from "@/composables/pdfContentCleaner";
 import ArrowNarrowLetIcon from "@/assets/icons/common/arrow-narrow-left.svg";
@@ -315,41 +335,51 @@ const isDownloading = ref({});
 const alternativeEmailError = ref("");
 const validationErrors = ref([]);
 
+// Show debug info in development
+const showDebugInfo = computed(() => import.meta.env.DEV);
+
 // Computed
 const userEmail = computed(() => authStore.user?.email || "user@doclast.com");
 
 // Get document content from preview step
 const documentContent = computed(() => {
-  if (props.allStepData?.preview?.content) {
-    return props.allStepData.preview.content;
-  }
-  return templatesStore.populatedDocumentContent || "";
+  const content =
+    props.allStepData?.preview?.content ||
+    templatesStore.populatedDocumentContent ||
+    "";
+
+  console.log("[Document Step] Content check:", {
+    fromPreview: !!props.allStepData?.preview?.content,
+    fromStore: !!templatesStore.populatedDocumentContent,
+    hasContent: !!content,
+    contentLength: content?.length || 0,
+    contentPreview: content?.substring(0, 100),
+  });
+
+  return content;
 });
 
-// Extract recipients from input step (emails entered in forms)
+// Extract recipients from input step
 const inputRecipients = computed(() => {
   const recipients = [];
   const inputData = props.allStepData?.input || {};
 
-  // Extract email fields from input data
   const extractEmails = (data) => {
     if (Array.isArray(data)) {
       data.forEach((item) => extractEmails(item));
     } else if (typeof data === "object" && data !== null) {
       Object.entries(data).forEach(([key, value]) => {
-        // Check if this is an email field
         if (
           key.toLowerCase().includes("email") &&
           typeof value === "string" &&
           value.includes("@")
         ) {
-          // Create a recipient from the email
           const id = `input-${key}-${value}`;
           const name = extractNameForEmail(key, data);
 
           recipients.push({
             id,
-            name: name || value.split("@")[0], // Use part before @ if no name
+            name: name || value.split("@")[0],
             email: value,
             role: extractRoleForEmail(key),
             source: "input",
@@ -367,15 +397,12 @@ const inputRecipients = computed(() => {
   return recipients;
 });
 
-// Helper to extract name for an email field
 function extractNameForEmail(emailKey, data) {
-  // Try to find a corresponding name field
   const nameKey = emailKey.replace("Email", "Name").replace("email", "name");
   if (data[nameKey]) {
     return data[nameKey];
   }
 
-  // Try common patterns
   const patterns = ["Name", "name", "PartyName", "partyName"];
   for (const pattern of patterns) {
     const key = emailKey.replace(/Email|email/, pattern);
@@ -387,7 +414,6 @@ function extractNameForEmail(emailKey, data) {
   return "";
 }
 
-// Helper to extract role for an email field
 function extractRoleForEmail(emailKey) {
   const lower = emailKey.toLowerCase();
   if (lower.includes("disclosing")) return "Disclosing Party";
@@ -463,27 +489,57 @@ function restoreState(data) {
   }
 }
 
+// Preview content in browser (for debugging)
+function previewContentInBrowser() {
+  const cleanedContent = cleanContentForPDF(documentContent.value);
+  previewContent(cleanedContent);
+}
+
 // PDF Download Function with Content Cleaning
 async function downloadDocument(doc) {
   if (!documentContent.value) {
-    alert("No document content available. Please complete previous steps.");
+    alert(
+      "No document content available. Please go back to the Preview step and ensure the document has loaded."
+    );
+    return;
+  }
+
+  // Additional validation
+  if (
+    documentContent.value.trim() === "" ||
+    documentContent.value === "<p></p>"
+  ) {
+    alert(
+      "The document appears to be empty. Please go back to the Preview step and wait for the content to load."
+    );
     return;
   }
 
   try {
     console.log("[Document Step] Starting PDF download for:", doc.name);
+    console.log(
+      "[Document Step] Original content length:",
+      documentContent.value.length
+    );
+
     isDownloading.value[doc.id] = true;
 
-    // CRITICAL: Clean the content before PDF export
-    // This removes lock icons (🔒) and locked field styling
+    // Clean the content before PDF export
     const cleanedContent = cleanContentForPDF(documentContent.value);
 
     console.log("[Document Step] Content cleaned for PDF export");
     console.log(
-      "[Document Step] Original length:",
-      documentContent.value.length
+      "[Document Step] Cleaned content length:",
+      cleanedContent.length
     );
-    console.log("[Document Step] Cleaned length:", cleanedContent.length);
+    console.log(
+      "[Document Step] Cleaned content preview:",
+      cleanedContent.substring(0, 200)
+    );
+
+    if (!cleanedContent || cleanedContent.trim() === "") {
+      throw new Error("Content cleaning resulted in empty output");
+    }
 
     // Use the cleaned content for PDF generation
     await downloadPDF(
@@ -504,7 +560,6 @@ async function downloadDocument(doc) {
     );
 
     if (retry) {
-      // Also clean content for fallback method
       const cleanedContent = cleanContentForPDF(documentContent.value);
       generatePDFPrintFallback(
         cleanedContent,
@@ -630,7 +685,6 @@ async function sendDocuments() {
   try {
     isSending.value = true;
 
-    // Combine all recipients (from input, internal contacts, and external)
     const allRecipients = [
       ...inputRecipients.value.filter((r) =>
         selectedRecipientIds.value.includes(r.id)
@@ -669,7 +723,6 @@ async function sendDocuments() {
         id: props.template?.id,
         name: props.template?.name,
       },
-      // Include cleaned content for email attachments
       cleanedContent: cleanContentForPDF(documentContent.value),
       allStepData: props.allStepData,
     };
@@ -723,7 +776,6 @@ onMounted(async () => {
   if (props.stepData && Object.keys(props.stepData).length > 0) {
     restoreState(props.stepData);
   } else {
-    // Auto-select input recipients and internal contacts
     const autoSelectIds = [
       ...inputRecipients.value.map((r) => r.id),
       ...internalContacts.value.map((c) => c.id),
@@ -735,6 +787,12 @@ onMounted(async () => {
     "[Document Step] Mounted with input recipients:",
     inputRecipients.value
   );
+
+  // Log content availability
+  console.log("[Document Step] Content available:", {
+    hasContent: !!documentContent.value,
+    contentLength: documentContent.value?.length || 0,
+  });
 });
 
 onBeforeUnmount(() => {
@@ -791,8 +849,54 @@ useKeyboardShortcuts({
 </script>
 
 <style scoped lang="scss">
-// Keep all existing styles, just add:
 @use "./stepStyles.scss";
+
+.debug-info {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 0.5rem;
+
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #92400e;
+    margin-bottom: 0.5rem;
+  }
+
+  &__content {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+
+    p {
+      margin: 0.5rem 0;
+    }
+
+    pre {
+      background: #ffffff;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      overflow-x: auto;
+      font-size: 0.75rem;
+    }
+  }
+
+  .debug-btn {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+
+    &:hover {
+      background: #2563eb;
+    }
+  }
+}
 
 .recipient-section-label {
   font-size: 0.75rem;
@@ -903,7 +1007,7 @@ useKeyboardShortcuts({
   }
 }
 
-// All other existing styles remain the same...
+// Rest of existing styles...
 .document-step {
   &__header {
     margin-bottom: 1.5rem;

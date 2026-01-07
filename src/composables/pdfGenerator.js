@@ -1,133 +1,144 @@
 /**
- * PDF Generation Utility
- * Uses html2pdf.js to convert HTML content to PDF
+ * @file pdfGenerator.js
+ * @location src/composables/pdfGenerator.js
  *
- * Installation: npm install html2pdf.js
+ * Robust PDF generation using multiple fallback methods
  */
-
-import html2pdf from "html2pdf.js";
 
 /**
- * Generate and download a PDF from HTML content
- * @param {string} htmlContent - The HTML content to convert
- * @param {string} filename - The filename for the PDF (without extension)
- * @param {Object} options - Optional configuration
- * @returns {Promise<void>}
+ * Load external library dynamically
  */
-export async function generatePDF(htmlContent, filename, options = {}) {
-  const defaultOptions = {
-    margin: [15, 15, 15, 15], // top, right, bottom, left in mm
-    filename: `${filename}.pdf`,
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      letterRendering: true,
-    },
-    jsPDF: {
-      unit: "mm",
-      format: "a4",
-      orientation: "portrait",
-    },
-    pagebreak: {
-      mode: ["avoid-all", "css", "legacy"],
-      before: ".page-break-before",
-      after: ".page-break-after",
-    },
-  };
+async function loadScript(src, globalName) {
+  if (window[globalName]) {
+    return window[globalName];
+  }
 
-  const mergedOptions = { ...defaultOptions, ...options };
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = () => {
+      console.log(`[PDF Generator] ${globalName} loaded`);
+      resolve(window[globalName]);
+    };
+    script.onerror = () => reject(new Error(`Failed to load ${globalName}`));
+    document.head.appendChild(script);
+  });
+}
 
+/**
+ * Method 1: Using jsPDF with html2canvas (Most Reliable)
+ */
+async function generatePDFWithJsPDF(htmlContent, filename) {
   try {
-    console.log("[PDF Generator] Starting PDF generation...");
-    console.log("[PDF Generator] Filename:", mergedOptions.filename);
+    console.log("[PDF Generator] Method 1: Using jsPDF + html2canvas");
 
-    // Create a temporary container
+    // Load libraries
+    await loadScript(
+      "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
+      "html2canvas"
+    );
+    await loadScript(
+      "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+      "jspdf"
+    );
+
+    const { jsPDF } = window.jspdf;
+
+    // Create container
     const container = document.createElement("div");
+    container.style.cssText = `
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      width: 794px;
+      padding: 40px;
+      background: white;
+      font-family: Georgia, serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #000;
+    `;
+
     container.innerHTML = htmlContent;
-    container.style.position = "absolute";
-    container.style.left = "-9999px";
-    container.style.top = "0";
-    container.style.width = "210mm"; // A4 width
     document.body.appendChild(container);
 
-    // Generate PDF
-    await html2pdf().set(mergedOptions).from(container).save();
+    // Wait for images to load
+    const images = container.querySelectorAll("img");
+    await Promise.all(
+      Array.from(images).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      })
+    );
+
+    console.log("[PDF Generator] Capturing content as canvas...");
+
+    // Capture as canvas
+    const canvas = await window.html2canvas(container, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+    });
+
+    // Create PDF
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const imgWidth = 210; // A4 width in mm
+    const pageHeight = 297; // A4 height in mm
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Add first page
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // Add additional pages if needed
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    // Save
+    pdf.save(`${filename}.pdf`);
 
     // Cleanup
     document.body.removeChild(container);
 
-    console.log("[PDF Generator] PDF generated successfully");
+    console.log("[PDF Generator] PDF generated successfully with jsPDF");
+    return true;
   } catch (error) {
-    console.error("[PDF Generator] Failed to generate PDF:", error);
-    throw new Error(`PDF generation failed: ${error.message}`);
+    console.error("[PDF Generator] jsPDF method failed:", error);
+    throw error;
   }
 }
 
 /**
- * Generate PDF as Blob (for previewing or uploading)
- * @param {string} htmlContent - The HTML content to convert
- * @param {Object} options - Optional configuration
- * @returns {Promise<Blob>}
+ * Method 2: Simple print with styled iframe
  */
-export async function generatePDFBlob(htmlContent, options = {}) {
-  const defaultOptions = {
-    margin: [15, 15, 15, 15],
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      letterRendering: true,
-    },
-    jsPDF: {
-      unit: "mm",
-      format: "a4",
-      orientation: "portrait",
-    },
-  };
+function generatePDFWithPrint(htmlContent, filename) {
+  console.log("[PDF Generator] Method 2: Using browser print");
 
-  const mergedOptions = { ...defaultOptions, ...options };
+  // Create iframe
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText =
+    "position: absolute; width: 0; height: 0; border: none;";
+  document.body.appendChild(iframe);
 
-  try {
-    const container = document.createElement("div");
-    container.innerHTML = htmlContent;
-    container.style.position = "absolute";
-    container.style.left = "-9999px";
-    container.style.top = "0";
-    container.style.width = "210mm";
-    document.body.appendChild(container);
-
-    const pdfBlob = await html2pdf()
-      .set(mergedOptions)
-      .from(container)
-      .output("blob");
-
-    document.body.removeChild(container);
-
-    return pdfBlob;
-  } catch (error) {
-    console.error("[PDF Generator] Failed to generate PDF blob:", error);
-    throw new Error(`PDF blob generation failed: ${error.message}`);
-  }
-}
-
-/**
- * Fallback PDF generation using browser print dialog
- * @param {string} htmlContent - The HTML content to convert
- * @param {string} filename - The filename for the PDF
- */
-export function generatePDFPrintFallback(htmlContent, filename) {
-  console.log("[PDF Generator] Using print fallback method");
-
-  // Open new window with content
-  const printWindow = window.open("", "_blank", "width=800,height=600");
-
-  if (!printWindow) {
-    alert("Please allow popups to download the PDF");
-    return;
-  }
-
-  printWindow.document.write(`
+  const doc = iframe.contentWindow.document;
+  doc.open();
+  doc.write(`
     <!DOCTYPE html>
     <html>
       <head>
@@ -135,18 +146,47 @@ export function generatePDFPrintFallback(htmlContent, filename) {
         <style>
           @page {
             size: A4;
-            margin: 15mm;
+            margin: 20mm;
           }
-          body {
-            font-family: Georgia, serif;
-            line-height: 1.6;
-            color: #1a1a1a;
-          }
+          
           @media print {
             body {
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
+              margin: 0;
+              padding: 0;
             }
+          }
+          
+          body {
+            font-family: Georgia, serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            color: #000;
+            background: white;
+          }
+          
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          h1, h2, h3, h4, h5, h6 {
+            page-break-after: avoid;
+            color: #000;
+          }
+          
+          p, div {
+            page-break-inside: avoid;
+            orphans: 3;
+            widows: 3;
+          }
+          
+          img {
+            max-width: 100%;
+            page-break-inside: avoid;
+          }
+          
+          table {
+            page-break-inside: avoid;
           }
         </style>
       </head>
@@ -155,35 +195,228 @@ export function generatePDFPrintFallback(htmlContent, filename) {
       </body>
     </html>
   `);
+  doc.close();
 
-  printWindow.document.close();
-
-  // Wait for content to load then trigger print
-  printWindow.onload = () => {
+  // Wait and print
+  iframe.contentWindow.focus();
+  setTimeout(() => {
+    iframe.contentWindow.print();
+    // Cleanup after a delay
     setTimeout(() => {
-      printWindow.print();
-      // Close after print dialog is dismissed
-      printWindow.onafterprint = () => {
-        printWindow.close();
-      };
-    }, 250);
-  };
+      document.body.removeChild(iframe);
+    }, 1000);
+  }, 500);
+
+  console.log("[PDF Generator] Print dialog opened");
 }
 
 /**
- * Main export function with automatic fallback
- * @param {string} htmlContent - The HTML content to convert
- * @param {string} filename - The filename for the PDF (without extension)
- * @param {Object} options - Optional configuration
- * @returns {Promise<void>}
+ * Method 3: Direct download as HTML (fallback)
  */
-export async function downloadPDF(htmlContent, filename, options = {}) {
-  try {
-    // Try html2pdf first
-    await generatePDF(htmlContent, filename, options);
-  } catch (error) {
-    console.error("[PDF Generator] html2pdf failed, using fallback:", error);
-    // Fallback to print dialog
-    generatePDFPrintFallback(htmlContent, filename);
+function downloadAsHTML(htmlContent, filename) {
+  console.log("[PDF Generator] Method 3: Downloading as HTML");
+
+  const fullHTML = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>${filename}</title>
+        <style>
+          body {
+            font-family: Georgia, serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            color: #000;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+          }
+        </style>
+      </head>
+      <body>
+        ${htmlContent}
+      </body>
+    </html>
+  `;
+
+  const blob = new Blob([fullHTML], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  console.log("[PDF Generator] HTML file downloaded");
+}
+
+/**
+ * Main PDF download function with automatic fallbacks
+ */
+export async function downloadPDF(
+  htmlContent,
+  filename = "document",
+  options = {}
+) {
+  console.log("[PDF Generator] Starting PDF generation");
+  console.log("[PDF Generator] Content length:", htmlContent?.length || 0);
+
+  // Validate content
+  if (!htmlContent || htmlContent.trim() === "" || htmlContent === "<p></p>") {
+    throw new Error(
+      "No content available. Please ensure the document has content."
+    );
   }
+
+  try {
+    // Try Method 1: jsPDF + html2canvas (most reliable)
+    await generatePDFWithJsPDF(htmlContent, filename);
+  } catch (error) {
+    console.warn(
+      "[PDF Generator] Primary method failed, trying print fallback"
+    );
+
+    // Ask user which fallback to use
+    const usePrint = confirm(
+      "PDF generation failed. Would you like to:\n\n" +
+        "• Click OK to use browser print (Save as PDF)\n" +
+        "• Click Cancel to download as HTML file"
+    );
+
+    if (usePrint) {
+      generatePDFWithPrint(htmlContent, filename);
+    } else {
+      downloadAsHTML(htmlContent, filename);
+    }
+  }
+}
+
+/**
+ * Alternative: Use print dialog directly
+ */
+export function generatePDFPrintFallback(htmlContent, filename = "document") {
+  console.log("[PDF Generator] Using print dialog fallback");
+
+  if (!htmlContent || htmlContent.trim() === "" || htmlContent === "<p></p>") {
+    alert("No content available to print.");
+    return;
+  }
+
+  generatePDFWithPrint(htmlContent, filename);
+}
+
+/**
+ * Preview content in new window
+ */
+export function previewContent(htmlContent) {
+  console.log("[PDF Generator] Opening preview window");
+
+  const previewWindow = window.open("", "_blank", "width=900,height=800");
+
+  if (!previewWindow) {
+    alert("Pop-up blocked. Please allow pop-ups to preview.");
+    return;
+  }
+
+  previewWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Document Preview</title>
+        <style>
+          body {
+            font-family: Georgia, serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            color: #000;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 40px;
+            background: #f5f5f5;
+          }
+          
+          .content {
+            background: white;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          }
+          
+          .header {
+            background: #3b82f6;
+            color: white;
+            padding: 15px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 8px 8px 0 0;
+          }
+          
+          .actions {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f9ff;
+            border-top: 2px solid #3b82f6;
+          }
+          
+          button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+          }
+          
+          button:hover {
+            background: #2563eb;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="content">
+          <div class="header">
+            <h2 style="margin: 0;">📄 Document Preview</h2>
+            <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 14px;">
+              This is how your content will appear in the PDF
+            </p>
+          </div>
+          
+          <div class="document-content">
+            ${htmlContent}
+          </div>
+          
+          <div class="actions">
+            <button onclick="window.print()">🖨️ Print / Save as PDF</button>
+            <button onclick="window.close()">❌ Close Preview</button>
+          </div>
+        </div>
+      </body>
+    </html>
+  `);
+
+  previewWindow.document.close();
+}
+
+/**
+ * Test if content will render properly
+ */
+export function testContentRendering(htmlContent) {
+  const testDiv = document.createElement("div");
+  testDiv.style.cssText = "position: absolute; left: -9999px; width: 800px;";
+  testDiv.innerHTML = htmlContent;
+  document.body.appendChild(testDiv);
+
+  const hasContent = testDiv.textContent.trim().length > 0;
+  const hasElements = testDiv.children.length > 0;
+
+  document.body.removeChild(testDiv);
+
+  return {
+    valid: hasContent && hasElements,
+    textLength: testDiv.textContent.trim().length,
+    elementCount: testDiv.children.length,
+  };
 }
