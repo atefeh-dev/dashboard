@@ -16,21 +16,14 @@
       <div class="info-banner">
         <WarningIcon />
         <div class="info-banner__content">
-          <p class="info-banner__title">Editing Guidelines</p>
-          <ul class="info-banner__list">
-            <li>
-              🔒 <strong>Your data fields</strong> (highlighted in yellow) are
-              protected and cannot be edited or deleted
-            </li>
-            <li>
-              ✏️ All other <strong>template content</strong> can be freely
-              edited and styled
-            </li>
-          </ul>
+          <p class="info-banner__title">
+            You can edit and style the generated content but you can’t save your
+            new changed content
+          </p>
         </div>
       </div>
 
-      <!-- Locked Fields Legend -->
+      <!-- Locked Fields Legend
       <div class="legend">
         <div class="legend__item">
           <span class="legend__sample locked-field-sample">
@@ -42,7 +35,7 @@
           <span class="legend__sample editable-sample">Template Text</span>
           <span class="legend__label">Fully editable</span>
         </div>
-      </div>
+      </div> -->
 
       <!-- Editor -->
       <div v-if="!templateToUse" class="error-banner">

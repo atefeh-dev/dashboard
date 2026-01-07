@@ -27,7 +27,7 @@
         </div>
 
         <div class="document-step__section-content">
-          <!-- Debug Info (Development Only) -->
+          <!-- Debug Info (Development Only)
           <div v-if="showDebugInfo" class="debug-info">
             <details>
               <summary>🔍 Debug Info</summary>
@@ -44,8 +44,7 @@
                 </button>
               </div>
             </details>
-          </div>
-
+          </div> -->
           <div
             v-if="!isGenerating && generatedDocuments.length > 0"
             class="document-list"
@@ -57,7 +56,7 @@
             >
               <div class="document-card__info">
                 <div class="document-card__icon">
-                  <FileText />
+                  <PdfIcon />
                 </div>
                 <div class="document-card__details">
                   <h4 class="document-card__name">{{ doc.displayName }}</h4>
@@ -290,6 +289,7 @@ import {
   useKeyboardShortcuts,
   getShortcutLabels,
 } from "@/composables/useKeyboardShortcuts";
+import PdfIcon from "@/assets/icons/common/pdf-icon.svg";
 
 // Props & Emits
 const props = defineProps({
