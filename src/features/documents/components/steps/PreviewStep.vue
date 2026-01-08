@@ -59,8 +59,8 @@
 
       <!-- Actions -->
       <div class="form-actions">
-        <AppButton variant="ghost" @click="handleBack">
-          <ChevronLeft /> Back
+        <AppButton variant="blank" @click="handleBack">
+          <ArrowNarrowLetIcon /> Back
         </AppButton>
 
         <AppButton
@@ -68,7 +68,7 @@
           @click="handleContinue"
           :disabled="!templateToUse || !editorContent"
         >
-          Continue <ChevronRight />
+          Continue
         </AppButton>
       </div>
     </section>
@@ -82,6 +82,7 @@ import AppButton from "@/components/ui/AppButton.vue";
 import RichTextEditor from "@/components/ui/RichTextEditor.vue";
 import { useTemplatesStore } from "@/stores/useTemplatesStore";
 import WarningIcon from "@/assets/icons/common/warning.svg";
+import ArrowNarrowLetIcon from "@/assets/icons/common/arrow-narrow-left.svg";
 
 const props = defineProps({
   stepData: {
