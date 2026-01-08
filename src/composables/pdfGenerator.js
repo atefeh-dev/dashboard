@@ -2,7 +2,7 @@
  * @file pdfGenerator.js
  * @location src/composables/pdfGenerator.js
  *
- * Professional PDF generation with improved formatting
+ * Professional PDF generation with smart page break handling
  */
 
 /**
@@ -26,16 +26,75 @@ async function loadScript(src, globalName) {
 }
 
 /**
+ * Smart function to prevent orphaned headings by adding spacing
+ */
+function preventOrphanedHeadings(container) {
+  const A4_HEIGHT_PX = 1123; // A4 height at 96 DPI (297mm)
+  const PAGE_PADDING = 140; // Account for top/bottom margins (80px top + 60px bottom)
+  const DANGER_ZONE = 150; // Increased: Pixels from bottom where headings are dangerous
+  const MIN_CONTENT_AFTER_HEADING = 80; // Minimum space needed for content after heading
+
+  const headings = container.querySelectorAll("h1, h2, h3, h4, h5, h6");
+
+  headings.forEach((heading) => {
+    const rect = heading.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const relativeTop = rect.top - containerRect.top;
+
+    // Calculate position in current page
+    const effectivePageHeight = A4_HEIGHT_PX - PAGE_PADDING;
+    const positionInPage = relativeTop % effectivePageHeight;
+    const distanceFromBottom = effectivePageHeight - positionInPage;
+
+    // Get next element to check if we need space for it
+    const nextElement = heading.nextElementSibling;
+    const headingHeight = rect.height;
+    const nextElementHeight = nextElement
+      ? nextElement.getBoundingClientRect().height
+      : 0;
+    const totalNeededSpace =
+      headingHeight + Math.min(nextElementHeight, MIN_CONTENT_AFTER_HEADING);
+
+    // If heading + content won't fit, push to next page
+    if (distanceFromBottom < totalNeededSpace + 20) {
+      const pushDistance = distanceFromBottom + 30;
+      console.log(
+        `[PDF Generator] Pushing heading "${heading.textContent.substring(
+          0,
+          40
+        )}..." by ${pushDistance}px to prevent orphan`
+      );
+
+      const currentMargin = parseInt(heading.style.marginTop) || 0;
+      heading.style.marginTop = `${currentMargin + pushDistance}px`;
+
+      // Reduce bottom margin to compensate
+      heading.style.marginBottom = "10px";
+    }
+
+    // Keep next element tight with heading
+    if (
+      nextElement &&
+      nextElement.tagName !== "H1" &&
+      nextElement.tagName !== "H2" &&
+      nextElement.tagName !== "H3"
+    ) {
+      nextElement.style.marginTop = "0";
+      nextElement.style.paddingTop = "0";
+    }
+  });
+}
+
+/**
  * Apply professional formatting to content for PDF
  */
 function applyProfessionalFormatting(container) {
-  // Apply base styling to container
   container.style.cssText = `
     position: absolute;
     left: -9999px;
     top: 0;
     width: 794px;
-    padding: 60px;
+    padding: 80px 60px 60px 60px;
     background: white;
     font-family: Georgia, serif;
     font-size: 14px;
@@ -97,7 +156,6 @@ function applyProfessionalFormatting(container) {
   // Style divs with padding/margin
   const divs = container.querySelectorAll("div");
   divs.forEach((div) => {
-    // If div has background color, ensure proper spacing
     const bgColor = window.getComputedStyle(div).backgroundColor;
     if (
       bgColor &&
@@ -120,24 +178,23 @@ function applyProfessionalFormatting(container) {
   // Ensure all text is visible
   const allElements = container.querySelectorAll("*");
   allElements.forEach((el) => {
-    // Ensure text color is visible
     const color = window.getComputedStyle(el).color;
     if (color === "rgba(0, 0, 0, 0)" || color === "transparent") {
       el.style.color = "#000";
     }
-
-    // Remove problematic styles
     el.style.userSelect = "auto";
     el.style.webkitUserSelect = "auto";
   });
 }
 
 /**
- * Method 1: Using jsPDF with html2canvas (Most Reliable)
+ * Method 1: Using jsPDF with html2canvas and smart heading detection
  */
 async function generatePDFWithJsPDF(htmlContent, filename) {
   try {
-    console.log("[PDF Generator] Method 1: Using jsPDF + html2canvas");
+    console.log(
+      "[PDF Generator] Method 1: Using jsPDF + html2canvas with smart breaks"
+    );
 
     // Load libraries
     await loadScript(
@@ -161,6 +218,15 @@ async function generatePDFWithJsPDF(htmlContent, filename) {
     // Append to body temporarily
     document.body.appendChild(container);
 
+    // CRITICAL: Wait for layout to fully settle
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    // Smart heading adjustment to prevent orphans
+    preventOrphanedHeadings(container);
+
+    // Wait again after adjustments for reflow
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
     // Wait for images to load
     const images = container.querySelectorAll("img");
     await Promise.all(
@@ -183,13 +249,6 @@ async function generatePDFWithJsPDF(htmlContent, filename) {
       backgroundColor: "#ffffff",
       windowWidth: container.scrollWidth,
       windowHeight: container.scrollHeight,
-      onclone: (clonedDoc) => {
-        // Additional formatting on cloned document
-        const clonedContainer = clonedDoc.querySelector("div");
-        if (clonedContainer) {
-          applyProfessionalFormatting(clonedContainer);
-        }
-      },
     });
 
     // Create PDF
@@ -234,12 +293,11 @@ async function generatePDFWithJsPDF(htmlContent, filename) {
 }
 
 /**
- * Method 2: Simple print with styled iframe
+ * Method 2: Browser print (BEST for page breaks)
  */
 function generatePDFWithPrint(htmlContent, filename) {
-  console.log("[PDF Generator] Method 2: Using browser print");
+  console.log("[PDF Generator] Method 2: Using browser print (recommended)");
 
-  // Create iframe
   const iframe = document.createElement("iframe");
   iframe.style.cssText =
     "position: absolute; width: 0; height: 0; border: none;";
@@ -255,13 +313,30 @@ function generatePDFWithPrint(htmlContent, filename) {
         <style>
           @page {
             size: A4;
-            margin: 20mm;
+            margin-top: 30mm;
+            margin-right: 20mm;
+            margin-bottom: 30mm;
+            margin-left: 20mm;
           }
           
           @media print {
             body {
               margin: 0;
               padding: 0;
+            }
+            
+            /* Force headings to stay with content */
+            h1, h2, h3, h4, h5, h6 {
+              page-break-after: avoid !important;
+              page-break-inside: avoid !important;
+              break-after: avoid-page !important;
+              break-inside: avoid !important;
+            }
+            
+            /* Keep next element with heading */
+            h1 + *, h2 + *, h3 + *, h4 + *, h5 + *, h6 + * {
+              page-break-before: avoid !important;
+              break-before: avoid !important;
             }
           }
           
@@ -271,7 +346,7 @@ function generatePDFWithPrint(htmlContent, filename) {
             line-height: 1.8;
             color: #000;
             background: white;
-            padding: 20mm;
+            padding: 30mm 20mm 30mm 20mm;
           }
           
           * {
@@ -285,7 +360,6 @@ function generatePDFWithPrint(htmlContent, filename) {
             margin: 0 0 30px 0;
             padding-bottom: 15px;
             line-height: 1.3;
-            page-break-after: avoid;
           }
           
           h2 {
@@ -294,7 +368,6 @@ function generatePDFWithPrint(htmlContent, filename) {
             margin: 35px 0 18px 0;
             padding-bottom: 8px;
             line-height: 1.4;
-            page-break-after: avoid;
           }
           
           h3 {
@@ -302,7 +375,10 @@ function generatePDFWithPrint(htmlContent, filename) {
             font-weight: bold;
             margin: 25px 0 12px 0;
             line-height: 1.4;
-            page-break-after: avoid;
+          }
+          
+          h4, h5, h6 {
+            font-weight: bold;
           }
           
           p {
@@ -350,11 +426,9 @@ function generatePDFWithPrint(htmlContent, filename) {
   `);
   doc.close();
 
-  // Wait and print
   iframe.contentWindow.focus();
   setTimeout(() => {
     iframe.contentWindow.print();
-    // Cleanup after a delay
     setTimeout(() => {
       document.body.removeChild(iframe);
     }, 1000);
@@ -364,7 +438,7 @@ function generatePDFWithPrint(htmlContent, filename) {
 }
 
 /**
- * Method 3: Direct download as HTML (fallback)
+ * Method 3: Direct download as HTML
  */
 function downloadAsHTML(htmlContent, filename) {
   console.log("[PDF Generator] Method 3: Downloading as HTML");
@@ -376,6 +450,23 @@ function downloadAsHTML(htmlContent, filename) {
         <meta charset="UTF-8">
         <title>${filename}</title>
         <style>
+          @page {
+            margin-top: 30mm;
+            margin-right: 20mm;
+            margin-bottom: 30mm;
+            margin-left: 20mm;
+          }
+          
+          @media print {
+            h1, h2, h3, h4, h5, h6 {
+              page-break-after: avoid !important;
+              page-break-inside: avoid !important;
+            }
+            h1 + *, h2 + *, h3 + *, h4 + *, h5 + *, h6 + * {
+              page-break-before: avoid !important;
+            }
+          }
+          
           body {
             font-family: Georgia, serif;
             font-size: 12pt;
@@ -386,6 +477,7 @@ function downloadAsHTML(htmlContent, filename) {
             padding: 40px;
             background: white;
           }
+          
           h1 { margin: 0 0 30px 0; font-size: 24px; }
           h2 { margin: 35px 0 18px 0; font-size: 18px; }
           h3 { margin: 25px 0 12px 0; font-size: 16px; }
@@ -412,7 +504,7 @@ function downloadAsHTML(htmlContent, filename) {
 }
 
 /**
- * Main PDF download function with automatic fallbacks
+ * Main PDF download function - Fast direct download with smart heading protection
  */
 export async function downloadPDF(
   htmlContent,
@@ -422,7 +514,6 @@ export async function downloadPDF(
   console.log("[PDF Generator] Starting PDF generation");
   console.log("[PDF Generator] Content length:", htmlContent?.length || 0);
 
-  // Validate content
   if (!htmlContent || htmlContent.trim() === "" || htmlContent === "<p></p>") {
     throw new Error(
       "No content available. Please ensure the document has content."
@@ -430,25 +521,15 @@ export async function downloadPDF(
   }
 
   try {
-    // Try Method 1: jsPDF + html2canvas (most reliable)
+    // Use fast jsPDF method with smart heading detection
     await generatePDFWithJsPDF(htmlContent, filename);
   } catch (error) {
     console.warn(
-      "[PDF Generator] Primary method failed, trying print fallback"
+      "[PDF Generator] Fast PDF failed, using browser print fallback"
     );
 
-    // Ask user which fallback to use
-    const usePrint = confirm(
-      "PDF generation failed. Would you like to:\n\n" +
-        "• Click OK to use browser print (Save as PDF)\n" +
-        "• Click Cancel to download as HTML file"
-    );
-
-    if (usePrint) {
-      generatePDFWithPrint(htmlContent, filename);
-    } else {
-      downloadAsHTML(htmlContent, filename);
-    }
+    // Fallback to browser print if jsPDF fails
+    generatePDFWithPrint(htmlContent, filename);
   }
 }
 
@@ -456,7 +537,7 @@ export async function downloadPDF(
  * Alternative: Use print dialog directly
  */
 export function generatePDFPrintFallback(htmlContent, filename = "document") {
-  console.log("[PDF Generator] Using print dialog fallback");
+  console.log("[PDF Generator] Using print dialog");
 
   if (!htmlContent || htmlContent.trim() === "" || htmlContent === "<p></p>") {
     alert("No content available to print.");
@@ -486,6 +567,26 @@ export function previewContent(htmlContent) {
         <meta charset="UTF-8">
         <title>Document Preview</title>
         <style>
+          @media print {
+            .header, .actions {
+              display: none;
+            }
+            body {
+              background: white;
+            }
+            .content {
+              box-shadow: none;
+              padding: 0;
+            }
+            h1, h2, h3, h4, h5, h6 {
+              page-break-after: avoid !important;
+              page-break-inside: avoid !important;
+            }
+            h1 + *, h2 + *, h3 + *, h4 + *, h5 + *, h6 + * {
+              page-break-before: avoid !important;
+            }
+          }
+          
           body {
             font-family: Georgia, serif;
             font-size: 12pt;
@@ -533,10 +634,20 @@ export function previewContent(htmlContent) {
             background: #2563eb;
           }
           
-          /* Professional formatting */
-          h1 { margin: 0 0 30px 0; font-size: 24px; line-height: 1.3; }
-          h2 { margin: 35px 0 18px 0; font-size: 18px; line-height: 1.4; }
-          h3 { margin: 25px 0 12px 0; font-size: 16px; }
+          h1 { 
+            margin: 0 0 30px 0; 
+            font-size: 24px; 
+            line-height: 1.3;
+          }
+          h2 { 
+            margin: 35px 0 18px 0; 
+            font-size: 18px; 
+            line-height: 1.4;
+          }
+          h3 { 
+            margin: 25px 0 12px 0; 
+            font-size: 16px;
+          }
           p { margin: 0 0 16px 0; line-height: 1.8; }
           ul, ol { margin: 12px 0 20px 0; padding-left: 30px; }
           li { margin-bottom: 10px; }
