@@ -1,0 +1,188 @@
+<div
+  style="
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: 'Georgia', serif;
+    line-height: 1.8;
+    color: #1a1a1a;
+  "
+>
+  <h1
+    style="
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 3px solid #0ea5e9;
+      padding-bottom: 15px;
+    "
+  >
+    Consulting Agreement
+  </h1>
+
+  <p style="margin-bottom: 20px; text-align: justify">
+    This Consulting Agreement (the "<strong>Agreement</strong>") is entered into
+    as of
+    <strong>{{effectiveDate}}</strong> (the "<strong>Effective Date</strong>")
+    by and between:
+  </p>
+
+  <div
+    style="
+      margin: 30px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+      border-left: 5px solid #0ea5e9;
+      border-radius: 8px;
+    "
+  >
+    <h3
+      style="
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: #075985;
+      "
+    >
+      CLIENT
+    </h3>
+    <p><strong>Name:</strong> {{clientName}}</p>
+    <p><strong>Email:</strong> {{clientEmail}}</p>
+  </div>
+
+  <div
+    style="
+      margin: 30px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #ecfeff 0%, #f0fdfa 100%);
+      border-left: 5px solid #14b8a6;
+      border-radius: 8px;
+    "
+  >
+    <h3
+      style="
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: #115e59;
+      "
+    >
+      CONSULTANT
+    </h3>
+    <p><strong>Name:</strong> {{consultantName}}</p>
+    <p><strong>Email:</strong> {{consultantEmail}}</p>
+  </div>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 35px; color: #075985"
+  >
+    1. Services
+  </h2>
+  <p
+    style="
+      background-color: #f9fafb;
+      padding: 15px;
+      border-radius: 6px;
+      text-align: justify;
+    "
+  >
+    {{servicesDescription}}
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+  >
+    2. Term
+  </h2>
+  <p style="text-align: justify">
+    This Agreement shall commence on the Effective Date and continue for a
+    period of
+    <strong>{{agreementTerm}}</strong>, unless earlier terminated in accordance
+    with this Agreement.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+  >
+    3. Compensation
+  </h2>
+  <p style="text-align: justify">
+    In consideration for the services provided, the Client shall pay the
+    Consultant
+    <strong>{{compensation}}</strong>. Payment shall be made in accordance with
+    the following schedule: {{paymentSchedule}}.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+  >
+    4. Independent Contractor
+  </h2>
+  <p style="text-align: justify">
+    The Consultant is an independent contractor and not an employee, partner, or
+    agent of the Client. The Consultant shall be solely responsible for all
+    taxes, withholdings, and statutory obligations.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+  >
+    5. Confidentiality
+  </h2>
+  <p style="text-align: justify">
+    During and after the term of this Agreement, the Consultant agrees to
+    maintain the confidentiality of all non-public, proprietary, or confidential
+    information of the Client.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+  >
+    6. Intellectual Property
+  </h2>
+  <p style="text-align: justify">
+    Unless otherwise agreed in writing, all work product, reports, materials, or
+    deliverables created by the Consultant in connection with the services shall
+    be the property of the Client.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+  >
+    7. Termination
+  </h2>
+  <p style="text-align: justify">
+    Either party may terminate this Agreement by providing
+    <strong>{{terminationNotice}}</strong> written notice to the other party.
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+  >
+    8. Governing Law
+  </h2>
+  <p style="text-align: justify">
+    This Agreement shall be governed and construed in accordance with applicable
+    laws, without regard to conflict of law principles.
+  </p>
+
+  <div
+    style="margin-top: 50px; padding-top: 30px; border-top: 2px solid #e5e7eb"
+  >
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px">
+      <div>
+        <p><strong>CLIENT</strong></p>
+        <div style="border-bottom: 2px solid #000; margin: 20px 0"></div>
+        <p>{{clientName}}</p>
+      </div>
+      <div>
+        <p><strong>CONSULTANT</strong></p>
+        <div style="border-bottom: 2px solid #000; margin: 20px 0"></div>
+        <p>{{consultantName}}</p>
+      </div>
+    </div>
+  </div>
+</div>

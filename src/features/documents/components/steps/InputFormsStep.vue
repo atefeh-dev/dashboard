@@ -54,6 +54,7 @@
                     field.placeholder || `Enter ${field.label.toLowerCase()}`
                   "
                   :class="{ 'input-error': errors.length && meta.touched }"
+                  :maxlength="field.maxLength"
                   @update:model-value="
                     handleFieldUpdate(field.name, $event, formValues)
                   "
@@ -68,6 +69,7 @@
                     field.placeholder || `Enter ${field.label.toLowerCase()}`
                   "
                   :class="{ 'input-error': errors.length && meta.touched }"
+                  :maxlength="field.maxLength"
                   @update:model-value="
                     handleFieldUpdate(field.name, $event, formValues)
                   "
@@ -82,6 +84,7 @@
                   "
                   :rows="field.rows || 4"
                   :class="{ 'input-error': errors.length && meta.touched }"
+                  :maxlength="field.maxLength"
                   @update:model-value="
                     handleFieldUpdate(field.name, $event, formValues)
                   "
@@ -243,7 +246,7 @@ function initializeFormData() {
   return data;
 }
 
-// Validation schema based on template fields
+// Enhanced validation schema based on template fields
 function createFieldValidation(field) {
   let validation;
 
@@ -269,24 +272,45 @@ function createFieldValidation(field) {
           if (!value) return undefined;
           const trimmed = value.trim();
           return trimmed === "" ? undefined : trimmed;
-        })
-        .test(
+        });
+
+      // Add min length test only if field has minLength
+      if (field.minLength && field.minLength > 0) {
+        validation = validation.test(
+          "min-when-provided",
+          `${field.label} must be at least ${field.minLength} characters`,
+          (value) => value == null || value.length >= field.minLength
+        );
+      } else {
+        // Default min length for text fields without specific requirement
+        validation = validation.test(
           "min-when-provided",
           `${field.label} must be at least 3 characters`,
           (value) => value == null || value.length >= 3
         );
+      }
   }
 
+  // Required validation
   if (field.required) {
     validation = validation.required(`${field.label} is required`);
   } else {
     validation = validation.notRequired();
   }
 
+  // Max length validation (if specified)
   if (field.maxLength) {
     validation = validation.max(
       field.maxLength,
       `Maximum ${field.maxLength} characters allowed`
+    );
+  }
+
+  // Min length validation for textarea (if specified)
+  if (field.type === "textarea" && field.minLength && field.minLength > 0) {
+    validation = validation.min(
+      field.minLength,
+      `${field.label} must be at least ${field.minLength} characters`
     );
   }
 
@@ -315,11 +339,20 @@ function canContinue(formValues) {
     const value = formValues[field.name];
     if (!value) return false;
 
-    if (field.type === "text") {
-      return value.trim().length >= 3;
+    const trimmedValue = typeof value === "string" ? value.trim() : value;
+    if (trimmedValue === "") return false;
+
+    // Check minimum length
+    if (field.minLength && field.minLength > 0) {
+      return trimmedValue.length >= field.minLength;
     }
 
-    return value.trim() !== "";
+    // Default minimum length for text fields
+    if (field.type === "text") {
+      return trimmedValue.length >= 3;
+    }
+
+    return true;
   });
 }
 

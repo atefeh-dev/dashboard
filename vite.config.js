@@ -12,6 +12,8 @@ export default defineConfig({
     tailwindcss(),
     svgLoader(), // correct SVG loader for Vite + Vue 3
   ],
+  assetsInclude: ["**/*.html"],
+
   base: "/",
   resolve: {
     alias: {

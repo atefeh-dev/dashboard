@@ -1,9 +1,18 @@
+/**
+ * @file useTemplatesStore.js
+ * @location src/stores/useTemplatesStore.js
+ *
+ * Template store with comprehensive validation rules
+ */
+
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import NdaTemplate from "../templates/nda.html?raw";
-import EmploymentContractTemplate from "../templates/employment-contract.html?raw";
-import ServiceAgreementTemplate from "../templates/service-agreement.html?raw";
-import PartnershipAgreementTemplate from "../templates/partnership-agreement.html?raw";
+import ConsultingAgreementTemplateContent from "../templates/consulting-agreement.html?raw";
+import EmploymentContractTemplateContent from "../templates/employment-contract.html?raw";
+import ServiceAgreementTemplateContent from "../templates/service-agreement.html?raw";
+import NDATemplateContent from "../templates/nda.html?raw";
+import PartnerShipAgreementTemplateContent from "../templates/partnership-agreement.html?raw";
+
 export const useTemplatesStore = defineStore("document", () => {
   const templates = ref([
     {
@@ -14,49 +23,76 @@ export const useTemplatesStore = defineStore("document", () => {
       tags: ["nda", "legal", "confidential", "agreement"],
       status: "verified",
       type: "agreement",
-      // Define the fields this template needs
       fields: [
         {
           name: "effectiveDate",
           label: "Effective Date",
           type: "date",
           required: true,
+          placeholder: "Select effective date",
+          hint: "The date when this agreement becomes effective",
+          minLength: null,
+          maxLength: null,
         },
         {
           name: "disclosingPartyName",
           label: "Disclosing Party Name",
           type: "text",
           required: true,
+          placeholder: "Enter full legal name",
+          hint: "The party who will be sharing confidential information",
+          minLength: 3,
+          maxLength: 100,
         },
         {
           name: "disclosingPartyAddress",
           label: "Disclosing Party Address",
           type: "textarea",
           required: true,
+          rows: 3,
+          placeholder: "Enter complete address",
+          hint: "Full mailing address including city, state, and zip code",
+          minLength: 10,
+          maxLength: 500,
         },
         {
           name: "disclosingPartyEmail",
           label: "Disclosing Party Email",
           type: "email",
           required: true,
+          placeholder: "email@example.com",
+          hint: "Primary contact email for the disclosing party",
+          maxLength: 100,
         },
         {
           name: "receivingPartyName",
           label: "Receiving Party Name",
           type: "text",
           required: true,
+          placeholder: "Enter full legal name",
+          hint: "The party who will be receiving confidential information",
+          minLength: 3,
+          maxLength: 100,
         },
         {
           name: "receivingPartyAddress",
           label: "Receiving Party Address",
           type: "textarea",
           required: true,
+          rows: 3,
+          placeholder: "Enter complete address",
+          hint: "Full mailing address including city, state, and zip code",
+          minLength: 10,
+          maxLength: 500,
         },
         {
           name: "receivingPartyEmail",
           label: "Receiving Party Email",
           type: "email",
           required: true,
+          placeholder: "email@example.com",
+          hint: "Primary contact email for the receiving party",
+          maxLength: 100,
         },
         {
           name: "purpose",
@@ -64,9 +100,14 @@ export const useTemplatesStore = defineStore("document", () => {
           type: "textarea",
           required: true,
           rows: 4,
+          placeholder:
+            "Describe the specific purpose for sharing confidential information",
+          hint: "Be specific about why confidential information will be shared",
+          minLength: 20,
+          maxLength: 1000,
         },
       ],
-      content: NdaTemplate,
+      content: NDATemplateContent,
     },
     {
       id: 2,
@@ -79,54 +120,82 @@ export const useTemplatesStore = defineStore("document", () => {
       fields: [
         {
           name: "effectiveDate",
-          label: "Effective Date",
+          label: "Employment Start Date",
           type: "date",
           required: true,
+          placeholder: "Select start date",
+          hint: "The date the employee will begin work",
         },
         {
           name: "employerName",
           label: "Employer Name",
           type: "text",
           required: true,
+          placeholder: "Enter company/employer name",
+          hint: "Legal name of the employing entity",
+          minLength: 2,
+          maxLength: 100,
         },
         {
           name: "employerEmail",
-          label: "Employer Email",
+          label: "Employer Contact Email",
           type: "email",
           required: true,
+          placeholder: "hr@company.com",
+          hint: "HR or primary contact email",
+          maxLength: 100,
         },
         {
           name: "employeeName",
-          label: "Employee Name",
+          label: "Employee Full Name",
           type: "text",
           required: true,
+          placeholder: "Enter employee's full legal name",
+          hint: "As it appears on official documents",
+          minLength: 3,
+          maxLength: 100,
         },
         {
           name: "employeeEmail",
           label: "Employee Email",
           type: "email",
           required: true,
+          placeholder: "employee@email.com",
+          hint: "Employee's work or personal email",
+          maxLength: 100,
         },
         {
           name: "position",
           label: "Job Title / Position",
           type: "text",
           required: true,
+          placeholder: "e.g., Senior Software Engineer",
+          hint: "Official job title",
+          minLength: 3,
+          maxLength: 100,
         },
         {
           name: "workLocation",
-          label: "Work Location",
+          label: "Primary Work Location",
           type: "text",
           required: true,
+          placeholder: "e.g., New York Office, Remote",
+          hint: "Where the employee will primarily work",
+          minLength: 3,
+          maxLength: 200,
         },
         {
           name: "salary",
-          label: "Salary",
+          label: "Annual Salary",
           type: "text",
           required: true,
+          placeholder: "e.g., $75,000 per year",
+          hint: "Base salary and payment frequency",
+          minLength: 5,
+          maxLength: 100,
         },
       ],
-      content: EmploymentContractTemplate,
+      content: EmploymentContractTemplateContent,
     },
     {
       id: 3,
@@ -139,33 +208,49 @@ export const useTemplatesStore = defineStore("document", () => {
       fields: [
         {
           name: "effectiveDate",
-          label: "Effective Date",
+          label: "Agreement Start Date",
           type: "date",
           required: true,
+          placeholder: "Select start date",
+          hint: "When services will begin",
         },
         {
           name: "clientName",
           label: "Client Name",
           type: "text",
           required: true,
+          placeholder: "Enter client name or company",
+          hint: "Individual or organization receiving services",
+          minLength: 2,
+          maxLength: 100,
         },
         {
           name: "clientEmail",
           label: "Client Email",
           type: "email",
           required: true,
+          placeholder: "client@email.com",
+          hint: "Primary contact email",
+          maxLength: 100,
         },
         {
           name: "providerName",
           label: "Service Provider Name",
           type: "text",
           required: true,
+          placeholder: "Enter provider name",
+          hint: "Individual or company providing services",
+          minLength: 2,
+          maxLength: 100,
         },
         {
           name: "providerEmail",
-          label: "Service Provider Email",
+          label: "Provider Email",
           type: "email",
           required: true,
+          placeholder: "provider@email.com",
+          hint: "Service provider contact email",
+          maxLength: 100,
         },
         {
           name: "servicesDescription",
@@ -173,18 +258,30 @@ export const useTemplatesStore = defineStore("document", () => {
           type: "textarea",
           required: true,
           rows: 5,
+          placeholder: "Describe the services to be provided in detail",
+          hint: "Be specific about deliverables, scope, and expectations",
+          minLength: 50,
+          maxLength: 2000,
         },
         {
           name: "serviceTerm",
-          label: "Service Term",
+          label: "Service Term / Duration",
           type: "text",
           required: true,
+          placeholder: "e.g., 6 months, Ongoing, Project-based",
+          hint: "How long services will be provided",
+          minLength: 3,
+          maxLength: 100,
         },
         {
           name: "serviceFee",
-          label: "Service Fee",
+          label: "Service Fee / Rate",
           type: "text",
           required: true,
+          placeholder: "e.g., $5,000/month, $150/hour",
+          hint: "Compensation amount and frequency",
+          minLength: 5,
+          maxLength: 100,
         },
         {
           name: "paymentTerms",
@@ -192,15 +289,23 @@ export const useTemplatesStore = defineStore("document", () => {
           type: "textarea",
           required: true,
           rows: 4,
+          placeholder: "Describe payment schedule and conditions",
+          hint: "Include due dates, accepted payment methods, late fees, etc.",
+          minLength: 20,
+          maxLength: 1000,
         },
         {
           name: "terminationNotice",
           label: "Termination Notice Period",
           type: "text",
           required: true,
+          placeholder: "e.g., 30 days written notice",
+          hint: "Required notice period for ending the agreement",
+          minLength: 5,
+          maxLength: 100,
         },
       ],
-      content: ServiceAgreementTemplate,
+      content: ServiceAgreementTemplateContent,
     },
     {
       id: 4,
@@ -216,30 +321,46 @@ export const useTemplatesStore = defineStore("document", () => {
           label: "Effective Date",
           type: "date",
           required: true,
+          placeholder: "Select effective date",
+          hint: "The date when the partnership becomes effective",
         },
         {
           name: "partnerOneName",
           label: "Partner One Name",
           type: "text",
           required: true,
+          placeholder: "Enter full legal name",
+          hint: "Full legal name of the first partner",
+          minLength: 2,
+          maxLength: 100,
         },
         {
           name: "partnerOneEmail",
           label: "Partner One Email",
           type: "email",
           required: true,
+          placeholder: "email@example.com",
+          hint: "Primary contact email for partner one",
+          maxLength: 100,
         },
         {
           name: "partnerTwoName",
           label: "Partner Two Name",
           type: "text",
           required: true,
+          placeholder: "Enter full legal name",
+          hint: "Full legal name of the second partner",
+          minLength: 2,
+          maxLength: 100,
         },
         {
           name: "partnerTwoEmail",
           label: "Partner Two Email",
           type: "email",
           required: true,
+          placeholder: "email@example.com",
+          hint: "Primary contact email for partner two",
+          maxLength: 100,
         },
         {
           name: "partnershipPurpose",
@@ -247,39 +368,63 @@ export const useTemplatesStore = defineStore("document", () => {
           type: "textarea",
           required: true,
           rows: 4,
+          placeholder: "Describe the partnership purpose and goals",
+          hint: "Be specific about objectives, scope, and intended activities",
+          minLength: 20,
+          maxLength: 1000,
         },
         {
           name: "partnerOneContribution",
           label: "Partner One Contribution",
           type: "text",
           required: true,
+          placeholder: "Describe cash, assets, or services contributed",
+          hint: "Include approximate values or percentages if applicable",
+          minLength: 3,
+          maxLength: 300,
         },
         {
           name: "partnerTwoContribution",
           label: "Partner Two Contribution",
           type: "text",
           required: true,
+          placeholder: "Describe cash, assets, or services contributed",
+          hint: "Include approximate values or percentages if applicable",
+          minLength: 3,
+          maxLength: 300,
         },
         {
           name: "partnerOneShare",
           label: "Partner One Profit/Loss Share",
           type: "text",
           required: true,
+          placeholder: "e.g., 50%",
+          hint: "Profit and loss sharing percentage for partner one",
+          minLength: 2,
+          maxLength: 50,
         },
         {
           name: "partnerTwoShare",
           label: "Partner Two Profit/Loss Share",
           type: "text",
           required: true,
+          placeholder: "e.g., 50%",
+          hint: "Profit and loss sharing percentage for partner two",
+          minLength: 2,
+          maxLength: 50,
         },
         {
           name: "partnershipTerm",
           label: "Partnership Term",
           type: "text",
           required: true,
+          placeholder: "e.g., 3 years, Ongoing",
+          hint: "Length or duration of the partnership",
+          minLength: 3,
+          maxLength: 100,
         },
       ],
-      content: PartnershipAgreementTemplate,
+      content: PartnerShipAgreementTemplateContent,
     },
     {
       id: 5,
@@ -295,30 +440,46 @@ export const useTemplatesStore = defineStore("document", () => {
           label: "Effective Date",
           type: "date",
           required: true,
+          placeholder: "Select effective date",
+          hint: "When the consulting engagement begins",
         },
         {
           name: "consultantName",
           label: "Consultant Name",
           type: "text",
           required: true,
+          placeholder: "Enter consultant name",
+          hint: "Individual or firm providing consulting services",
+          minLength: 2,
+          maxLength: 100,
         },
         {
           name: "consultantEmail",
           label: "Consultant Email",
           type: "email",
           required: true,
+          placeholder: "consultant@email.com",
+          hint: "Primary contact email for consultant",
+          maxLength: 100,
         },
         {
           name: "clientName",
           label: "Client Name",
           type: "text",
           required: true,
+          placeholder: "Enter client name",
+          hint: "Organization engaging consultant",
+          minLength: 2,
+          maxLength: 100,
         },
         {
           name: "clientEmail",
           label: "Client Email",
           type: "email",
           required: true,
+          placeholder: "client@company.com",
+          hint: "Client contact email",
+          maxLength: 100,
         },
         {
           name: "consultingServices",
@@ -326,87 +487,33 @@ export const useTemplatesStore = defineStore("document", () => {
           type: "textarea",
           required: true,
           rows: 5,
+          placeholder: "Detail the consulting services to be provided",
+          hint: "Include scope, deliverables, and expected outcomes",
+          minLength: 50,
+          maxLength: 2000,
         },
         {
           name: "hourlyRate",
           label: "Hourly Rate or Project Fee",
           type: "text",
           required: true,
+          placeholder: "e.g., $200/hour or $50,000 fixed",
+          hint: "Compensation structure",
+          minLength: 5,
+          maxLength: 100,
         },
         {
           name: "projectDuration",
           label: "Expected Project Duration",
           type: "text",
           required: true,
+          placeholder: "e.g., 3 months, 6 weeks",
+          hint: "Estimated timeframe for completion",
+          minLength: 3,
+          maxLength: 100,
         },
       ],
-      content: `<div style="max-width: 800px; margin: 0 auto; padding: 40px 20px; font-family: 'Georgia', serif; line-height: 1.8; color: #1a1a1a;">
-  <h1 style="text-align: center; font-size: 28px; font-weight: bold; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; border-bottom: 3px solid #8b5cf6; padding-bottom: 15px;">Consulting Agreement</h1>
-
-  <p style="margin-bottom: 20px; text-align: justify;">This Consulting Agreement (the "Agreement") is entered into as of <strong>{{effectiveDate}}</strong> (the "Effective Date") by and between:</p>
-
-  <div style="margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%); border-left: 5px solid #8b5cf6; border-radius: 8px;">
-    <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 12px; color: #6b21a8;">CONSULTANT</h3>
-    <p style="margin: 8px 0;"><strong>Name:</strong> {{consultantName}}</p>
-    <p style="margin: 8px 0;"><strong>Email:</strong> {{consultantEmail}}</p>
-  </div>
-
-  <div style="margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #ffedd5 0%, #fff7ed 100%); border-left: 5px solid #f97316; border-radius: 8px;">
-    <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 12px; color: #9a3412;">CLIENT</h3>
-    <p style="margin: 8px 0;"><strong>Name:</strong> {{clientName}}</p>
-    <p style="margin: 8px 0;"><strong>Email:</strong> {{clientEmail}}</p>
-  </div>
-
-  <h2 style="font-size: 20px; font-weight: bold; margin-top: 35px; margin-bottom: 15px; color: #6b21a8; border-bottom: 2px solid #c4b5fd; padding-bottom: 8px;">1. CONSULTING SERVICES</h2>
-  <p style="margin-bottom: 16px; text-align: justify;">The Consultant agrees to provide the following consulting services to the Client:</p>
-  <div style="padding: 15px; background-color: #f9fafb; border-radius: 6px; margin-bottom: 20px;">
-    <p style="text-align: justify; white-space: pre-wrap;">{{consultingServices}}</p>
-  </div>
-
-  <h2 style="font-size: 20px; font-weight: bold; margin-top: 35px; margin-bottom: 15px; color: #6b21a8; border-bottom: 2px solid #c4b5fd; padding-bottom: 8px;">2. COMPENSATION</h2>
-  <p style="margin-bottom: 16px; text-align: justify;">The Client shall compensate the Consultant at a rate of <strong>{{hourlyRate}}</strong> for services rendered under this Agreement.</p>
-
-  <h2 style="font-size: 20px; font-weight: bold; margin-top: 35px; margin-bottom: 15px; color: #6b21a8; border-bottom: 2px solid #c4b5fd; padding-bottom: 8px;">3. TERM</h2>
-  <p style="margin-bottom: 16px; text-align: justify;">The expected duration of this consulting engagement is <strong>{{projectDuration}}</strong>, commencing on the Effective Date. This Agreement may be extended or terminated by mutual written agreement of both parties.</p>
-
-  <h2 style="font-size: 20px; font-weight: bold; margin-top: 35px; margin-bottom: 15px; color: #6b21a8; border-bottom: 2px solid #c4b5fd; padding-bottom: 8px;">4. PAYMENT TERMS</h2>
-  <p style="margin-bottom: 16px; text-align: justify;">Payment terms are as follows:</p>
-  <ul style="margin-left: 25px; margin-bottom: 20px;">
-    <li style="margin-bottom: 10px;">Invoices will be submitted bi-weekly or monthly</li>
-    <li style="margin-bottom: 10px;">Payment is due within thirty (30) days of invoice receipt</li>
-    <li style="margin-bottom: 10px;">Late payments may incur interest charges at 1.5% per month</li>
-  </ul>
-
-  <h2 style="font-size: 20px; font-weight: bold; margin-top: 35px; margin-bottom: 15px; color: #6b21a8; border-bottom: 2px solid #c4b5fd; padding-bottom: 8px;">5. INDEPENDENT CONTRACTOR STATUS</h2>
-  <p style="margin-bottom: 16px; text-align: justify;">The Consultant is engaged as an independent contractor and not as an employee. The Consultant is responsible for all applicable taxes, insurance, and other obligations arising from this independent contractor status.</p>
-
-  <h2 style="font-size: 20px; font-weight: bold; margin-top: 35px; margin-bottom: 15px; color: #6b21a8; border-bottom: 2px solid #c4b5fd; padding-bottom: 8px;">6. CONFIDENTIALITY AND INTELLECTUAL PROPERTY</h2>
-  <p style="margin-bottom: 16px; text-align: justify;">The Consultant agrees to maintain strict confidentiality regarding all proprietary information and trade secrets of the Client. Any intellectual property developed during the course of this engagement shall be owned by the Client unless otherwise agreed in writing.</p>
-
-  <h2 style="font-size: 20px; font-weight: bold; margin-top: 35px; margin-bottom: 15px; color: #6b21a8; border-bottom: 2px solid #c4b5fd; padding-bottom: 8px;">7. TERMINATION</h2>
-  <p style="margin-bottom: 16px; text-align: justify;">Either party may terminate this Agreement with thirty (30) days written notice. Upon termination, the Consultant shall be compensated for all work completed up to the termination date.</p>
-
-  <div style="margin-top: 50px; padding-top: 30px; border-top: 2px solid #e5e7eb;">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px;">
-      <div>
-        <p style="margin-bottom: 30px;"><strong>CONSULTANT:</strong></p>
-        <div style="border-bottom: 2px solid #000; width: 100%; margin-bottom: 8px;"></div>
-        <p style="font-size: 14px; color: #6b7280;">Signature</p>
-        <p style="margin-top: 20px; font-size: 14px;">{{consultantName}}</p>
-        <div style="border-bottom: 2px solid #000; width: 150px; margin-top: 30px; margin-bottom: 8px;"></div>
-        <p style="font-size: 14px; color: #6b7280;">Date</p>
-      </div>
-      <div>
-        <p style="margin-bottom: 30px;"><strong>CLIENT:</strong></p>
-        <div style="border-bottom: 2px solid #000; width: 100%; margin-bottom: 8px;"></div>
-        <p style="font-size: 14px; color: #6b7280;">Signature</p>
-        <p style="margin-top: 20px; font-size: 14px;">{{clientName}}</p>
-        <div style="border-bottom: 2px solid #000; width: 150px; margin-top: 30px; margin-bottom: 8px;"></div>
-        <p style="font-size: 14px; color: #6b7280;">Date</p>
-      </div>
-    </div>
-  </div>
-</div>`,
+      content: ConsultingAgreementTemplateContent,
     },
   ]);
 
@@ -446,7 +553,6 @@ export const useTemplatesStore = defineStore("document", () => {
     let content = template.content;
     console.log("[Templates Store] Populating template:", template.name);
 
-    // Handle both data structures: { items: [...] } or direct array [...]
     const inputFormsData =
       currentDocument.value.inputForms?.items ||
       currentDocument.value.inputForms ||
@@ -454,7 +560,6 @@ export const useTemplatesStore = defineStore("document", () => {
 
     console.log("[Templates Store] Input forms data:", inputFormsData);
 
-    // Get the first item's data for simple placeholders
     const firstItem =
       Array.isArray(inputFormsData) && inputFormsData.length > 0
         ? inputFormsData[0]
@@ -462,7 +567,6 @@ export const useTemplatesStore = defineStore("document", () => {
 
     console.log("[Templates Store] First item data:", firstItem);
 
-    // Replace all {{variable}} placeholders with actual values
     content = content.replace(/\{\{(\w+)\}\}/g, (match, key) => {
       const value = firstItem[key];
 
@@ -472,7 +576,7 @@ export const useTemplatesStore = defineStore("document", () => {
       }
 
       console.warn(`[Templates Store] No value found for {{${key}}}`);
-      return match; // Keep placeholder if no value
+      return match;
     });
 
     console.log("[Templates Store] Content population complete");
@@ -575,7 +679,6 @@ export const useTemplatesStore = defineStore("document", () => {
   }
 
   function updateInputForms(formsData) {
-    // Handle both structures: { items: [...] } or direct [...]
     if (formsData?.items && Array.isArray(formsData.items)) {
       currentDocument.value.inputForms = JSON.parse(
         JSON.stringify(formsData.items)
