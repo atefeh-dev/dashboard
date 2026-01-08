@@ -176,7 +176,7 @@
           </div>
 
           <!-- Alternative Email -->
-          <AppAlternativeEmailInput
+          <AlternativeEmailInput
             v-model="alternativeEmail"
             v-model:enabled="sendToAlternativeEmail"
             :disabled="isSending"
@@ -185,22 +185,16 @@
 
           <!-- My Email Checkbox -->
           <div class="my-email">
-            <input
-              type="checkbox"
+            <AppCheckbox
               id="my-email"
               v-model="sendToMyEmail"
-              class="my-email__checkbox"
               :disabled="isSending"
-            />
-            <label for="my-email" class="my-email__label">
-              <span class="my-email__check-box">
-                <CheckIcon v-if="sendToMyEmail" class="my-email__check-icon" />
-              </span>
+            >
               <span class="my-email__text">
                 Send to my email
                 <span class="my-email__address">{{ userEmail }}</span>
               </span>
-            </label>
+            </AppCheckbox>
           </div>
         </div>
       </div>
@@ -269,7 +263,7 @@ import {
 } from "vue";
 import { storeToRefs } from "pinia";
 import { FileText, Loader, Send, AlertCircle, Download } from "lucide-vue-next";
-import AppAlternativeEmailInput from "@/components/ui/AppAlternativeEmailInput.vue";
+import AlternativeEmailInput from "@/features/documents/components/contact/AlternativeEmailInput.vue";
 import AppButton from "@/components/ui/AppButton.vue";
 import AppSelect from "@/components/ui/AppSelect.vue";
 import ErrorBoundary from "./ErrorBoundary.vue";
@@ -278,6 +272,7 @@ import CheckIcon from "@/assets/icons/common/check.svg";
 import { useContactsStore } from "@/stores/useContactsStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useTemplatesStore } from "@/stores/useTemplatesStore";
+import AppCheckbox from "@/components/ui/AppCheckbox.vue";
 import {
   downloadPDF,
   generatePDFPrintFallback,
