@@ -60,9 +60,10 @@
                 </div>
                 <div class="document-card__details">
                   <h4 class="document-card__name">{{ doc.displayName }}</h4>
-                  <p class="document-card__meta">
-                    {{ doc.size }} • {{ doc.format.toUpperCase() }}
-                  </p>
+                  <div class="document-card__meta">
+                    <span>{{ doc.size }}</span>
+                    <span><CheckCircleIcon /> Completed</span>
+                  </div>
                 </div>
               </div>
               <AppButton
@@ -262,7 +263,14 @@ import {
   nextTick,
 } from "vue";
 import { storeToRefs } from "pinia";
-import { FileText, Loader, Send, AlertCircle, Download } from "lucide-vue-next";
+import {
+  FileText,
+  Loader,
+  Send,
+  AlertCircle,
+  Download,
+  CheckCircle,
+} from "lucide-vue-next";
 import AlternativeEmailInput from "@/features/documents/components/contact/AlternativeEmailInput.vue";
 import AppButton from "@/components/ui/AppButton.vue";
 import AppSelect from "@/components/ui/AppSelect.vue";
@@ -285,6 +293,7 @@ import {
   getShortcutLabels,
 } from "@/composables/useKeyboardShortcuts";
 import PdfIcon from "@/assets/icons/common/pdf-icon.svg";
+import CheckCircleIcon from "@/assets/icons/common/check-circle.svg";
 
 // Props & Emits
 const props = defineProps({
@@ -951,7 +960,19 @@ useKeyboardShortcuts({
   &__meta {
     font-size: 0.8125rem;
     color: #6b7280;
+    display: flex;
+    align-items: center;
     margin: 0;
+    > :first-child {
+      padding-right: 0.25rem;
+      border-right: 1px solid #d5d7da;
+    }
+    > :last-child {
+      padding-left: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
   }
 }
 

@@ -26,13 +26,16 @@ async function loadScript(src, globalName) {
 }
 
 /**
- * Smart function to prevent orphaned headings by adding spacing
+ * Smart function to prevent orphaned headings and ensure proper page-aware layout
+ * Prevents headings from appearing at bottom of pages without sufficient content
  */
 function preventOrphanedHeadings(container) {
   const A4_HEIGHT_PX = 1123; // A4 height at 96 DPI (297mm)
-  const PAGE_PADDING = 140; // Account for top/bottom margins (80px top + 60px bottom)
-  const DANGER_ZONE = 150; // Increased: Pixels from bottom where headings are dangerous
-  const MIN_CONTENT_AFTER_HEADING = 80; // Minimum space needed for content after heading
+  const MARGIN_TOP_PX = 94; // Top margin in pixels
+  const MARGIN_BOTTOM_PX = 106; // Bottom margin in pixels
+  const PAGE_PADDING = MARGIN_TOP_PX + MARGIN_BOTTOM_PX;
+  const DANGER_ZONE = 180; // Increased: Pixels from bottom where headings/sections are dangerous
+  const MIN_CONTENT_AFTER_HEADING = 100; // Increased: Minimum space needed for content after heading
 
   const headings = container.querySelectorAll("h1, h2, h3, h4, h5, h6");
 
@@ -43,117 +46,250 @@ function preventOrphanedHeadings(container) {
 
     // Calculate position in current page
     const effectivePageHeight = A4_HEIGHT_PX - PAGE_PADDING;
-    const positionInPage = relativeTop % effectivePageHeight;
+    const pageNumber = Math.floor(relativeTop / effectivePageHeight);
+    const pageStartY = pageNumber * effectivePageHeight;
+    const positionInPage = relativeTop - pageStartY;
     const distanceFromBottom = effectivePageHeight - positionInPage;
 
-    // Get next element to check if we need space for it
-    const nextElement = heading.nextElementSibling;
-    const headingHeight = rect.height;
-    const nextElementHeight = nextElement
-      ? nextElement.getBoundingClientRect().height
-      : 0;
-    const totalNeededSpace =
-      headingHeight + Math.min(nextElementHeight, MIN_CONTENT_AFTER_HEADING);
+    // Collect all next siblings until we hit another heading
+    let totalContentHeight = 0;
+    let currentElement = heading.nextElementSibling;
+    const contentElements = [];
 
-    // If heading + content won't fit, push to next page
-    if (distanceFromBottom < totalNeededSpace + 20) {
-      const pushDistance = distanceFromBottom + 30;
+    while (currentElement && !/^H[1-6]$/.test(currentElement.tagName)) {
+      contentElements.push(currentElement);
+      totalContentHeight += currentElement.getBoundingClientRect().height + 10; // Add spacing
+      currentElement = currentElement.nextElementSibling;
+
+      // Cap at reasonable amount for this check
+      if (contentElements.length > 5 || totalContentHeight > 300) break;
+    }
+
+    const requiredSpace =
+      rect.height +
+      Math.min(totalContentHeight, MIN_CONTENT_AFTER_HEADING) +
+      20;
+
+    // If heading + content won't fit in danger zone, push to next page
+    if (
+      distanceFromBottom < requiredSpace &&
+      distanceFromBottom < DANGER_ZONE
+    ) {
+      const pushDistance = distanceFromBottom + 40;
       console.log(
         `[PDF Generator] Pushing heading "${heading.textContent.substring(
           0,
           40
-        )}..." by ${pushDistance}px to prevent orphan`
+        )}..." by ${pushDistance}px (distance: ${distanceFromBottom}px, required: ${requiredSpace}px)`
       );
 
       const currentMargin = parseInt(heading.style.marginTop) || 0;
       heading.style.marginTop = `${currentMargin + pushDistance}px`;
-
-      // Reduce bottom margin to compensate
-      heading.style.marginBottom = "10px";
+      heading.style.marginBottom = "8px";
     }
 
-    // Keep next element tight with heading
-    if (
-      nextElement &&
-      nextElement.tagName !== "H1" &&
-      nextElement.tagName !== "H2" &&
-      nextElement.tagName !== "H3"
-    ) {
-      nextElement.style.marginTop = "0";
-      nextElement.style.paddingTop = "0";
+    // Keep next element(s) tight with heading
+    if (contentElements.length > 0 && contentElements[0]) {
+      const firstElement = contentElements[0];
+      if (firstElement && !/^H[1-6]$/.test(firstElement.tagName)) {
+        firstElement.style.marginTop = "0";
+        firstElement.style.paddingTop = "0";
+      }
     }
   });
 }
 
 /**
- * Apply professional formatting to content for PDF
+ * Apply professional legal document formatting for PDF
+ * Conforms to formal contract standards suitable for NDAs, service agreements, etc.
+ * Issues addressed:
+ * - Professional serif typography
+ * - Consistent vertical rhythm and spacing normalization
+ * - Party information structure and styling
+ * - Proper text wrapping and hyphenation
+ * - Page-safe margins and footer preparation
  */
 function applyProfessionalFormatting(container) {
+  // A4 width: 210mm = 794px at 96 DPI
+  // Professional margins: 25mm (top), 20mm (left/right), 30mm (bottom for footer safety)
   container.style.cssText = `
     position: absolute;
     left: -9999px;
     top: 0;
     width: 794px;
-    padding: 80px 60px 60px 60px;
+    padding: 94px 40px 120px 40px;
     background: white;
-    font-family: Georgia, serif;
-    font-size: 14px;
-    line-height: 1.8;
-    color: #000;
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #1a1a1a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   `;
 
-  // Style all headings
+  // Style all headings with strong professional hierarchy
   const headings = container.querySelectorAll("h1, h2, h3, h4, h5, h6");
   headings.forEach((heading) => {
     const tag = heading.tagName.toLowerCase();
 
     if (tag === "h1") {
-      heading.style.fontSize = "20px";
-      heading.style.fontWeight = "bold";
+      // Main title - strong visual prominence
+      heading.style.fontSize = "16pt";
+      heading.style.fontWeight = "700";
       heading.style.marginTop = "0";
-      heading.style.marginBottom = "30px";
-      heading.style.paddingBottom = "15px";
-      heading.style.lineHeight = "1.3";
-    } else if (tag === "h2") {
-      heading.style.fontSize = "18px";
-      heading.style.fontWeight = "bold";
-      heading.style.marginTop = "35px";
-      heading.style.marginBottom = "18px";
-      heading.style.paddingBottom = "8px";
-      heading.style.lineHeight = "1.4";
-    } else if (tag === "h3") {
-      heading.style.fontSize = "16px";
-      heading.style.fontWeight = "bold";
-      heading.style.marginTop = "25px";
       heading.style.marginBottom = "12px";
+      heading.style.paddingBottom = "0";
       heading.style.lineHeight = "1.4";
+      heading.style.letterSpacing = "0px";
+      heading.style.color = "#000";
+      heading.style.textTransform = "uppercase";
+      heading.style.textAlign = "center";
+      heading.style.pageBreakAfter = "avoid";
+      heading.style.pageBreakInside = "avoid";
+    } else if (tag === "h2") {
+      // Major section headers - numbered sections like "1. Purpose"
+      heading.style.fontSize = "11pt";
+      heading.style.fontWeight = "700";
+      heading.style.marginTop = "10px";
+      heading.style.marginBottom = "8px";
+      heading.style.paddingBottom = "6px";
+      heading.style.lineHeight = "1.4";
+      heading.style.color = "#000";
+      heading.style.pageBreakAfter = "avoid";
+      heading.style.pageBreakInside = "avoid";
+      // Subtle divider line under section heading
+      heading.style.borderBottom = "1px solid #d5dce0";
+    } else if (tag === "h3") {
+      // Subsection headers - like "DISCLOSING PARTY"
+      heading.style.fontSize = "11pt";
+      heading.style.fontWeight = "700";
+      heading.style.marginTop = "8px";
+      heading.style.marginBottom = "6px";
+      heading.style.lineHeight = "1.4";
+      heading.style.color = "#000";
+      heading.style.pageBreakAfter = "avoid";
+      heading.style.pageBreakInside = "avoid";
+      heading.style.textTransform = "uppercase";
+      heading.style.letterSpacing = "0.5px";
+      heading.style.fontVariant = "small-caps";
+    } else if (tag === "h4" || tag === "h5" || tag === "h6") {
+      // Minor headers
+      heading.style.fontSize = "11pt";
+      heading.style.fontWeight = "700";
+      heading.style.marginTop = "8px";
+      heading.style.marginBottom = "4px";
+      heading.style.lineHeight = "1.4";
+      heading.style.color = "#1a1a1a";
+      heading.style.pageBreakAfter = "avoid";
     }
   });
 
-  // Style all paragraphs
+  // Style all paragraphs with proper legal document spacing
   const paragraphs = container.querySelectorAll("p");
   paragraphs.forEach((p) => {
-    p.style.marginBottom = "16px";
-    p.style.lineHeight = "1.8";
+    p.style.margin = "0 0 8px 0";
+    p.style.lineHeight = "1.55";
     p.style.textAlign = "justify";
+    p.style.orphans = "3";
+    p.style.widows = "3";
+    p.style.color = "#1a1a1a";
+    p.style.hyphens = "auto";
+    p.style.WebkitHyphens = "auto";
+    p.style.msHyphens = "auto";
+    p.style.wordBreak = "break-word";
+    p.style.overflowWrap = "break-word";
+    p.style.wordWrap = "break-word";
   });
 
-  // Style lists
+  // Special styling for party information sections (NAME, ADDRESS, EMAIL)
+  const labels = container.querySelectorAll("strong");
+  labels.forEach((label) => {
+    const text = label.textContent.trim().toUpperCase();
+    if (["NAME", "ADDRESS", "EMAIL"].includes(text)) {
+      label.style.display = "block";
+      label.style.marginTop = "6px";
+      label.style.marginBottom = "2px";
+      label.style.fontWeight = "700";
+      label.style.fontSize = "10pt";
+      label.style.color = "#000";
+      label.style.textTransform = "uppercase";
+      label.style.letterSpacing = "0.3px";
+    }
+  });
+
+  // Style party information blocks for better visual grouping
+  const allText = container.innerHTML;
+  const partyPatterns = [
+    "DISCLOSING PARTY",
+    "RECEIVING PARTY",
+    "PARTNER",
+    "EMPLOYER",
+    "EMPLOYEE",
+    "CLIENT",
+    "SERVICE PROVIDER",
+    "CONSULTANT",
+  ];
+
+  // Find sections with party information and add special spacing
+  let currentHeading = null;
+  const partyElements = Array.from(container.children);
+  partyElements.forEach((el) => {
+    if (
+      /^H[2-3]$/.test(el.tagName) &&
+      partyPatterns.some((p) => el.textContent.includes(p))
+    ) {
+      currentHeading = el;
+      el.style.marginTop = "8px";
+    } else if (currentHeading && /^(P|H[4-6])$/.test(el.tagName)) {
+      if (el.textContent.match(/^(Name|Address|Email):/i)) {
+        el.style.marginLeft = "20px";
+        el.style.marginBottom = "4px";
+      }
+    }
+  });
+
+  // Ensure all text is visible and properly rendered
+  const allElements = container.querySelectorAll("*");
+
+  // Style numbered and bulleted lists with proper rendering and page control
   const lists = container.querySelectorAll("ul, ol");
   lists.forEach((list) => {
-    list.style.marginTop = "12px";
-    list.style.marginBottom = "20px";
-    list.style.paddingLeft = "30px";
-    list.style.lineHeight = "1.5";
+    list.style.margin = "6px 0 8px 0";
+    list.style.paddingLeft = "28px";
+    list.style.lineHeight = "1.55";
+    list.style.pageBreakInside = "avoid";
+    // Ensure list markers are visible
+    list.style.listStyle = list.tagName === "OL" ? "decimal" : "disc";
+    list.style.listStylePosition = "outside";
   });
 
   const listItems = container.querySelectorAll("li");
   listItems.forEach((li) => {
-    li.style.marginBottom = "10px";
-    li.style.lineHeight = "1.5";
+    li.style.margin = "2px 0 2px 0";
+    li.style.lineHeight = "1.55";
+    li.style.paddingLeft = "0";
+    li.style.color = "#1a1a1a";
+    li.style.wordBreak = "break-word";
+    li.style.overflowWrap = "break-word";
+    li.style.pageBreakInside = "avoid";
+    // Critical: Proper bullet-text vertical centering
+    li.style.display = "list-item";
+    li.style.textAlign = "left";
+    li.style.verticalAlign = "middle";
   });
 
-  // Style divs with padding/margin
+  // Normalize section spacing - critical for formal documents
+  const sections = container.querySelectorAll("section, article, .section");
+  sections.forEach((section, idx) => {
+    if (idx > 0) {
+      section.style.marginTop = "0"; // Consistent spacing maintained by headings
+    }
+    section.style.marginBottom = "0";
+    section.style.pageBreakInside = "avoid";
+  });
+
+  // Style divs with padding/margin (for callout boxes, etc)
   const divs = container.querySelectorAll("div");
   divs.forEach((div) => {
     const bgColor = window.getComputedStyle(div).backgroundColor;
@@ -162,28 +298,46 @@ function applyProfessionalFormatting(container) {
       bgColor !== "rgba(0, 0, 0, 0)" &&
       bgColor !== "transparent"
     ) {
-      div.style.marginTop = "25px";
-      div.style.marginBottom = "25px";
-      div.style.padding = "20px";
+      div.style.margin = "12px 0";
+      div.style.padding = "12px";
+      div.style.border = "1px solid #ccc";
+      div.style.pageBreakInside = "avoid";
     }
   });
 
   // Style strong/bold text
   const strongElements = container.querySelectorAll("strong, b");
   strongElements.forEach((el) => {
-    el.style.fontWeight = "bold";
-    el.style.color = "#000";
+    const text = el.textContent.trim().toUpperCase();
+    // Don't override party information labels (handled above)
+    if (!["NAME", "ADDRESS", "EMAIL"].includes(text)) {
+      el.style.fontWeight = "700";
+      el.style.color = "#000";
+    }
   });
 
-  // Ensure all text is visible
-  const allElements = container.querySelectorAll("*");
-  allElements.forEach((el) => {
+  // Style emphasized text
+  const emElements = container.querySelectorAll("em, i");
+  emElements.forEach((el) => {
+    el.style.fontStyle = "italic";
+    el.style.color = "#1a1a1a";
+  });
+
+  // Ensure all text is visible and properly rendered
+  const visibleElements = container.querySelectorAll("*");
+  visibleElements.forEach((el) => {
     const color = window.getComputedStyle(el).color;
     if (color === "rgba(0, 0, 0, 0)" || color === "transparent") {
-      el.style.color = "#000";
+      el.style.color = "#1a1a1a";
     }
     el.style.userSelect = "auto";
     el.style.webkitUserSelect = "auto";
+    // Text wrapping for long content
+    if (el.tagName === "P" || el.tagName === "LI" || el.tagName === "TD") {
+      el.style.wordBreak = "break-word";
+      el.style.overflowWrap = "break-word";
+      el.style.hyphens = "auto";
+    }
   });
 }
 
@@ -313,7 +467,7 @@ function generatePDFWithPrint(htmlContent, filename) {
         <style>
           @page {
             size: A4;
-            margin-top: 30mm;
+            margin-top: 25mm;
             margin-right: 20mm;
             margin-bottom: 30mm;
             margin-left: 20mm;
@@ -323,9 +477,10 @@ function generatePDFWithPrint(htmlContent, filename) {
             body {
               margin: 0;
               padding: 0;
+              counter-reset: page;
             }
             
-            /* Force headings to stay with content */
+            /* Force headings to stay with content and avoid orphans */
             h1, h2, h3, h4, h5, h6 {
               page-break-after: avoid !important;
               page-break-inside: avoid !important;
@@ -333,20 +488,52 @@ function generatePDFWithPrint(htmlContent, filename) {
               break-inside: avoid !important;
             }
             
-            /* Keep next element with heading */
-            h1 + *, h2 + *, h3 + *, h4 + *, h5 + *, h6 + * {
+            /* Keep lists with their headings */
+            h1 + ul, h1 + ol,
+            h2 + ul, h2 + ol,
+            h3 + ul, h3 + ol,
+            h4 + ul, h4 + ol,
+            h5 + ul, h5 + ol,
+            h6 + ul, h6 + ol {
               page-break-before: avoid !important;
               break-before: avoid !important;
+            }
+            
+            /* Keep first paragraph with heading */
+            h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p {
+              page-break-before: avoid !important;
+              break-before: avoid !important;
+            }
+            
+            /* Prevent list splitting */
+            ul, ol {
+              page-break-inside: avoid !important;
+            }
+            
+            li {
+              page-break-inside: avoid !important;
+            }
+            
+            /* Prevent isolated paragraphs */
+            p {
+              orphans: 3;
+              widows: 3;
+            }
+            
+            section, article, .section {
+              page-break-inside: avoid !important;
             }
           }
           
           body {
-            font-family: Georgia, serif;
-            font-size: 12pt;
-            line-height: 1.8;
-            color: #000;
+            font-family: Calibri, "Segoe UI", Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #1a1a1a;
             background: white;
-            padding: 30mm 20mm 30mm 20mm;
+            padding: 25mm 20mm 30mm 20mm;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
           }
           
           * {
@@ -355,53 +542,91 @@ function generatePDFWithPrint(htmlContent, filename) {
           }
           
           h1 {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0 0 30px 0;
-            padding-bottom: 15px;
-            line-height: 1.3;
+            font-size: 16pt;
+            font-weight: 700;
+            margin: 0 0 12px 0;
+            padding-bottom: 0;
+            line-height: 1.4;
+            color: #000;
+            text-transform: uppercase;
+            text-align: center;
+            page-break-after: avoid;
+            page-break-inside: avoid;
           }
           
           h2 {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 35px 0 18px 0;
-            padding-bottom: 8px;
+            font-size: 11pt;
+            font-weight: 700;
+            margin: 10px 0 8px 0;
+            padding-bottom: 6px;
             line-height: 1.4;
+            color: #000;
+            page-break-after: avoid;
+            page-break-inside: avoid;
+            border-bottom: 1px solid #d5dce0;
           }
           
           h3 {
-            font-size: 16px;
-            font-weight: bold;
-            margin: 25px 0 12px 0;
+            font-size: 11pt;
+            font-weight: 700;
+            margin: 8px 0 6px 0;
             line-height: 1.4;
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-variant: small-caps;
+            page-break-after: avoid;
+            page-break-inside: avoid;
           }
           
           h4, h5, h6 {
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 11pt;
+            margin: 8px 0 4px 0;
+            line-height: 1.4;
+            color: #1a1a1a;
+            page-break-after: avoid;
           }
           
           p {
-            margin: 0 0 16px 0;
-            line-height: 1.8;
+            margin: 0 0 8px 0;
+            line-height: 1.55;
             text-align: justify;
             orphans: 3;
             widows: 3;
+            color: #1a1a1a;
+            hyphens: auto;
+            word-break: break-word;
+            overflow-wrap: break-word;
           }
           
           ul, ol {
-            margin: 12px 0 20px 0;
-            padding-left: 30px;
-            line-height: 1.8;
+            margin: 6px 0 8px 0;
+            padding-left: 28px;
+            line-height: 1.55;
+            page-break-inside: avoid;
+            list-style: decimal outside;
+          }
+          
+          ul {
+            list-style: disc outside;
           }
           
           li {
-            margin-bottom: 10px;
-            line-height: 1.8;
+            margin: 2px 0 2px 0;
+            line-height: 1.55;
+            color: #1a1a1a;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            page-break-inside: avoid;
+            padding-left: 0;
+            display: list-item;
+            text-align: left;
+            vertical-align: middle;
           }
           
           div {
-            margin: 15px 0;
+            margin: 10px 0;
           }
           
           img {
@@ -411,11 +636,18 @@ function generatePDFWithPrint(htmlContent, filename) {
           
           table {
             page-break-inside: avoid;
+            width: 100%;
+            border-collapse: collapse;
           }
           
           strong, b {
-            font-weight: bold;
+            font-weight: 700;
             color: #000;
+          }
+          
+          em, i {
+            font-style: italic;
+            color: #1a1a1a;
           }
         </style>
       </head>
@@ -462,28 +694,43 @@ function downloadAsHTML(htmlContent, filename) {
               page-break-after: avoid !important;
               page-break-inside: avoid !important;
             }
-            h1 + *, h2 + *, h3 + *, h4 + *, h5 + *, h6 + * {
+            h1 + ul, h1 + ol, h2 + ul, h2 + ol, h3 + ul, h3 + ol, h4 + ul, h4 + ol, h5 + ul, h5 + ol, h6 + ul, h6 + ol {
               page-break-before: avoid !important;
+            }
+            h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p {
+              page-break-before: avoid !important;
+            }
+            ul, ol {
+              page-break-inside: avoid !important;
+            }
+            li {
+              page-break-inside: avoid !important;
             }
           }
           
           body {
-            font-family: Georgia, serif;
-            font-size: 12pt;
-            line-height: 1.8;
-            color: #000;
+            font-family: Calibri, "Segoe UI", Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #1a1a1a;
             max-width: 800px;
             margin: 40px auto;
             padding: 40px;
             background: white;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
           }
           
-          h1 { margin: 0 0 30px 0; font-size: 24px; }
-          h2 { margin: 35px 0 18px 0; font-size: 18px; }
-          h3 { margin: 25px 0 12px 0; font-size: 16px; }
-          p { margin: 0 0 16px 0; line-height: 1.8; }
-          ul, ol { margin: 12px 0 20px 0; padding-left: 30px; }
-          li { margin-bottom: 10px; }
+          h1 { margin: 0 0 12px 0; font-size: 16pt; font-weight:700; color:#000; text-transform: uppercase; text-align: center; }
+          h2 { margin: 10px 0 8px 0; padding-bottom: 6px; font-size: 11pt; font-weight:700; color:#000; border-bottom: 1px solid #d5dce0; }
+          h3 { margin: 8px 0 6px 0; font-size: 11pt; font-weight:700; color:#000; text-transform: uppercase; letter-spacing: 0.5px; }
+          p { margin: 0 0 8px 0; line-height: 1.55; orphans:3; widows:3; color:#1a1a1a; hyphens: auto; word-break: break-word; }
+          ul, ol { margin: 6px 0 8px 0; padding-left: 28px; line-height: 1.55; page-break-inside: avoid; }
+          ul { list-style: disc outside; }
+          ol { list-style: decimal outside; }
+          li { margin: 2px 0 2px 0; color:#1a1a1a; word-break: break-word; page-break-inside: avoid; padding-left: 0; display: list-item; line-height: 1.55; vertical-align: middle; }
+          strong, b { font-weight:700; color:#000; }
+          em, i { font-style:italic; color:#1a1a1a; }
         </style>
       </head>
       <body>
@@ -582,75 +829,122 @@ export function previewContent(htmlContent) {
               page-break-after: avoid !important;
               page-break-inside: avoid !important;
             }
-            h1 + *, h2 + *, h3 + *, h4 + *, h5 + *, h6 + * {
+            h1 + ul, h1 + ol, h2 + ul, h2 + ol, h3 + ul, h3 + ol, h4 + ul, h4 + ol, h5 + ul, h5 + ol, h6 + ul, h6 + ol {
               page-break-before: avoid !important;
+            }
+            h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p {
+              page-break-before: avoid !important;
+            }
+            ul, ol {
+              page-break-inside: avoid !important;
+            }
+            li {
+              page-break-inside: avoid !important;
             }
           }
           
           body {
-            font-family: Georgia, serif;
-            font-size: 12pt;
-            line-height: 1.8;
-            color: #000;
-            max-width: 800px;
+            font-family: Calibri, "Segoe UI", Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #1a1a1a;
+            max-width: 850px;
             margin: 20px auto;
             padding: 40px;
-            background: #f5f5f5;
+            background: #f8f8f8;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
           }
           
           .content {
             background: white;
-            padding: 60px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-radius: 3px;
           }
           
           .header {
-            background: #3b82f6;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: white;
-            padding: 15px;
-            margin: -20px -20px 20px -20px;
-            border-radius: 8px 8px 0 0;
+            padding: 16px 20px;
+            margin: -40px -40px 28px -40px;
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+          }
+          
+          .header h2 {
+            margin: 0 0 4px 0;
+            font-size: 15pt;
+            color: white;
+            border: none;
+            text-transform: none;
+          }
+          
+          .header p {
+            margin: 0;
+            font-size: 12pt;
+            opacity: 0.95;
+            color: white;
           }
           
           .actions {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f0f9ff;
-            border-top: 2px solid #3b82f6;
+            margin-top: 28px;
+            padding-top: 16px;
+            border-top: 1px solid #e0e0e0;
+            display:flex;
+            gap:12px;
           }
           
           button {
-            background: #3b82f6;
+            background: #2c3e50;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
+            padding: 11px 20px;
+            border-radius: 3px;
             cursor: pointer;
-            font-size: 14px;
-            margin-right: 10px;
+            font-size: 11pt;
+            font-weight: 500;
+            transition: all 0.2s ease;
           }
           
           button:hover {
-            background: #2563eb;
+            background: #1a252f;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           }
           
           h1 { 
-            margin: 0 0 30px 0; 
-            font-size: 24px; 
-            line-height: 1.3;
+            margin: 0 0 12px 0; 
+            font-size: 16pt; 
+            line-height: 1.4;
+            font-weight:700;
+            color:#000;
+            text-transform: uppercase;
+            text-align: center;
           }
           h2 { 
-            margin: 35px 0 18px 0; 
-            font-size: 18px; 
+            margin: 10px 0 8px 0; 
+            padding-bottom: 6px;
+            font-size: 11pt; 
             line-height: 1.4;
+            font-weight:700;
+            color:#000;
+            border-bottom: 1px solid #d5dce0;
           }
           h3 { 
-            margin: 25px 0 12px 0; 
-            font-size: 16px;
+            margin: 8px 0 6px 0; 
+            font-size: 11pt;
+            font-weight:700;
+            color:#000;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
           }
-          p { margin: 0 0 16px 0; line-height: 1.8; }
-          ul, ol { margin: 12px 0 20px 0; padding-left: 30px; }
-          li { margin-bottom: 10px; }
+          p { margin: 0 0 8px 0; line-height: 1.55; color:#1a1a1a; hyphens: auto; word-break: break-word; }
+          ul, ol { margin: 6px 0 8px 0; padding-left: 28px; line-height: 1.55; page-break-inside: avoid; }
+          ul { list-style: disc outside; }
+          ol { list-style: decimal outside; }
+          li { margin: 2px 0 2px 0; color:#1a1a1a; word-break: break-word; page-break-inside: avoid; padding-left: 0; display: list-item; line-height: 1.55; vertical-align: middle; }
+          strong, b { font-weight:700; color:#000; }
+          em, i { font-style:italic; color:#1a1a1a; }
         </style>
       </head>
       <body>
