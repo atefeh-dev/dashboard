@@ -27,24 +27,6 @@
         </div>
 
         <div class="document-step__section-content">
-          <!-- Debug Info (Development Only)
-          <div v-if="showDebugInfo" class="debug-info">
-            <details>
-              <summary>🔍 Debug Info</summary>
-              <div class="debug-info__content">
-                <p><strong>Has Content:</strong> {{ !!documentContent }}</p>
-                <p>
-                  <strong>Content Length:</strong>
-                  {{ documentContent?.length || 0 }}
-                </p>
-                <p><strong>Content Preview:</strong></p>
-                <pre>{{ documentContent?.substring(0, 200) }}...</pre>
-                <button @click="previewContentInBrowser" class="debug-btn">
-                  Preview Content
-                </button>
-              </div>
-            </details>
-          </div> -->
           <div
             v-if="!isGenerating && generatedDocuments.length > 0"
             class="document-list"
@@ -281,9 +263,10 @@ import { useContactsStore } from "@/stores/useContactsStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useTemplatesStore } from "@/stores/useTemplatesStore";
 import AppCheckbox from "@/components/ui/AppCheckbox.vue";
+// UPDATED: Import from new PDF generator with pdfMake support
 import {
   downloadPDF,
-  generatePDFPrintFallback,
+  printDocument,
   previewContent,
 } from "@/composables/pdfGenerator";
 import { cleanContentForPDF } from "@/composables/pdfContentCleaner";
@@ -339,9 +322,6 @@ const isDownloading = ref({});
 const alternativeEmailError = ref("");
 const validationErrors = ref([]);
 
-// Show debug info in development
-const showDebugInfo = computed(() => import.meta.env.DEV);
-
 // Computed
 const userEmail = computed(() => authStore.user?.email || "user@doclast.com");
 
@@ -357,7 +337,6 @@ const documentContent = computed(() => {
     fromStore: !!templatesStore.populatedDocumentContent,
     hasContent: !!content,
     contentLength: content?.length || 0,
-    contentPreview: content?.substring(0, 100),
   });
 
   return content;
@@ -499,7 +478,7 @@ function previewContentInBrowser() {
   previewContent(cleanedContent);
 }
 
-// PDF Download Function with Content Cleaning
+// UPDATED: PDF Download with new pdfMake generator
 async function downloadDocument(doc) {
   if (!documentContent.value) {
     alert(
@@ -508,7 +487,6 @@ async function downloadDocument(doc) {
     return;
   }
 
-  // Additional validation
   if (
     documentContent.value.trim() === "" ||
     documentContent.value === "<p></p>"
@@ -520,55 +498,57 @@ async function downloadDocument(doc) {
   }
 
   try {
-    console.log("[Document Step] Starting PDF download for:", doc.name);
+    console.log("[Document Step] Starting PDF download with pdfMake");
+    console.log("[Document Step] Document:", doc.name);
     console.log(
-      "[Document Step] Original content length:",
+      "[Document Step] Content length:",
       documentContent.value.length
     );
+    console.log("[DEBUG] Raw HTML content:", documentContent.value);
+    console.log("[DEBUG] Cleaned content:", cleanedContent);
 
     isDownloading.value[doc.id] = true;
 
     // Clean the content before PDF export
     const cleanedContent = cleanContentForPDF(documentContent.value);
 
-    console.log("[Document Step] Content cleaned for PDF export");
-    console.log(
-      "[Document Step] Cleaned content length:",
-      cleanedContent.length
-    );
-    console.log(
-      "[Document Step] Cleaned content preview:",
-      cleanedContent.substring(0, 200)
-    );
+    console.log("[Document Step] Content cleaned for PDF");
+    console.log("[Document Step] Cleaned length:", cleanedContent.length);
 
     if (!cleanedContent || cleanedContent.trim() === "") {
       throw new Error("Content cleaning resulted in empty output");
     }
 
-    // Use the cleaned content for PDF generation
+    // Use new PDF generator (auto-selects pdfMake first, with fallbacks)
     await downloadPDF(
       cleanedContent,
       props.documentMetadata?.filename || "document",
-      {
-        margin: [15, 15, 15, 15],
-        filename: doc.name,
-      }
+      { method: "auto" } // 'auto' tries pdfMake, then print, then jspdf
     );
 
-    console.log("[Document Step] PDF download completed successfully");
+    console.log("[Document Step] ✅ PDF downloaded successfully");
   } catch (error) {
     console.error("[Document Step] PDF download failed:", error);
 
+    // Offer fallback to browser print
     const retry = confirm(
-      `Failed to download PDF: ${error.message}\n\nWould you like to try the print dialog method instead?`
+      `Primary PDF generation failed: ${error.message}\n\nWould you like to try the browser print dialog instead?`
     );
 
     if (retry) {
-      const cleanedContent = cleanContentForPDF(documentContent.value);
-      generatePDFPrintFallback(
-        cleanedContent,
-        props.documentMetadata?.filename || "document"
-      );
+      try {
+        const cleanedContent = cleanContentForPDF(documentContent.value);
+        printDocument(
+          cleanedContent,
+          props.documentMetadata?.filename || "document"
+        );
+      } catch (printError) {
+        console.error(
+          "[Document Step] Print fallback also failed:",
+          printError
+        );
+        alert("PDF generation failed. Please try again or contact support.");
+      }
     }
   } finally {
     isDownloading.value[doc.id] = false;
@@ -791,8 +771,6 @@ onMounted(async () => {
     "[Document Step] Mounted with input recipients:",
     inputRecipients.value
   );
-
-  // Log content availability
   console.log("[Document Step] Content available:", {
     hasContent: !!documentContent.value,
     contentLength: documentContent.value?.length || 0,
@@ -855,53 +833,6 @@ useKeyboardShortcuts({
 <style scoped lang="scss">
 @use "./stepStyles.scss";
 
-.debug-info {
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background: #fef3c7;
-  border: 1px solid #fbbf24;
-  border-radius: 0.5rem;
-
-  summary {
-    cursor: pointer;
-    font-weight: 600;
-    color: #92400e;
-    margin-bottom: 0.5rem;
-  }
-
-  &__content {
-    margin-top: 0.75rem;
-    font-size: 0.875rem;
-
-    p {
-      margin: 0.5rem 0;
-    }
-
-    pre {
-      background: #ffffff;
-      padding: 0.5rem;
-      border-radius: 0.25rem;
-      overflow-x: auto;
-      font-size: 0.75rem;
-    }
-  }
-
-  .debug-btn {
-    margin-top: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-
-    &:hover {
-      background: #2563eb;
-    }
-  }
-}
-
 .recipient-section-label {
   font-size: 0.75rem;
   font-weight: 600;
@@ -938,7 +869,6 @@ useKeyboardShortcuts({
     display: flex;
     align-items: center;
     justify-content: center;
-
     flex-shrink: 0;
   }
 
@@ -1019,7 +949,6 @@ useKeyboardShortcuts({
   }
 }
 
-// Rest of existing styles...
 .document-step {
   &__header {
     margin-bottom: 1.5rem;
@@ -1156,46 +1085,6 @@ useKeyboardShortcuts({
   display: flex;
   align-items: center;
   margin: 1rem 0;
-
-  &__checkbox {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-    width: 0;
-    height: 0;
-  }
-
-  &__label {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    cursor: pointer;
-  }
-
-  &__check-box {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-    border: 2px solid #d1d5db;
-    border-radius: 4px;
-    background-color: #ffffff;
-    transition: all 0.2s ease;
-
-    .my-email__checkbox:checked + .my-email__label & {
-      background-color: #4539cc;
-      border-color: #4539cc;
-    }
-  }
-
-  &__check-icon {
-    width: 12px;
-    height: 12px;
-    color: #ffffff;
-  }
 
   &__text {
     font-size: 0.875rem;
