@@ -31,8 +31,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Select effective date",
           hint: "The date when this agreement becomes effective",
-          minLength: null,
-          maxLength: null,
+          validation: {
+            pattern: null,
+            minLength: null,
+            maxLength: null,
+            customMessage: null,
+          },
         },
         {
           name: "disclosingPartyName",
@@ -41,8 +45,13 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Enter full legal name",
           hint: "The party who will be sharing confidential information",
-          minLength: 3,
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z\\s\\.,&'-]+$",
+            minLength: 3,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid name (letters, spaces, and common punctuation only)",
+          },
         },
         {
           name: "disclosingPartyAddress",
@@ -52,8 +61,12 @@ export const useTemplatesStore = defineStore("document", () => {
           rows: 3,
           placeholder: "Enter complete address",
           hint: "Full mailing address including city, state, and zip code",
-          minLength: 10,
-          maxLength: 500,
+          validation: {
+            pattern: null,
+            minLength: 10,
+            maxLength: 500,
+            customMessage: null,
+          },
         },
         {
           name: "disclosingPartyEmail",
@@ -62,7 +75,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "email@example.com",
           hint: "Primary contact email for the disclosing party",
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            minLength: null,
+            maxLength: 100,
+            customMessage: "Please enter a valid email address",
+          },
         },
         {
           name: "receivingPartyName",
@@ -71,8 +89,13 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Enter full legal name",
           hint: "The party who will be receiving confidential information",
-          minLength: 3,
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z\\s\\.,&'-]+$",
+            minLength: 3,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid name (letters, spaces, and common punctuation only)",
+          },
         },
         {
           name: "receivingPartyAddress",
@@ -82,8 +105,12 @@ export const useTemplatesStore = defineStore("document", () => {
           rows: 3,
           placeholder: "Enter complete address",
           hint: "Full mailing address including city, state, and zip code",
-          minLength: 10,
-          maxLength: 500,
+          validation: {
+            pattern: null,
+            minLength: 10,
+            maxLength: 500,
+            customMessage: null,
+          },
         },
         {
           name: "receivingPartyEmail",
@@ -92,7 +119,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "email@example.com",
           hint: "Primary contact email for the receiving party",
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            minLength: null,
+            maxLength: 100,
+            customMessage: "Please enter a valid email address",
+          },
         },
         {
           name: "purpose",
@@ -103,8 +135,12 @@ export const useTemplatesStore = defineStore("document", () => {
           placeholder:
             "Describe the specific purpose for sharing confidential information",
           hint: "Be specific about why confidential information will be shared",
-          minLength: 20,
-          maxLength: 1000,
+          validation: {
+            pattern: null,
+            minLength: 20,
+            maxLength: 1000,
+            customMessage: null,
+          },
         },
       ],
       content: NDATemplateContent,
@@ -125,6 +161,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Select start date",
           hint: "The date the employee will begin work",
+          validation: {
+            pattern: null,
+            minLength: null,
+            maxLength: null,
+            customMessage: null,
+          },
         },
         {
           name: "employerName",
@@ -133,8 +175,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Enter company/employer name",
           hint: "Legal name of the employing entity",
-          minLength: 2,
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9\\s\\.,&'-]+$",
+            minLength: 2,
+            maxLength: 100,
+            customMessage: "Please enter a valid company name",
+          },
         },
         {
           name: "employerEmail",
@@ -143,7 +189,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "hr@company.com",
           hint: "HR or primary contact email",
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            minLength: null,
+            maxLength: 100,
+            customMessage: "Please enter a valid email address",
+          },
         },
         {
           name: "employeeName",
@@ -152,8 +203,13 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Enter employee's full legal name",
           hint: "As it appears on official documents",
-          minLength: 3,
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z\\s\\.,'-]+$",
+            minLength: 3,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid name (letters, spaces, and common punctuation only)",
+          },
         },
         {
           name: "employeeEmail",
@@ -162,7 +218,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "employee@email.com",
           hint: "Employee's work or personal email",
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            minLength: null,
+            maxLength: 100,
+            customMessage: "Please enter a valid email address",
+          },
         },
         {
           name: "position",
@@ -171,8 +232,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "e.g., Senior Software Engineer",
           hint: "Official job title",
-          minLength: 3,
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9\\s\\.,/-]+$",
+            minLength: 3,
+            maxLength: 100,
+            customMessage: "Please enter a valid job title",
+          },
         },
         {
           name: "workLocation",
@@ -181,8 +246,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "e.g., New York Office, Remote",
           hint: "Where the employee will primarily work",
-          minLength: 3,
-          maxLength: 200,
+          validation: {
+            pattern: "^[a-zA-Z0-9\\s\\.,/-]+$",
+            minLength: 3,
+            maxLength: 200,
+            customMessage: "Please enter a valid location",
+          },
         },
         {
           name: "salary",
@@ -191,8 +260,14 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "e.g., $75,000 per year",
           hint: "Base salary and payment frequency",
-          minLength: 5,
-          maxLength: 100,
+          validation: {
+            pattern:
+              "^\\$?[0-9,]+(\\.\\d{2})?\\s*(per\\s+(year|month|hour|week)|annually|monthly|hourly|weekly)?$",
+            minLength: 5,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid salary format (e.g., $75,000 per year or $50/hour)",
+          },
         },
       ],
       content: EmploymentContractTemplateContent,
@@ -213,6 +288,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Select start date",
           hint: "When services will begin",
+          validation: {
+            pattern: null,
+            minLength: null,
+            maxLength: null,
+            customMessage: null,
+          },
         },
         {
           name: "clientName",
@@ -221,8 +302,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Enter client name or company",
           hint: "Individual or organization receiving services",
-          minLength: 2,
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9\\s\\.,&'-]+$",
+            minLength: 2,
+            maxLength: 100,
+            customMessage: "Please enter a valid name",
+          },
         },
         {
           name: "clientEmail",
@@ -231,7 +316,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "client@email.com",
           hint: "Primary contact email",
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            minLength: null,
+            maxLength: 100,
+            customMessage: "Please enter a valid email address",
+          },
         },
         {
           name: "providerName",
@@ -240,8 +330,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Enter provider name",
           hint: "Individual or company providing services",
-          minLength: 2,
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9\\s\\.,&'-]+$",
+            minLength: 2,
+            maxLength: 100,
+            customMessage: "Please enter a valid name",
+          },
         },
         {
           name: "providerEmail",
@@ -250,7 +344,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "provider@email.com",
           hint: "Service provider contact email",
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            minLength: null,
+            maxLength: 100,
+            customMessage: "Please enter a valid email address",
+          },
         },
         {
           name: "servicesDescription",
@@ -260,8 +359,12 @@ export const useTemplatesStore = defineStore("document", () => {
           rows: 5,
           placeholder: "Describe the services to be provided in detail",
           hint: "Be specific about deliverables, scope, and expectations",
-          minLength: 50,
-          maxLength: 2000,
+          validation: {
+            pattern: null,
+            minLength: 50,
+            maxLength: 2000,
+            customMessage: null,
+          },
         },
         {
           name: "serviceTerm",
@@ -270,8 +373,14 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "e.g., 6 months, Ongoing, Project-based",
           hint: "How long services will be provided",
-          minLength: 3,
-          maxLength: 100,
+          validation: {
+            pattern:
+              "^(\\d+\\s+(day|days|week|weeks|month|months|year|years)|ongoing|project-based|indefinite|until completion)$",
+            minLength: 3,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid duration (e.g., 6 months, 3 weeks, Ongoing, Project-based)",
+          },
         },
         {
           name: "serviceFee",
@@ -280,8 +389,14 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "e.g., $5,000/month, $150/hour",
           hint: "Compensation amount and frequency",
-          minLength: 5,
-          maxLength: 100,
+          validation: {
+            pattern:
+              "^\\$?[0-9,]+(\\.\\d{2})?\\s*(/|per)?\\s*(hour|month|year|week|project|day)?$",
+            minLength: 5,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid fee format (e.g., $5,000/month, $150/hour, $10,000 per project)",
+          },
         },
         {
           name: "paymentTerms",
@@ -291,8 +406,12 @@ export const useTemplatesStore = defineStore("document", () => {
           rows: 4,
           placeholder: "Describe payment schedule and conditions",
           hint: "Include due dates, accepted payment methods, late fees, etc.",
-          minLength: 20,
-          maxLength: 1000,
+          validation: {
+            pattern: null,
+            minLength: 20,
+            maxLength: 1000,
+            customMessage: null,
+          },
         },
         {
           name: "terminationNotice",
@@ -301,8 +420,14 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "e.g., 30 days written notice",
           hint: "Required notice period for ending the agreement",
-          minLength: 5,
-          maxLength: 100,
+          validation: {
+            pattern:
+              "^\\d+\\s+(day|days|week|weeks|month|months)\\s*(written\\s+notice|notice)?$",
+            minLength: 5,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid notice period (e.g., 30 days written notice, 2 weeks notice)",
+          },
         },
       ],
       content: ServiceAgreementTemplateContent,
@@ -323,6 +448,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Select effective date",
           hint: "The date when the partnership becomes effective",
+          validation: {
+            pattern: null,
+            minLength: null,
+            maxLength: null,
+            customMessage: null,
+          },
         },
         {
           name: "partnerOneName",
@@ -331,8 +462,13 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Enter full legal name",
           hint: "Full legal name of the first partner",
-          minLength: 2,
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z\\s\\.,'-]+$",
+            minLength: 2,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid name (letters, spaces, and common punctuation only)",
+          },
         },
         {
           name: "partnerOneEmail",
@@ -341,7 +477,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "email@example.com",
           hint: "Primary contact email for partner one",
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            minLength: null,
+            maxLength: 100,
+            customMessage: "Please enter a valid email address",
+          },
         },
         {
           name: "partnerTwoName",
@@ -350,8 +491,13 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Enter full legal name",
           hint: "Full legal name of the second partner",
-          minLength: 2,
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z\\s\\.,'-]+$",
+            minLength: 2,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid name (letters, spaces, and common punctuation only)",
+          },
         },
         {
           name: "partnerTwoEmail",
@@ -360,7 +506,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "email@example.com",
           hint: "Primary contact email for partner two",
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            minLength: null,
+            maxLength: 100,
+            customMessage: "Please enter a valid email address",
+          },
         },
         {
           name: "partnershipPurpose",
@@ -370,8 +521,12 @@ export const useTemplatesStore = defineStore("document", () => {
           rows: 4,
           placeholder: "Describe the partnership purpose and goals",
           hint: "Be specific about objectives, scope, and intended activities",
-          minLength: 20,
-          maxLength: 1000,
+          validation: {
+            pattern: null,
+            minLength: 20,
+            maxLength: 1000,
+            customMessage: null,
+          },
         },
         {
           name: "partnerOneContribution",
@@ -380,8 +535,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Describe cash, assets, or services contributed",
           hint: "Include approximate values or percentages if applicable",
-          minLength: 3,
-          maxLength: 300,
+          validation: {
+            pattern: null,
+            minLength: 3,
+            maxLength: 300,
+            customMessage: null,
+          },
         },
         {
           name: "partnerTwoContribution",
@@ -390,8 +549,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Describe cash, assets, or services contributed",
           hint: "Include approximate values or percentages if applicable",
-          minLength: 3,
-          maxLength: 300,
+          validation: {
+            pattern: null,
+            minLength: 3,
+            maxLength: 300,
+            customMessage: null,
+          },
         },
         {
           name: "partnerOneShare",
@@ -400,8 +563,13 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "e.g., 50%",
           hint: "Profit and loss sharing percentage for partner one",
-          minLength: 2,
-          maxLength: 50,
+          validation: {
+            pattern: "^(100|[1-9]?\\d)\\s*%?$",
+            minLength: 2,
+            maxLength: 50,
+            customMessage:
+              "Please enter a valid percentage (e.g., 50%, 33.33%, 25)",
+          },
         },
         {
           name: "partnerTwoShare",
@@ -410,8 +578,13 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "e.g., 50%",
           hint: "Profit and loss sharing percentage for partner two",
-          minLength: 2,
-          maxLength: 50,
+          validation: {
+            pattern: "^(100|[1-9]?\\d)\\s*%?$",
+            minLength: 2,
+            maxLength: 50,
+            customMessage:
+              "Please enter a valid percentage (e.g., 50%, 33.33%, 25)",
+          },
         },
         {
           name: "partnershipTerm",
@@ -420,8 +593,14 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "e.g., 3 years, Ongoing",
           hint: "Length or duration of the partnership",
-          minLength: 3,
-          maxLength: 100,
+          validation: {
+            pattern:
+              "^(\\d+\\s+(day|days|week|weeks|month|months|year|years)|ongoing|indefinite|perpetual)$",
+            minLength: 3,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid duration (e.g., 3 years, 6 months, Ongoing)",
+          },
         },
       ],
       content: PartnerShipAgreementTemplateContent,
@@ -442,6 +621,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Select effective date",
           hint: "When the consulting engagement begins",
+          validation: {
+            pattern: null,
+            minLength: null,
+            maxLength: null,
+            customMessage: null,
+          },
         },
         {
           name: "consultantName",
@@ -450,8 +635,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Enter consultant name",
           hint: "Individual or firm providing consulting services",
-          minLength: 2,
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9\\s\\.,&'-]+$",
+            minLength: 2,
+            maxLength: 100,
+            customMessage: "Please enter a valid name",
+          },
         },
         {
           name: "consultantEmail",
@@ -460,7 +649,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "consultant@email.com",
           hint: "Primary contact email for consultant",
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            minLength: null,
+            maxLength: 100,
+            customMessage: "Please enter a valid email address",
+          },
         },
         {
           name: "clientName",
@@ -469,8 +663,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "Enter client name",
           hint: "Organization engaging consultant",
-          minLength: 2,
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9\\s\\.,&'-]+$",
+            minLength: 2,
+            maxLength: 100,
+            customMessage: "Please enter a valid name",
+          },
         },
         {
           name: "clientEmail",
@@ -479,7 +677,12 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "client@company.com",
           hint: "Client contact email",
-          maxLength: 100,
+          validation: {
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            minLength: null,
+            maxLength: 100,
+            customMessage: "Please enter a valid email address",
+          },
         },
         {
           name: "consultingServices",
@@ -489,8 +692,12 @@ export const useTemplatesStore = defineStore("document", () => {
           rows: 5,
           placeholder: "Detail the consulting services to be provided",
           hint: "Include scope, deliverables, and expected outcomes",
-          minLength: 50,
-          maxLength: 2000,
+          validation: {
+            pattern: null,
+            minLength: 50,
+            maxLength: 2000,
+            customMessage: null,
+          },
         },
         {
           name: "hourlyRate",
@@ -499,8 +706,14 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "e.g., $200/hour or $50,000 fixed",
           hint: "Compensation structure",
-          minLength: 5,
-          maxLength: 100,
+          validation: {
+            pattern:
+              "^\\$?[0-9,]+(\\.\\d{2})?\\s*(/|per)?\\s*(hour|project|day|week|month|fixed)?$",
+            minLength: 5,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid rate (e.g., $200/hour, $50,000 fixed, $1,500 per day)",
+          },
         },
         {
           name: "projectDuration",
@@ -509,8 +722,13 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "e.g., 3 months, 6 weeks",
           hint: "Estimated timeframe for completion",
-          minLength: 3,
-          maxLength: 100,
+          validation: {
+            pattern: "^\\d+\\s+(day|days|week|weeks|month|months|year|years)$",
+            minLength: 3,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid duration (e.g., 3 months, 6 weeks, 1 year)",
+          },
         },
         {
           name: "paymentTerms",
@@ -520,8 +738,12 @@ export const useTemplatesStore = defineStore("document", () => {
           rows: 4,
           placeholder: "Describe payment schedule and conditions",
           hint: "Include due dates, accepted payment methods, late fees, etc.",
-          minLength: 20,
-          maxLength: 1000,
+          validation: {
+            pattern: null,
+            minLength: 20,
+            maxLength: 1000,
+            customMessage: null,
+          },
         },
         {
           name: "terminationNotice",
@@ -530,8 +752,14 @@ export const useTemplatesStore = defineStore("document", () => {
           required: true,
           placeholder: "e.g., 30 days written notice",
           hint: "Required notice period for ending the agreement",
-          minLength: 5,
-          maxLength: 100,
+          validation: {
+            pattern:
+              "^\\d+\\s+(day|days|week|weeks|month|months)\\s*(written\\s+notice|notice)?$",
+            minLength: 5,
+            maxLength: 100,
+            customMessage:
+              "Please enter a valid notice period (e.g., 30 days written notice, 2 weeks notice)",
+          },
         },
       ],
       content: ConsultingAgreementTemplateContent,

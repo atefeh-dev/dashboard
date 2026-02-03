@@ -54,7 +54,7 @@
                     field.placeholder || `Enter ${field.label.toLowerCase()}`
                   "
                   :class="{ 'input-error': errors.length && meta.touched }"
-                  :maxlength="field.maxLength"
+                  :maxlength="field.validation?.maxLength"
                   @update:model-value="
                     handleFieldUpdate(field.name, $event, formValues)
                   "
@@ -69,7 +69,7 @@
                     field.placeholder || `Enter ${field.label.toLowerCase()}`
                   "
                   :class="{ 'input-error': errors.length && meta.touched }"
-                  :maxlength="field.maxLength"
+                  :maxlength="field.validation?.maxLength"
                   @update:model-value="
                     handleFieldUpdate(field.name, $event, formValues)
                   "
@@ -84,7 +84,7 @@
                   "
                   :rows="field.rows || 4"
                   :class="{ 'input-error': errors.length && meta.touched }"
-                  :maxlength="field.maxLength"
+                  :maxlength="field.validation?.maxLength"
                   @update:model-value="
                     handleFieldUpdate(field.name, $event, formValues)
                   "
@@ -114,6 +114,20 @@
                 <!-- Hint Text -->
                 <p v-if="field.hint && !errors.length" class="form-field__hint">
                   {{ field.hint }}
+                </p>
+
+                <!-- Character Counter (for fields with maxLength) -->
+                <p
+                  v-if="field.validation?.maxLength && formValues[field.name]"
+                  class="char-counter"
+                  :class="{
+                    'char-limit-warning':
+                      formValues[field.name].length >
+                      field.validation.maxLength * 0.9,
+                  }"
+                >
+                  {{ formValues[field.name].length }} /
+                  {{ field.validation.maxLength }}
                 </p>
               </div>
             </Field>
@@ -246,7 +260,7 @@ function initializeFormData() {
   return data;
 }
 
-// Enhanced validation schema based on template fields
+// Enhanced validation schema based on template fields with pattern support
 function createFieldValidation(field) {
   let validation;
 
@@ -273,22 +287,6 @@ function createFieldValidation(field) {
           const trimmed = value.trim();
           return trimmed === "" ? undefined : trimmed;
         });
-
-      // Add min length test only if field has minLength
-      if (field.minLength && field.minLength > 0) {
-        validation = validation.test(
-          "min-when-provided",
-          `${field.label} must be at least ${field.minLength} characters`,
-          (value) => value == null || value.length >= field.minLength
-        );
-      } else {
-        // Default min length for text fields without specific requirement
-        validation = validation.test(
-          "min-when-provided",
-          `${field.label} must be at least 3 characters`,
-          (value) => value == null || value.length >= 3
-        );
-      }
   }
 
   // Required validation
@@ -299,18 +297,31 @@ function createFieldValidation(field) {
   }
 
   // Max length validation (if specified)
-  if (field.maxLength) {
+  if (field.validation?.maxLength) {
     validation = validation.max(
-      field.maxLength,
-      `Maximum ${field.maxLength} characters allowed`
+      field.validation.maxLength,
+      `Maximum ${field.validation.maxLength} characters allowed`,
     );
   }
 
-  // Min length validation for textarea (if specified)
-  if (field.type === "textarea" && field.minLength && field.minLength > 0) {
+  // Min length validation (if specified)
+  if (field.validation?.minLength && field.validation.minLength > 0) {
     validation = validation.min(
-      field.minLength,
-      `${field.label} must be at least ${field.minLength} characters`
+      field.validation.minLength,
+      `${field.label} must be at least ${field.validation.minLength} characters`,
+    );
+  }
+
+  // Pattern validation (regex) - NEW ADDITION
+  if (field.validation?.pattern) {
+    validation = validation.test(
+      "pattern-match",
+      field.validation.customMessage || `${field.label} has an invalid format`,
+      (value) => {
+        if (!value) return true; // Skip pattern check if empty (required handles this)
+        const regex = new RegExp(field.validation.pattern, "i"); // case-insensitive
+        return regex.test(value);
+      },
     );
   }
 
@@ -342,14 +353,21 @@ function canContinue(formValues) {
     const trimmedValue = typeof value === "string" ? value.trim() : value;
     if (trimmedValue === "") return false;
 
-    // Check minimum length
-    if (field.minLength && field.minLength > 0) {
-      return trimmedValue.length >= field.minLength;
+    // Check minimum length if specified
+    if (
+      field.validation?.minLength &&
+      field.validation.minLength > 0 &&
+      trimmedValue.length < field.validation.minLength
+    ) {
+      return false;
     }
 
-    // Default minimum length for text fields
-    if (field.type === "text") {
-      return trimmedValue.length >= 3;
+    // Check pattern if specified
+    if (field.validation?.pattern) {
+      const regex = new RegExp(field.validation.pattern, "i");
+      if (!regex.test(trimmedValue)) {
+        return false;
+      }
     }
 
     return true;
@@ -416,7 +434,7 @@ function handleFormError(errorInfo) {
   localStorage.setItem("emergency-backup-input-step", JSON.stringify(backup));
 
   alert(
-    "An error occurred with the form. Your data has been saved as a backup."
+    "An error occurred with the form. Your data has been saved as a backup.",
   );
 }
 
@@ -459,7 +477,7 @@ watch(
       Object.assign(currentFormData.value, newStepData);
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 onBeforeUnmount(() => {
@@ -513,5 +531,17 @@ useKeyboardShortcuts({
   justify-content: space-between;
   margin-right: unset;
   margin-left: unset;
+}
+
+.char-counter {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: right;
+}
+
+.char-limit-warning {
+  color: #f59e0b;
+  font-weight: 500;
 }
 </style>
