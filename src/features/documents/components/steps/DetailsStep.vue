@@ -71,6 +71,7 @@
           :templates="templatesStore.filteredTemplates"
           :selected-template="currentSelectedTemplate"
           @select="handleSelectTemplate"
+          @preview="handlePreviewTemplate"
           @clear-filters="clearFilters"
         />
 
@@ -343,6 +344,14 @@
         </Form>
       </section>
     </ErrorBoundary>
+
+    <!-- Template Preview Modal -->
+    <TemplatePreviewModal
+      :is-open="isPreviewModalOpen"
+      :template="previewTemplate"
+      @close="closePreviewModal"
+      @use-template="handleUseTemplateFromPreview"
+    />
   </div>
 </template>
 
@@ -379,6 +388,7 @@ import { getShortcutLabels } from "@/composables/useKeyboardShortcuts";
 import FileTypeIcon from "@/assets/icons/common/file-type-icon.svg";
 import VerifiedTickIcon from "@/assets/icons/common/verified-tick.svg";
 import ExportFilePlus from "@/assets/icons/common/export-file-plus.svg";
+import TemplatePreviewModal from "./TemplatePreviewModal.vue";
 
 const props = defineProps({
   form: {
@@ -418,11 +428,15 @@ const {
     debounceMs: 500,
     enableEmergencyBackup: true,
     logChanges: import.meta.env.DEV,
-  }
+  },
 );
 
 const currentSelectedTemplate = ref(null);
 const templateErrorMessage = ref("");
+
+// Preview modal state
+const isPreviewModalOpen = ref(false);
+const previewTemplate = ref(null);
 
 const MAX_DESCRIPTION_LENGTH = 500;
 
@@ -439,7 +453,7 @@ const validationSchema = yup.object({
     .test(
       "template-required",
       "Please select a template to continue",
-      () => currentSelectedTemplate.value !== null
+      () => currentSelectedTemplate.value !== null,
     ),
   name: yup
     .string()
@@ -453,14 +467,14 @@ const validationSchema = yup.object({
     .max(50, "File name must not exceed 50 characters")
     .matches(
       /^[a-z0-9-]+$/,
-      "File name can only contain lowercase letters, numbers, and hyphens"
+      "File name can only contain lowercase letters, numbers, and hyphens",
     )
     .matches(/^[a-z]/, "File name must start with a letter")
     .matches(/[a-z0-9]$/, "File name must end with a letter or number")
     .test(
       "no-consecutive-hyphens",
       "File name cannot contain consecutive hyphens",
-      (value) => !value?.includes("--")
+      (value) => !value?.includes("--"),
     )
     .required("File name is required")
     .trim(),
@@ -468,7 +482,7 @@ const validationSchema = yup.object({
     .string()
     .max(
       MAX_DESCRIPTION_LENGTH,
-      `Description must not exceed ${MAX_DESCRIPTION_LENGTH} characters`
+      `Description must not exceed ${MAX_DESCRIPTION_LENGTH} characters`,
     )
     .notRequired()
     .transform((value) => value || ""),
@@ -534,7 +548,7 @@ watch(
         setFieldValue("status", newForm.status || "draft");
     }
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 
 watch(
@@ -545,7 +559,7 @@ watch(
       setFieldValue("templateId", newTemplate.id);
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 let keyboardHandler = null;
@@ -583,7 +597,7 @@ function initializeDefaultTemplate() {
   if (!currentSelectedTemplate.value) {
     const defaultTemplate =
       templatesStore.filteredTemplates.find(
-        (t) => t.name === "Non Disclosure Agreement"
+        (t) => t.name === "Non Disclosure Agreement",
       ) || templatesStore.filteredTemplates[0];
 
     if (defaultTemplate) handleSelectTemplate(defaultTemplate);
@@ -595,6 +609,33 @@ function handleSelectTemplate(template) {
   setFieldValue("templateId", template.id);
   templateErrorMessage.value = "";
   emit("selectTemplate", template);
+}
+
+// Handle preview template
+function handlePreviewTemplate(template) {
+  previewTemplate.value = template;
+  isPreviewModalOpen.value = true;
+}
+
+// Close preview modal
+function closePreviewModal() {
+  isPreviewModalOpen.value = false;
+  // Don't clear previewTemplate immediately for smooth transition
+  setTimeout(() => {
+    previewTemplate.value = null;
+  }, 300);
+}
+
+// Use template from preview modal
+function handleUseTemplateFromPreview(template) {
+  handleSelectTemplate(template);
+  closePreviewModal();
+
+  // Scroll to form after closing modal
+  setTimeout(() => {
+    const formSection = document.querySelector(".section--form");
+    formSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 400);
 }
 
 function scrollToTemplateSelection() {
@@ -624,7 +665,7 @@ async function handleSubmit(formValues) {
 
 function handleDiscard() {
   const confirmed = confirm(
-    "Are you sure you want to discard? All your changes will be lost."
+    "Are you sure you want to discard? All your changes will be lost.",
   );
 
   if (confirmed) {
@@ -671,7 +712,7 @@ function handleFormError(errorInfo) {
   if (values && Object.keys(values).length > 0) {
     localStorage.setItem(
       "emergency-backup-details-step",
-      JSON.stringify(values)
+      JSON.stringify(values),
     );
   }
 }
