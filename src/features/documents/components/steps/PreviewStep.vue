@@ -71,6 +71,16 @@
           Continue
         </AppButton>
       </div>
+      <!-- Keyboard Shortcuts Hint -->
+      <div class="keyboard-hints">
+        <kbd class="kbd">{{ shortcutLabels.alt }}</kbd>
+        <kbd class="kbd">{{ shortcutLabels.left }}</kbd>
+        Back
+        <span class="keyboard-hints__separator">•</span>
+        <kbd class="kbd">{{ shortcutLabels.alt }}</kbd>
+        <kbd class="kbd">{{ shortcutLabels.right }}</kbd>
+        Continue
+      </div>
     </section>
   </div>
 </template>
@@ -83,6 +93,7 @@ import RichTextEditor from "@/components/ui/RichTextEditor.vue";
 import { useTemplatesStore } from "@/stores/useTemplatesStore";
 import WarningIcon from "@/assets/icons/common/warning.svg";
 import ArrowNarrowLetIcon from "@/assets/icons/common/arrow-narrow-left.svg";
+import { getShortcutLabels } from "@/composables/useKeyboardShortcuts";
 
 const props = defineProps({
   stepData: {
@@ -90,6 +101,8 @@ const props = defineProps({
     default: () => ({}),
   },
 });
+
+const shortcutLabels = getShortcutLabels();
 
 const emit = defineEmits(["continue", "back", "update:data"]);
 
@@ -107,7 +120,7 @@ const templateToUse = computed(() => {
 
   if (props.stepData?.templateName) {
     const template = templatesStore.templates.find(
-      (t) => t.name === props.stepData.templateName
+      (t) => t.name === props.stepData.templateName,
     );
     if (template) return template;
   }
@@ -118,7 +131,7 @@ const templateToUse = computed(() => {
   }
 
   const defaultTemplate = templatesStore.templates.find(
-    (t) => t.name === "Non Disclosure Agreement"
+    (t) => t.name === "Non Disclosure Agreement",
   );
 
   return defaultTemplate || null;
@@ -252,7 +265,7 @@ watch(
       processTemplateWithLockedFields();
     }
   },
-  { immediate: false }
+  { immediate: false },
 );
 
 // Watch editor content changes and emit updates
@@ -285,7 +298,7 @@ async function handleContinue() {
 
   console.log(
     "✅ Continuing with content, length:",
-    editorContent.value.length
+    editorContent.value.length,
   );
 
   // CRITICAL: Emit the content with the continue event
@@ -301,6 +314,8 @@ async function handleContinue() {
 </script>
 
 <style scoped lang="scss">
+@use "./stepStyles.scss";
+
 .section {
   &__heading {
     font-size: 24px;

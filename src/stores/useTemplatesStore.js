@@ -512,6 +512,27 @@ export const useTemplatesStore = defineStore("document", () => {
           minLength: 3,
           maxLength: 100,
         },
+        {
+          name: "paymentTerms",
+          label: "Payment Terms",
+          type: "textarea",
+          required: true,
+          rows: 4,
+          placeholder: "Describe payment schedule and conditions",
+          hint: "Include due dates, accepted payment methods, late fees, etc.",
+          minLength: 20,
+          maxLength: 1000,
+        },
+        {
+          name: "terminationNotice",
+          label: "Termination Notice Period",
+          type: "text",
+          required: true,
+          placeholder: "e.g., 30 days written notice",
+          hint: "Required notice period for ending the agreement",
+          minLength: 5,
+          maxLength: 100,
+        },
       ],
       content: ConsultingAgreementTemplateContent,
     },
@@ -598,8 +619,8 @@ export const useTemplatesStore = defineStore("document", () => {
       result = result.filter((template) => {
         return selectedTags.value.every((selectedTag) =>
           template.tags.some(
-            (tag) => tag.toLowerCase() === selectedTag.toLowerCase()
-          )
+            (tag) => tag.toLowerCase() === selectedTag.toLowerCase(),
+          ),
         );
       });
     }
@@ -609,7 +630,7 @@ export const useTemplatesStore = defineStore("document", () => {
       result = result.filter(
         (template) =>
           template.name.toLowerCase().includes(query) ||
-          template.tags.some((tag) => tag.toLowerCase().includes(query))
+          template.tags.some((tag) => tag.toLowerCase().includes(query)),
       );
     }
 
@@ -649,7 +670,7 @@ export const useTemplatesStore = defineStore("document", () => {
 
   function removeTag(tag) {
     const index = selectedTags.value.findIndex(
-      (t) => t.toLowerCase() === tag.toLowerCase()
+      (t) => t.toLowerCase() === tag.toLowerCase(),
     );
     if (index > -1) {
       selectedTags.value.splice(index, 1);
@@ -674,14 +695,14 @@ export const useTemplatesStore = defineStore("document", () => {
     };
     console.log(
       "[Templates Store] Updated details:",
-      currentDocument.value.details
+      currentDocument.value.details,
     );
   }
 
   function updateInputForms(formsData) {
     if (formsData?.items && Array.isArray(formsData.items)) {
       currentDocument.value.inputForms = JSON.parse(
-        JSON.stringify(formsData.items)
+        JSON.stringify(formsData.items),
       );
     } else if (Array.isArray(formsData)) {
       currentDocument.value.inputForms = JSON.parse(JSON.stringify(formsData));
@@ -691,7 +712,7 @@ export const useTemplatesStore = defineStore("document", () => {
 
     console.log(
       "[Templates Store] Updated input forms:",
-      currentDocument.value.inputForms
+      currentDocument.value.inputForms,
     );
   }
 
@@ -702,7 +723,7 @@ export const useTemplatesStore = defineStore("document", () => {
     };
     console.log(
       "[Templates Store] Updated preview:",
-      currentDocument.value.preview
+      currentDocument.value.preview,
     );
   }
 
@@ -713,7 +734,7 @@ export const useTemplatesStore = defineStore("document", () => {
     };
     console.log(
       "[Templates Store] Updated document:",
-      currentDocument.value.document
+      currentDocument.value.document,
     );
   }
 

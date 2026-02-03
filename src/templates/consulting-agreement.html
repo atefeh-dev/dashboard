@@ -3,7 +3,7 @@
     max-width: 800px;
     margin: 0 auto;
     padding: 40px 20px;
-    font-family: 'Georgia', serif;
+    font-family: &quot;Georgia&quot;, serif;
     line-height: 1.8;
     color: #1a1a1a;
   "
@@ -16,7 +16,7 @@
       margin-bottom: 30px;
       text-transform: uppercase;
       letter-spacing: 2px;
-      border-bottom: 3px solid #0ea5e9;
+      border-bottom: 3px solid #8b5cf6;
       padding-bottom: 15px;
     "
   >
@@ -34,8 +34,8 @@
     style="
       margin: 30px 0;
       padding: 20px;
-      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-      border-left: 5px solid #0ea5e9;
+      background: linear-gradient(135deg, #f3e8ff 0%, #faf5ff 100%);
+      border-left: 5px solid #8b5cf6;
       border-radius: 8px;
     "
   >
@@ -44,30 +44,7 @@
         font-size: 18px;
         font-weight: bold;
         margin-bottom: 12px;
-        color: #075985;
-      "
-    >
-      CLIENT
-    </h3>
-    <p><strong>Name:</strong> {{clientName}}</p>
-    <p><strong>Email:</strong> {{clientEmail}}</p>
-  </div>
-
-  <div
-    style="
-      margin: 30px 0;
-      padding: 20px;
-      background: linear-gradient(135deg, #ecfeff 0%, #f0fdfa 100%);
-      border-left: 5px solid #14b8a6;
-      border-radius: 8px;
-    "
-  >
-    <h3
-      style="
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 12px;
-        color: #115e59;
+        color: #6b21a8;
       "
     >
       CONSULTANT
@@ -76,10 +53,33 @@
     <p><strong>Email:</strong> {{consultantEmail}}</p>
   </div>
 
-  <h2
-    style="font-size: 20px; font-weight: bold; margin-top: 35px; color: #075985"
+  <div
+    style="
+      margin: 30px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%);
+      border-left: 5px solid #a78bfa;
+      border-radius: 8px;
+    "
   >
-    1. Services
+    <h3
+      style="
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: #7c3aed;
+      "
+    >
+      CLIENT
+    </h3>
+    <p><strong>Name:</strong> {{clientName}}</p>
+    <p><strong>Email:</strong> {{clientEmail}}</p>
+  </div>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 35px; color: #6b21a8"
+  >
+    1. Consulting Services
   </h2>
   <p
     style="
@@ -89,80 +89,97 @@
       text-align: justify;
     "
   >
-    {{servicesDescription}}
+    {{consultingServices}}
   </p>
 
   <h2
-    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
   >
-    2. Term
+    2. Term and Duration
   </h2>
   <p style="text-align: justify">
-    This Agreement shall commence on the Effective Date and continue for a
-    period of
-    <strong>{{agreementTerm}}</strong>, unless earlier terminated in accordance
-    with this Agreement.
+    This Agreement shall commence on the Effective Date and is expected to
+    continue for a period of
+    <strong>{{projectDuration}}</strong>, unless earlier terminated in
+    accordance with this Agreement.
   </p>
 
   <h2
-    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
   >
     3. Compensation
   </h2>
   <p style="text-align: justify">
-    In consideration for the services provided, the Client shall pay the
-    Consultant
-    <strong>{{compensation}}</strong>. Payment shall be made in accordance with
-    the following schedule: {{paymentSchedule}}.
+    The Client agrees to pay the Consultant at a rate of
+    <strong>{{hourlyRate}}</strong> for the consulting services described
+    herein.
   </p>
 
   <h2
-    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
   >
-    4. Independent Contractor
+    4. Payment Terms
+  </h2>
+  <p
+    style="
+      background-color: #f9fafb;
+      padding: 15px;
+      border-radius: 6px;
+      text-align: justify;
+    "
+  >
+    {{paymentTerms}}
+  </p>
+
+  <h2
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
+  >
+    5. Independent Contractor
   </h2>
   <p style="text-align: justify">
-    The Consultant is an independent contractor and not an employee, partner, or
-    agent of the Client. The Consultant shall be solely responsible for all
-    taxes, withholdings, and statutory obligations.
+    The Consultant is engaged as an independent contractor. Nothing in this
+    Agreement shall be deemed to create any partnership, joint venture, or
+    employment relationship between the parties.
   </p>
 
   <h2
-    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
   >
-    5. Confidentiality
+    6. Confidentiality
   </h2>
   <p style="text-align: justify">
-    During and after the term of this Agreement, the Consultant agrees to
-    maintain the confidentiality of all non-public, proprietary, or confidential
-    information of the Client.
+    Each party agrees to maintain the confidentiality of any non-public,
+    proprietary, or confidential information received from the other party
+    during the term of this Agreement.
   </p>
 
   <h2
-    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
   >
-    6. Intellectual Property
+    7. Intellectual Property
   </h2>
   <p style="text-align: justify">
-    Unless otherwise agreed in writing, all work product, reports, materials, or
-    deliverables created by the Consultant in connection with the services shall
-    be the property of the Client.
+    Unless otherwise agreed in writing, all deliverables and work product
+    created by the Consultant under this Agreement shall be owned by the Client
+    upon full payment of all applicable fees.
   </p>
 
   <h2
-    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
   >
-    7. Termination
+    8. Termination
   </h2>
   <p style="text-align: justify">
     Either party may terminate this Agreement by providing
     <strong>{{terminationNotice}}</strong> written notice to the other party.
+    Upon termination, the Consultant shall be compensated for all services
+    performed up to the date of termination.
   </p>
 
   <h2
-    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #075985"
+    style="font-size: 20px; font-weight: bold; margin-top: 30px; color: #6b21a8"
   >
-    8. Governing Law
+    9. Governing Law
   </h2>
   <p style="text-align: justify">
     This Agreement shall be governed and construed in accordance with applicable
@@ -174,14 +191,14 @@
   >
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px">
       <div>
-        <p><strong>CLIENT</strong></p>
-        <div style="border-bottom: 2px solid #000; margin: 20px 0"></div>
-        <p>{{clientName}}</p>
-      </div>
-      <div>
         <p><strong>CONSULTANT</strong></p>
         <div style="border-bottom: 2px solid #000; margin: 20px 0"></div>
         <p>{{consultantName}}</p>
+      </div>
+      <div>
+        <p><strong>CLIENT</strong></p>
+        <div style="border-bottom: 2px solid #000; margin: 20px 0"></div>
+        <p>{{clientName}}</p>
       </div>
     </div>
   </div>
