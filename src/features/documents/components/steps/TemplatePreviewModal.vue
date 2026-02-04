@@ -655,6 +655,46 @@ watch(
     :deep(strong) {
       font-weight: 600;
     }
+
+    // Override template's colorful styling to be professional
+    :deep(div[style*="background"]) {
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+      border-left: none !important;
+      border: 1px solid #e5e7eb !important;
+      border-radius: 0.5rem !important;
+      padding: 1.25rem !important;
+      margin: 1rem 0 !important;
+    }
+
+    // Remove colored borders and backgrounds
+    :deep([style*="border-left"]) {
+      border-left: none !important;
+    }
+
+    // Make headings inside colored boxes look normal
+    :deep(div[style*="background"] h3),
+    :deep(div[style*="background"] h2) {
+      color: #111827 !important;
+      font-size: 0.875rem !important;
+      font-weight: 600 !important;
+      margin-bottom: 0.75rem !important;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+
+    // Normalize paragraph text in colored boxes
+    :deep(div[style*="background"] p) {
+      color: #374151 !important;
+      margin-bottom: 0.5rem !important;
+    }
+
+    // Remove any gradient backgrounds
+    :deep([style*="linear-gradient"]) {
+      background: transparent !important;
+      background-image: none !important;
+    }
   }
 }
 
