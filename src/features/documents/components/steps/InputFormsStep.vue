@@ -91,25 +91,26 @@
                 />
 
                 <!-- Date Input -->
-                <AppInput
+                <AppDatePicker
                   v-else-if="field.type === 'date'"
                   v-bind="fieldProps"
-                  type="date"
                   :class="{ 'input-error': errors.length && meta.touched }"
                   @update:model-value="
                     handleFieldUpdate(field.name, $event, formValues)
                   "
                 />
 
-                <!-- Error Message -->
-                <transition name="fade">
-                  <div
-                    v-if="errors.length && meta.touched"
-                    class="error-message"
-                  >
-                    {{ errors[0] }}
-                  </div>
-                </transition>
+                <!-- Error Message Container (Fixed height to prevent jumping) -->
+                <div class="error-message-container">
+                  <transition name="fade">
+                    <div
+                      v-if="errors.length && meta.touched"
+                      class="error-message"
+                    >
+                      {{ errors[0] }}
+                    </div>
+                  </transition>
+                </div>
 
                 <!-- Hint Text -->
                 <p v-if="field.hint && !errors.length" class="form-field__hint">
@@ -216,6 +217,7 @@ import {
   getShortcutLabels,
 } from "@/composables/useKeyboardShortcuts";
 import ArrowNarrowLetIcon from "@/assets/icons/common/arrow-narrow-left.svg";
+import AppDatePicker from "@/components/ui/AppDatePicker.vue";
 
 const props = defineProps({
   stepData: {
@@ -533,6 +535,17 @@ useKeyboardShortcuts({
   margin-left: unset;
 }
 
+// FIX: Error message container with fixed height to prevent layout shift
+.error-message-container {
+  min-height: 1.5rem; // Fixed height to prevent jumping
+  margin-top: 0.25rem;
+}
+
+.error-message {
+  // Remove any margin that might cause jumping
+  margin: 0;
+}
+
 .char-counter {
   margin-top: 0.25rem;
   font-size: 0.75rem;
@@ -543,5 +556,15 @@ useKeyboardShortcuts({
 .char-limit-warning {
   color: #f59e0b;
   font-weight: 500;
+}
+
+// Ensure form fields don't have conflicting margins
+.form-field {
+  margin-bottom: 1.5rem;
+
+  &__hint {
+    margin-top: 0.25rem;
+    margin-bottom: 0;
+  }
 }
 </style>
