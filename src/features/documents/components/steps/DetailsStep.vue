@@ -388,7 +388,7 @@ import { getShortcutLabels } from "@/composables/useKeyboardShortcuts";
 import FileTypeIcon from "@/assets/icons/common/file-type-icon.svg";
 import VerifiedTickIcon from "@/assets/icons/common/verified-tick.svg";
 import ExportFilePlus from "@/assets/icons/common/export-file-plus.svg";
-import TemplatePreviewModal from "./TemplatePreviewModal.vue";
+import TemplatePreviewModal from "../../../../components/ui/TemplatePreviewModal.vue";
 
 const props = defineProps({
   form: {
