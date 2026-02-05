@@ -33,12 +33,7 @@
               :name="field.name"
               v-slot="{ field: fieldProps, errors, meta }"
             >
-              <div
-                class="form-field"
-                :class="{
-                  'has-error': errors.length && meta.touched,
-                }"
-              >
+              <div class="form-field">
                 <label class="form-field__label">
                   {{ field.label }}
                   <span v-if="field.required" class="form-field__required"
@@ -93,43 +88,40 @@
                 <!-- Date Input -->
                 <AppDatePicker
                   v-else-if="field.type === 'date'"
-                  v-bind="fieldProps"
-                  :class="{ 'input-error': errors.length && meta.touched }"
+                  :model-value="fieldProps.value"
+                  :error="errors.length > 0 && meta.touched"
                   @update:model-value="
                     handleFieldUpdate(field.name, $event, formValues)
                   "
                 />
 
-                <!-- Error Message Container (Fixed height to prevent jumping) -->
-                <div class="error-message-container">
-                  <transition name="fade">
-                    <div
-                      v-if="errors.length && meta.touched"
-                      class="error-message"
-                    >
-                      {{ errors[0] }}
-                    </div>
-                  </transition>
+                <!-- Error or Hint (only one shows, no transition) -->
+                <div
+                  v-if="errors.length && meta.touched"
+                  class="form-field__message form-field__message--error"
+                >
+                  {{ errors[0] }}
+                </div>
+                <div
+                  v-else-if="field.hint"
+                  class="form-field__message form-field__message--hint"
+                >
+                  {{ field.hint }}
                 </div>
 
-                <!-- Hint Text -->
-                <p v-if="field.hint && !errors.length" class="form-field__hint">
-                  {{ field.hint }}
-                </p>
-
                 <!-- Character Counter (for fields with maxLength) -->
-                <p
+                <div
                   v-if="field.validation?.maxLength && formValues[field.name]"
-                  class="char-counter"
+                  class="form-field__char-counter"
                   :class="{
-                    'char-limit-warning':
+                    'form-field__char-counter--warning':
                       formValues[field.name].length >
                       field.validation.maxLength * 0.9,
                   }"
                 >
                   {{ formValues[field.name].length }} /
                   {{ field.validation.maxLength }}
-                </p>
+                </div>
               </div>
             </Field>
           </div>
@@ -159,25 +151,23 @@
           </div>
 
           <!-- Form Summary -->
-          <transition name="fade">
-            <div
-              v-if="Object.keys(formErrors).length > 0 && formMeta.touched"
-              class="form-summary"
-            >
-              <AlertCircle class="form-summary__icon" />
-              <div class="form-summary__content">
-                <p class="form-summary__title">
-                  Please fix the following errors:
-                </p>
-                <ul class="form-summary__list">
-                  <li v-for="(error, fieldName) in formErrors" :key="fieldName">
-                    <strong>{{ getFieldLabel(fieldName) }}:</strong>
-                    {{ error }}
-                  </li>
-                </ul>
-              </div>
+          <div
+            v-if="Object.keys(formErrors).length > 0 && formMeta.touched"
+            class="form-summary"
+          >
+            <AlertCircle class="form-summary__icon" />
+            <div class="form-summary__content">
+              <p class="form-summary__title">
+                Please fix the following errors:
+              </p>
+              <ul class="form-summary__list">
+                <li v-for="(error, fieldName) in formErrors" :key="fieldName">
+                  <strong>{{ getFieldLabel(fieldName) }}:</strong>
+                  {{ error }}
+                </li>
+              </ul>
             </div>
-          </transition>
+          </div>
 
           <!-- Keyboard Shortcuts Hint -->
           <div class="keyboard-hints">
@@ -210,6 +200,7 @@ import * as yup from "yup";
 import AppButton from "@/components/ui/AppButton.vue";
 import AppInput from "@/components/ui/AppInput.vue";
 import AppTextarea from "@/components/ui/AppTextarea.vue";
+import AppDatePicker from "@/components/ui/AppDatePicker.vue";
 import ErrorBoundary from "./ErrorBoundary.vue";
 import { useTemplatesStore } from "@/stores/useTemplatesStore";
 import {
@@ -217,7 +208,6 @@ import {
   getShortcutLabels,
 } from "@/composables/useKeyboardShortcuts";
 import ArrowNarrowLetIcon from "@/assets/icons/common/arrow-narrow-left.svg";
-import AppDatePicker from "@/components/ui/AppDatePicker.vue";
 
 const props = defineProps({
   stepData: {
@@ -314,14 +304,14 @@ function createFieldValidation(field) {
     );
   }
 
-  // Pattern validation (regex) - NEW ADDITION
+  // Pattern validation (regex)
   if (field.validation?.pattern) {
     validation = validation.test(
       "pattern-match",
       field.validation.customMessage || `${field.label} has an invalid format`,
       (value) => {
-        if (!value) return true; // Skip pattern check if empty (required handles this)
-        const regex = new RegExp(field.validation.pattern, "i"); // case-insensitive
+        if (!value) return true;
+        const regex = new RegExp(field.validation.pattern, "i");
         return regex.test(value);
       },
     );
@@ -535,36 +525,52 @@ useKeyboardShortcuts({
   margin-left: unset;
 }
 
-// FIX: Error message container with fixed height to prevent layout shift
-.error-message-container {
-  min-height: 1.5rem; // Fixed height to prevent jumping
-  margin-top: 0.25rem;
-}
-
-.error-message {
-  // Remove any margin that might cause jumping
-  margin: 0;
-}
-
-.char-counter {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  color: #6b7280;
-  text-align: right;
-}
-
-.char-limit-warning {
-  color: #f59e0b;
-  font-weight: 500;
-}
-
-// Ensure form fields don't have conflicting margins
+// PROPER FIX: Form field with consistent spacing
 .form-field {
   margin-bottom: 1.5rem;
 
-  &__hint {
+  &__label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #111827;
+  }
+
+  &__required {
+    color: #d92d20;
+    margin-left: 0.125rem;
+  }
+
+  // Message container - ALWAYS takes space (no transition, no jumping)
+  &__message {
+    min-height: 1.25rem; // Fixed height
+    margin-top: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    display: block;
+
+    &--error {
+      color: #d92d20;
+    }
+
+    &--hint {
+      color: #6b7280;
+    }
+  }
+
+  // Character counter
+  &__char-counter {
     margin-top: 0.25rem;
-    margin-bottom: 0;
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-align: right;
+    line-height: 1;
+
+    &--warning {
+      color: #f59e0b;
+      font-weight: 500;
+    }
   }
 }
 </style>
