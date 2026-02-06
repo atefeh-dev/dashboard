@@ -287,19 +287,6 @@ const allStepData = computed(() => {
   return data;
 });
 
-// Watch for step changes and scroll to top
-watch(currentStepIndex, async () => {
-  await nextTick();
-
-  // Smooth scroll to top
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-
-  // Alternative: instant scroll (if smooth is too slow)
-  // window.scrollTo(0, 0);
-});
 // Autosave setup
 const { timeSinceLastSave, scheduleAutosave, forceSave } = useAutosave(
   async () => {
@@ -403,6 +390,22 @@ onMounted(async () => {
     await contactsStore.fetchContacts();
   } catch (error) {
     console.error("Failed to load contacts:", error);
+  }
+});
+
+// ✅ CRITICAL FIX: Watch for step changes and scroll to top
+watch(currentStepIndex, async (newIndex, oldIndex) => {
+  if (newIndex !== oldIndex) {
+    console.log(`[Navigation] Step ${oldIndex} → ${newIndex}`);
+
+    // Wait for DOM to update
+    await nextTick();
+
+    // Smooth scroll to top
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   }
 });
 

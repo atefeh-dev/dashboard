@@ -206,6 +206,7 @@ const getStepOpacity = (item, index) => {
   padding-left: 1rem;
   padding-right: 1rem;
   margin: 0 auto;
+  max-width: 100%;
 
   &[data-step="1"] {
     max-width: 69rem;
@@ -213,18 +214,33 @@ const getStepOpacity = (item, index) => {
 
   @media (max-width: 1024px) {
     flex-direction: column;
+    gap: 1.5rem;
+    padding-top: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 1.5rem;
   }
 
   &__sidebar {
     flex: 0 0 320px;
     position: sticky;
+    top: 9rem;
     height: fit-content;
+    max-height: calc(100vh - 10rem);
     overflow-y: auto;
 
     @media (max-width: 1024px) {
       position: static;
       flex: 1;
       max-height: none;
+    }
+
+    @media (max-width: 768px) {
+      width: 100%;
+      max-width: 100%;
     }
 
     &::-webkit-scrollbar {
@@ -249,22 +265,36 @@ const getStepOpacity = (item, index) => {
   &__main {
     flex: 1;
     min-width: 0;
+    max-width: 100%;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      overflow-x: hidden;
+    }
   }
 }
+
 .betweengap {
   padding-left: 0.25rem;
 }
+
 // Sidebar Content
 .sidebar-content {
   display: flex;
   flex-direction: column;
   gap: 0;
-  max-width: 20rem;
+  min-width: 20rem;
   padding: 1rem 1.5rem;
   background-color: #ffffff;
   border: 1px solid #d5d7da;
   border-radius: 0.75rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
 
   &__section {
     display: flex;
@@ -273,6 +303,11 @@ const getStepOpacity = (item, index) => {
     padding-bottom: 1rem;
     border-bottom: 2px dotted #d5d7da;
 
+    @media (max-width: 768px) {
+      gap: 0.75rem;
+      padding-bottom: 0.875rem;
+    }
+
     &:last-child {
       border-bottom: none;
       padding-bottom: 0;
@@ -280,6 +315,10 @@ const getStepOpacity = (item, index) => {
 
     &:not(:first-child) {
       padding-top: 1rem;
+
+      @media (max-width: 768px) {
+        padding-top: 0.875rem;
+      }
     }
 
     &--checklist {
@@ -307,6 +346,11 @@ const getStepOpacity = (item, index) => {
     display: flex;
     gap: 1rem;
     align-items: flex-start;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
   }
 
   &__meta-col {
@@ -317,6 +361,13 @@ const getStepOpacity = (item, index) => {
     &--first {
       border-right: 1px solid #d5d7da;
       padding-right: 1rem;
+
+      @media (max-width: 480px) {
+        border-right: none;
+        padding-right: 0;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #d5d7da;
+      }
     }
   }
 

@@ -24,7 +24,7 @@
             <!-- Dynamic: Show status or Complete button (only after send) -->
             <span
               v-if="!shouldShowCompleteButton"
-              class="navbar-custom__breadcrumb-item navbar-custom__breadcrumb-item--status"
+              class="navbar-custom__status-badge"
             >
               {{ documentStatus }}
             </span>
@@ -231,7 +231,11 @@ function completeDocument() {
   margin-top: 10rem;
 
   @media (max-width: 768px) {
-    padding-top: 120px;
+    margin-top: 8rem;
+  }
+
+  @media (max-width: 480px) {
+    margin-top: 7rem;
   }
 
   &__content {
@@ -266,31 +270,36 @@ function completeDocument() {
     gap: 0.375rem;
     font-size: 0.875rem;
     color: #6b7280;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
 
     @media (min-width: 768px) {
       display: flex;
+    }
+
+    @media (max-width: 1024px) {
+      gap: 0.25rem;
+      font-size: 0.8125rem;
     }
   }
 
   &__breadcrumb-item {
     color: #6b7280;
     white-space: nowrap;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     &--active {
       color: #4539cc;
       font-weight: 600;
       font-size: 0.875rem;
-    }
+      max-width: 200px;
 
-    &--status {
-      color: #414651;
-      font-size: 0.875rem;
-      font-weight: 500;
-      border-radius: 0.5rem;
-      background-color: #fafafa;
-      border: 1px solid #e9eaeb;
-      padding: 0.25rem 0.625rem;
-      text-transform: capitalize;
+      @media (max-width: 1024px) {
+        max-width: 150px;
+      }
     }
   }
 
@@ -299,6 +308,31 @@ function completeDocument() {
     height: 1rem;
     color: #d1d5db;
     flex-shrink: 0;
+
+    @media (max-width: 1024px) {
+      width: 0.875rem;
+      height: 0.875rem;
+    }
+  }
+
+  &__status-badge {
+    display: inline-flex;
+    align-items: center;
+    color: #414651;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    background-color: #fafafa;
+    border: 1px solid #e9eaeb;
+    padding: 0.25rem 0.625rem;
+    text-transform: capitalize;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    @media (max-width: 768px) {
+      font-size: 0.8125rem;
+      padding: 0.2rem 0.5rem;
+    }
   }
 
   &__complete-btn {
@@ -314,6 +348,14 @@ function completeDocument() {
     border-radius: 0.375rem;
     cursor: pointer;
     transition: background-color 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    @media (max-width: 480px) {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8125rem;
+      gap: 0.25rem;
+    }
 
     &:hover {
       background-color: #059669;
@@ -327,10 +369,20 @@ function completeDocument() {
   &__complete-icon {
     width: 1rem;
     height: 1rem;
+
+    @media (max-width: 480px) {
+      width: 0.875rem;
+      height: 0.875rem;
+    }
   }
+
   &__setting-section {
     display: flex;
     gap: 0.125rem;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 
   &__icon-btn {
@@ -356,7 +408,7 @@ function completeDocument() {
   }
 
   &__autosave {
-    display: flex;
+    display: none;
     background-color: #fafafa;
     gap: 0.5rem;
     padding: 0.625rem 0.875rem;
@@ -423,6 +475,23 @@ function completeDocument() {
   &::-webkit-scrollbar-thumb {
     background: #d1d5db;
     border-radius: 2px;
+  }
+
+  @media (max-width: 768px) {
+    &::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 40px;
+      background: linear-gradient(
+        to left,
+        rgba(255, 255, 255, 1),
+        rgba(255, 255, 255, 0)
+      );
+      pointer-events: none;
+    }
   }
 }
 
