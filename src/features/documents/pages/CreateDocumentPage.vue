@@ -246,7 +246,7 @@ const reviewSections = computed(() => {
   if (selectedTemplate.value && selectedTemplate.value.fields) {
     console.log(
       "[Parent] Adding template fields section for:",
-      selectedTemplate.value.name
+      selectedTemplate.value.name,
     );
 
     sections.push({
@@ -287,6 +287,19 @@ const allStepData = computed(() => {
   return data;
 });
 
+// Watch for step changes and scroll to top
+watch(currentStepIndex, async () => {
+  await nextTick();
+
+  // Smooth scroll to top
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+
+  // Alternative: instant scroll (if smooth is too slow)
+  // window.scrollTo(0, 0);
+});
 // Autosave setup
 const { timeSinceLastSave, scheduleAutosave, forceSave } = useAutosave(
   async () => {
@@ -295,7 +308,7 @@ const { timeSinceLastSave, scheduleAutosave, forceSave } = useAutosave(
   {
     debounceMs: 500,
     updateIntervalMs: 1000,
-  }
+  },
 );
 
 async function saveDraftToStore() {
@@ -314,7 +327,7 @@ async function saveDraftToStore() {
 
     console.log(
       "[Parent] Saving draft with preview content length:",
-      stepData.value.preview?.content?.length || 0
+      stepData.value.preview?.content?.length || 0,
     );
     await documentsStore.saveDraft(draftData);
     console.log("[Parent] Draft saved successfully");
@@ -399,7 +412,7 @@ watch(
   () => {
     console.log("[Parent] documentForm changed, scheduling autosave");
     scheduleAutosave();
-  }
+  },
 );
 
 watch(
@@ -407,7 +420,7 @@ watch(
   () => {
     console.log("[Parent] stepData changed, scheduling autosave");
     scheduleAutosave();
-  }
+  },
 );
 
 watch([currentStepIndex, documentsSent], () => {
@@ -421,9 +434,9 @@ if (import.meta.env.DEV) {
     (newValue) => {
       console.log(
         "[Parent] Preview content changed, length:",
-        newValue?.length || 0
+        newValue?.length || 0,
       );
-    }
+    },
   );
 }
 
@@ -494,7 +507,7 @@ function completeStep(data) {
       // 🔥 CRITICAL FIX: Store preview content from the continue event
       console.log(
         "[Parent] Storing preview content, length:",
-        data?.content?.length || 0
+        data?.content?.length || 0,
       );
       stepData.value.preview = {
         ...stepData.value.preview,
@@ -563,7 +576,7 @@ async function handleGoBack() {
   await new Promise((resolve) => setTimeout(resolve, 100));
 
   const confirmed = confirm(
-    "Your progress has been saved as a draft. Return to documents?"
+    "Your progress has been saved as a draft. Return to documents?",
   );
 
   if (confirmed) {
@@ -579,7 +592,7 @@ async function saveAndExit() {
 
 function discard() {
   const confirmed = confirm(
-    "Are you sure you want to discard this document? All progress will be lost."
+    "Are you sure you want to discard this document? All progress will be lost.",
   );
 
   if (confirmed) {
@@ -683,14 +696,14 @@ async function completeDocument() {
     console.log("Input Data:", stepData.value.input);
     console.log(
       "Preview Content Length:",
-      stepData.value.preview?.content?.length || 0
+      stepData.value.preview?.content?.length || 0,
     );
     console.log("Documents Sent:", documentsSent.value);
     console.log("=====================================");
 
     if (documentsStore.currentDraft) {
       await documentsStore.convertDraftToDocument(
-        documentsStore.currentDraft.id
+        documentsStore.currentDraft.id,
       );
     }
 

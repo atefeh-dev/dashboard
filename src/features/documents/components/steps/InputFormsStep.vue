@@ -23,7 +23,12 @@
           :validation-schema="validationSchema"
           :initial-values="currentFormData"
           @submit="handleContinue"
-          v-slot="{ meta: formMeta, errors: formErrors, values: formValues }"
+          v-slot="{
+            meta: formMeta,
+            errors: formErrors,
+            values: formValues,
+            setFieldValue,
+          }"
         >
           <div class="form-card">
             <!-- Dynamic Form Fields based on Template -->
@@ -91,7 +96,10 @@
                   :model-value="fieldProps.value"
                   :error="errors.length > 0 && meta.touched"
                   @update:model-value="
-                    handleFieldUpdate(field.name, $event, formValues)
+                    (value) => {
+                      setFieldValue(field.name, value);
+                      handleFieldUpdate(field.name, value, formValues);
+                    }
                   "
                 />
 

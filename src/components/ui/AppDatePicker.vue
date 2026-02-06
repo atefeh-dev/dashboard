@@ -167,46 +167,20 @@ const monthNames = [
 const selectedDate = computed(() => {
   if (!props.modelValue || props.modelValue.trim() === "") return null;
   try {
-    let dateObj;
-    // Handle YYYY-MM-DD format
-    if (props.modelValue.includes("-") && !props.modelValue.includes("/")) {
-      dateObj = new Date(props.modelValue + "T00:00:00");
-    }
-    // Handle MM/DD/YYYY format
-    else if (props.modelValue.includes("/")) {
-      const parts = props.modelValue.split("/");
-      if (parts.length === 3) {
-        dateObj = new Date(
-          `${parts[2]}-${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}T00:00:00`,
-        );
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
-
-    // Validate date
-    if (isNaN(dateObj.getTime())) {
-      return null;
-    }
+    const dateObj = new Date(props.modelValue + "T00:00:00");
+    if (isNaN(dateObj.getTime())) return null;
     return dateObj;
   } catch (e) {
-    console.error("Date parsing error:", e);
     return null;
   }
 });
 
 const displayValue = computed(() => {
   if (!selectedDate.value) return "";
-  try {
-    const m = String(selectedDate.value.getMonth() + 1).padStart(2, "0");
-    const d = String(selectedDate.value.getDate()).padStart(2, "0");
-    const y = selectedDate.value.getFullYear();
-    return `${m}/${d}/${y}`;
-  } catch (e) {
-    return "";
-  }
+  const m = String(selectedDate.value.getMonth() + 1).padStart(2, "0");
+  const d = String(selectedDate.value.getDate()).padStart(2, "0");
+  const y = selectedDate.value.getFullYear();
+  return `${m}/${d}/${y}`;
 });
 
 const monthYearLabel = computed(() => {
@@ -322,14 +296,13 @@ function selectDate(day) {
   const y = day.fullDate.getFullYear();
   const m = String(day.fullDate.getMonth() + 1).padStart(2, "0");
   const d = String(day.fullDate.getDate()).padStart(2, "0");
-  const dateString = `${y}-${m}-${d}`;
-  emit("update:modelValue", dateString);
-  isOpen.value = false;
+  emit("update:modelValue", `${y}-${m}-${d}`);
+  closeCalendar();
 }
 
 function clearDate() {
   emit("update:modelValue", "");
-  isOpen.value = false;
+  closeCalendar();
 }
 
 function selectToday() {
@@ -339,9 +312,8 @@ function selectToday() {
   const y = today.getFullYear();
   const m = String(today.getMonth() + 1).padStart(2, "0");
   const d = String(today.getDate()).padStart(2, "0");
-  const dateString = `${y}-${m}-${d}`;
-  emit("update:modelValue", dateString);
-  isOpen.value = false;
+  emit("update:modelValue", `${y}-${m}-${d}`);
+  closeCalendar();
 }
 
 function handleEscape(e) {
@@ -359,27 +331,11 @@ onUnmounted(() => {
 watch(
   () => props.modelValue,
   (val) => {
-    if (val && val.trim() !== "") {
-      // Use the same parsing logic as selectedDate
-      try {
-        let dateObj;
-        if (val.includes("-") && !val.includes("/")) {
-          dateObj = new Date(val + "T00:00:00");
-        } else if (val.includes("/")) {
-          const parts = val.split("/");
-          if (parts.length === 3) {
-            dateObj = new Date(
-              `${parts[2]}-${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}T00:00:00`,
-            );
-          }
-        }
-
-        if (dateObj && !isNaN(dateObj.getTime())) {
-          currentMonth.value = dateObj.getMonth();
-          currentYear.value = dateObj.getFullYear();
-        }
-      } catch (e) {
-        // Silent fail
+    if (val) {
+      const date = new Date(val + "T00:00:00");
+      if (!isNaN(date.getTime())) {
+        currentMonth.value = date.getMonth();
+        currentYear.value = date.getFullYear();
       }
     }
   },
@@ -470,7 +426,7 @@ watch(
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(7px);
+  backdrop-filter: blur(4px);
 }
 
 /* ==================== CALENDAR MENU ==================== */
