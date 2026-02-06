@@ -17,7 +17,7 @@
     font-size: 0.875rem;
     font-weight: 400;
     color: #535862;
-    margin-bottom: 1rem;
+    // margin-bottom: 1rem;
   }
 }
 
@@ -479,7 +479,9 @@
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .fade-enter-from {

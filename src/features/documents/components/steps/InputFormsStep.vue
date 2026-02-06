@@ -17,6 +17,7 @@
             </p>
           </div>
         </div>
+        <div class="input-forms-step__divider"></div>
 
         <Form
           :key="formKey"
@@ -510,6 +511,14 @@ useKeyboardShortcuts({
 
 <style scoped lang="scss">
 @use "./stepStyles.scss";
+
+.input-forms-step {
+  &__divider {
+    height: 1px;
+    background-color: #e5e7eb;
+    margin-bottom: 1.5rem;
+  }
+}
 
 .section__header-with-badge {
   display: flex;

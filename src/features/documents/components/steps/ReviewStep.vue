@@ -13,6 +13,8 @@
           changes to any section.
         </p>
 
+        <div class="review-step__divider"></div>
+
         <!-- Review Sections (Accordion Style) -->
         <div class="review-sections">
           <div
@@ -236,7 +238,7 @@ const {
     debounceMs: 500,
     enableEmergencyBackup: true,
     logChanges: import.meta.env.DEV,
-  }
+  },
 );
 
 // Initialize local data structure
@@ -251,7 +253,7 @@ const initializeData = () => {
 
     console.log(
       `[Review Step] Processing section "${section.key}":`,
-      sectionData
+      sectionData,
     );
 
     // Initialize with empty values
@@ -276,7 +278,7 @@ const initializeData = () => {
 
     console.log(
       `[Review Step] Initialized section "${section.key}":`,
-      data[section.key]
+      data[section.key],
     );
   });
 
@@ -294,7 +296,7 @@ watch(
       localData.value = initializeData();
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 // Lifecycle
@@ -451,7 +453,7 @@ function handleError(errorInfo) {
         data: localData.value,
         editedSections: Array.from(editedSections.value),
         timestamp: Date.now(),
-      })
+      }),
     );
   }
 }
@@ -470,6 +472,14 @@ function handleRecover() {
 
 <style scoped lang="scss">
 @use "./stepStyles.scss";
+
+.review-step {
+  &__divider {
+    height: 1px;
+    background-color: #e5e7eb;
+    margin: 1.5rem 0 1.5rem 0;
+  }
+}
 
 .review-sections {
   display: flex;
