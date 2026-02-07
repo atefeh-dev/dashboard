@@ -8,6 +8,7 @@
       'app-input--error': error,
       'app-input--password': password,
     }"
+    autocomplete="new-password"
   />
 </template>
 
@@ -29,7 +30,9 @@ defineProps({
   font-size: 1rem;
   font-weight: 400;
   color: #717680;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
   box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
 
   &::placeholder {

@@ -14,6 +14,7 @@
       @input="$emit('update:modelValue', $event.target.value)"
       @focus="isFocused = true"
       @blur="isFocused = false"
+      autocomplete="new-password"
     />
   </div>
 </template>
@@ -47,7 +48,9 @@ const isFocused = ref(false);
   border-radius: 0.5rem;
   overflow: hidden;
   background-color: #ffffff;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
   box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
 
   &--focused {

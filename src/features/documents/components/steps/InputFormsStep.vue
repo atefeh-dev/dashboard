@@ -560,7 +560,6 @@ useKeyboardShortcuts({
     align-items: center; // ✅ KEY FIX: Centers items vertically
     gap: 1rem;
     min-height: 1.25rem;
-    margin-top: 0.375rem;
   }
 
   // Error message (takes full width)

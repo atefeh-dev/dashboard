@@ -42,7 +42,7 @@ defineEmits(["update:modelValue"]);
   }
 
   &:focus {
-    border: 1px solid #4539cc;
+    border: 2px solid #4539cc;
     // box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   }
 
