@@ -14,13 +14,17 @@
       @input="$emit('update:modelValue', $event.target.value)"
       @focus="isFocused = true"
       @blur="isFocused = false"
-      autocomplete="new-password"
+      autocomplete="off"
     />
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
+
+defineOptions({
+  inheritAttrs: false,
+});
 
 defineProps({
   modelValue: [String, Number],
@@ -59,6 +63,7 @@ const isFocused = ref(false);
     box-shadow: 0 0 0 2px #6366f1;
   }
 
+  // ✅ FIX: Error state properly overrides focus
   &--error {
     border-color: #d5d1d7;
 
@@ -73,9 +78,9 @@ const isFocused = ref(false);
     padding: 0.625rem 0.75rem 0.625rem 0.875rem;
     font-size: 0.875rem;
     color: #535862;
-    /* background-color: #f9fafb; */
     border-right: 1px solid #d5d7da;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   &__field {
@@ -88,6 +93,16 @@ const isFocused = ref(false);
     background: transparent;
     outline: none;
     min-width: 0;
+
+    // ✅ FIX: Remove blue autofill background
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px white inset !important;
+      -webkit-text-fill-color: #717680 !important;
+      box-shadow: 0 0 0 30px white inset !important;
+    }
 
     &::placeholder {
       color: #9ca3af;

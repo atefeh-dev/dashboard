@@ -100,7 +100,10 @@
         >
           <div class="form-card">
             <!-- Selected Template (Hidden Field for Validation) -->
-            <Field name="templateId" v-slot="{ field, errors: templateErrors }">
+            <Field
+              name="templateId"
+              v-slot="{ field, errors: templateErrors, meta }"
+            >
               <input type="hidden" v-bind="field" />
 
               <div class="selected-template">
@@ -116,7 +119,7 @@
                 <div
                   class="selected-template__card"
                   :class="{
-                    'has-error': templateErrors.length && formMeta.touched,
+                    'has-error': templateErrors.length && meta.touched,
                   }"
                 >
                   <div class="selected-template__info">
@@ -149,6 +152,17 @@
                     {{ currentSelectedTemplate ? "Change" : "Select" }}
                   </AppButton>
                 </div>
+
+                <!-- ✅ FIXED: Error message with consistent spacing -->
+                <transition name="fade">
+                  <div
+                    v-if="templateErrors.length && meta.touched"
+                    class="form-field__error"
+                    style="margin-top: 0.375rem"
+                  >
+                    {{ templateErrors[0] }}
+                  </div>
+                </transition>
               </div>
             </Field>
 
@@ -171,14 +185,17 @@
                     'input-error': errors.length && meta.touched,
                   }"
                 />
-                <transition name="fade">
-                  <div
-                    v-if="errors.length && meta.touched"
-                    class="error-message"
-                  >
-                    {{ errors[0] }}
-                  </div>
-                </transition>
+                <!-- ✅ FIXED: Consistent error message spacing -->
+                <div class="form-field__footer">
+                  <transition name="fade">
+                    <div
+                      v-if="errors.length && meta.touched"
+                      class="form-field__error"
+                    >
+                      {{ errors[0] }}
+                    </div>
+                  </transition>
+                </div>
               </div>
             </Field>
 
@@ -206,17 +223,20 @@
                     'input-error': errors.length && meta.touched,
                   }"
                 />
-                <transition name="fade">
-                  <div
-                    v-if="errors.length && meta.touched"
-                    class="error-message"
-                  >
-                    {{ errors[0] }}
-                  </div>
-                  <div v-else class="form-field__hint">
-                    Use lowercase letters, numbers, and hyphens only
-                  </div>
-                </transition>
+                <!-- ✅ FIXED: Error OR hint, not both -->
+                <div class="form-field__footer">
+                  <transition name="fade">
+                    <div
+                      v-if="errors.length && meta.touched"
+                      class="form-field__error"
+                    >
+                      {{ errors[0] }}
+                    </div>
+                    <div v-else class="form-field__hint">
+                      Use lowercase letters, numbers, and hyphens only
+                    </div>
+                  </transition>
+                </div>
               </div>
             </Field>
 
@@ -237,11 +257,12 @@
                     'input-error': errors.length && meta.touched,
                   }"
                 />
+                <!-- ✅ FIXED: Proper footer alignment -->
                 <div class="form-field__footer">
                   <transition name="fade">
                     <div
                       v-if="errors.length && meta.touched"
-                      class="error-message"
+                      class="form-field__error"
                     >
                       {{ errors[0] }}
                     </div>
@@ -249,7 +270,8 @@
                   <div
                     class="form-field__char-count"
                     :class="{
-                      'count-warning': getRemainingChars(field.value) < 50,
+                      'form-field__char-count--warning':
+                        getRemainingChars(field.value) < 50,
                     }"
                   >
                     {{ getRemainingChars(field.value) }}
@@ -727,7 +749,7 @@ function handleRecover() {
 @use "./stepStyles.scss";
 
 // ====================================
-// DETAILS STEP SPECIFIC STYLES
+// DETAILS STEP SPECIFIC STYLES - CLEANED
 // ====================================
 
 .section__description {
@@ -741,13 +763,7 @@ function handleRecover() {
   align-items: center;
   margin: 3.5rem 0 3rem 0;
 
-  &::before {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background-color: #e9eaeb;
-  }
-
+  &::before,
   &::after {
     content: "";
     flex: 1;
@@ -765,10 +781,8 @@ function handleRecover() {
 }
 
 // Form section adjustment
-.section {
-  &--form {
-    margin-top: 0;
-  }
+.section--form {
+  margin-top: 0;
 }
 
 // Custom filters grid for Details step

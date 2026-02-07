@@ -6,36 +6,24 @@
       <p class="section__description">
         You can see your answers in action with template and generated content.
       </p>
+
       <div class="export-banner">
         <div class="export-banner__content">
-          <AppButton size="md" variant="secondary ">Export 1</AppButton>
+          <AppButton size="md" variant="secondary">Export 1</AppButton>
           <AppButton size="md" variant="transparent">Export 2</AppButton>
         </div>
       </div>
+
       <!-- Info Banner -->
       <div class="info-banner">
         <WarningIcon />
         <div class="info-banner__content">
           <p class="info-banner__title">
-            You can edit and style the generated content but you can’t save your
+            You can edit and style the generated content but you can't save your
             new changed content
           </p>
         </div>
       </div>
-
-      <!-- Locked Fields Legend
-      <div class="legend">
-        <div class="legend__item">
-          <span class="legend__sample locked-field-sample">
-            Your Protected Data 🔒
-          </span>
-          <span class="legend__label">Read-only (from previous steps)</span>
-        </div>
-        <div class="legend__item">
-          <span class="legend__sample editable-sample">Template Text</span>
-          <span class="legend__label">Fully editable</span>
-        </div>
-      </div> -->
 
       <!-- Editor -->
       <div v-if="!templateToUse" class="error-banner">
@@ -71,6 +59,7 @@
           Continue
         </AppButton>
       </div>
+
       <!-- Keyboard Shortcuts Hint -->
       <div class="keyboard-hints">
         <kbd class="kbd">{{ shortcutLabels.alt }}</kbd>
@@ -316,38 +305,44 @@ async function handleContinue() {
 <style scoped lang="scss">
 @use "./stepStyles.scss";
 
+// ====================================
+// PREVIEW STEP SPECIFIC STYLES - CLEANED
+// ====================================
+
 .section {
   &__heading {
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #111827;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
   }
 
   &__description {
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #6b7280;
-    margin-bottom: 24px;
+    margin-bottom: 1.5rem;
   }
 }
+
 .export-banner {
   display: flex;
   background-color: #fafafa;
   border: 1px solid #e9eaeb;
   padding: 0.25rem;
   border-radius: 0.75rem;
-
   margin-bottom: 1.5rem;
+
   &__content {
     display: flex;
+    gap: 0.25rem;
   }
 }
 
 .info-banner {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px;
+  gap: 0.75rem;
+  padding: 1rem;
   background: transparent;
   border: 1px solid #d5d7da;
   border-radius: 0.75rem;
@@ -361,85 +356,24 @@ async function handleContinue() {
     font-size: 0.875rem;
     font-weight: 600;
     color: #414651;
-  }
-
-  &__list {
-    list-style: none;
-    padding: 0;
     margin: 0;
-    font-size: 13px;
-    color: #1e40af;
-    line-height: 1.6;
-
-    li {
-      margin-bottom: 4px;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-
-      strong {
-        font-weight: 600;
-      }
-    }
   }
-}
-
-.legend {
-  display: flex;
-  gap: 24px;
-  padding: 12px 16px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  margin-bottom: 20px;
-
-  &__item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  &__sample {
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  &__label {
-    font-size: 13px;
-    color: #6b7280;
-  }
-}
-
-.locked-field-sample {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 2px solid #fbbf24;
-  color: #92400e;
-}
-
-.editable-sample {
-  background: #ffffff;
-  border: 2px dashed #d1d5db;
-  color: #374151;
 }
 
 .error-banner {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
+  gap: 0.75rem;
+  padding: 1rem;
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   border: 1px solid #fecaca;
   border-left: 4px solid #ef4444;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  border-radius: 0.5rem;
+  margin-bottom: 1.25rem;
 
   &__icon {
-    width: 24px;
-    height: 24px;
+    width: 1.5rem;
+    height: 1.5rem;
     color: #ef4444;
     flex-shrink: 0;
   }
@@ -449,27 +383,27 @@ async function handleContinue() {
   }
 
   &__title {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 600;
     color: #991b1b;
-    margin-bottom: 4px;
+    margin-bottom: 0.25rem;
   }
 
   &__text {
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #991b1b;
     line-height: 1.5;
   }
 }
 
 .editor-wrapper {
-  margin-bottom: 32px;
+  margin-bottom: 2rem;
 }
 
 .form-actions {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  margin-top: 32px;
+  gap: 0.75rem;
+  margin-top: 2rem;
 }
 </style>

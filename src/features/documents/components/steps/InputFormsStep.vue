@@ -104,17 +104,16 @@
                   "
                 />
 
-                <!-- ✅ FIXED: Perfect vertical alignment with align-items: center -->
+                <!-- ✅ FIXED: Consistent footer with proper spacing -->
                 <div class="form-field__footer">
-                  <!-- Error Message (takes full width when present) -->
-                  <div
-                    v-if="errors.length && meta.touched"
-                    class="form-field__error"
-                  >
-                    {{ errors[0] }}
-                  </div>
+                  <!-- Error message (takes full width when present) -->
+                  <template v-if="errors.length && meta.touched">
+                    <div class="form-field__error">
+                      {{ errors[0] }}
+                    </div>
+                  </template>
 
-                  <!-- Hint and Character Counter Row (only when no error) -->
+                  <!-- Hint and Character Counter (only when no error) -->
                   <template v-else>
                     <div class="form-field__hint">
                       {{ field.hint || "" }}
@@ -516,6 +515,10 @@ useKeyboardShortcuts({
 <style scoped lang="scss">
 @use "./stepStyles.scss";
 
+// ====================================
+// INPUT FORMS STEP SPECIFIC STYLES - CLEANED
+// ====================================
+
 .input-forms-step {
   &__divider {
     height: 1px;
@@ -546,50 +549,5 @@ useKeyboardShortcuts({
   margin-left: unset;
 }
 
-// ✅ PERFECT: Form field with proper vertical alignment
-.form-field {
-  margin-bottom: 1.5rem;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  &__footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center; // ✅ KEY FIX: Centers items vertically
-    gap: 1rem;
-    min-height: 1.25rem;
-  }
-
-  // Error message (takes full width)
-  &__error {
-    flex: 1;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    color: #d92d20;
-  }
-
-  // Hint text (left side)
-  &__hint {
-    flex: 1;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    color: #6b7280;
-  }
-
-  // Character counter (right side)
-  &__char-count {
-    flex-shrink: 0;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    color: #6b7280;
-    white-space: nowrap;
-
-    &--warning {
-      color: #f59e0b;
-      font-weight: 600;
-    }
-  }
-}
+// ✅ NO DUPLICATE FORM FIELD STYLES - All in stepStyles.scss
 </style>

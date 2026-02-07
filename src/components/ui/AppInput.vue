@@ -8,7 +8,7 @@
       'app-input--error': error,
       'app-input--password': password,
     }"
-    autocomplete="new-password"
+    autocomplete="off"
   />
 </template>
 
@@ -18,6 +18,8 @@ defineProps({
   error: { type: Boolean, default: false },
   password: { type: Boolean, default: false },
 });
+
+defineEmits(["update:modelValue"]);
 </script>
 
 <style scoped lang="scss">
@@ -30,10 +32,21 @@ defineProps({
   font-size: 1rem;
   font-weight: 400;
   color: #717680;
+  background-color: #ffffff;
   transition:
     box-shadow 0.2s,
     border-color 0.2s;
   box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
+
+  // ✅ FIX: Remove blue autofill background
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #717680 !important;
+    box-shadow: 0 0 0 30px white inset !important;
+  }
 
   &::placeholder {
     color: #9ca3af;
@@ -49,11 +62,22 @@ defineProps({
     padding-right: 2.5rem;
   }
 
+  // ✅ FIX: Error state properly overrides focus
   &--error {
     border-color: #d5d1d7;
 
     &:focus {
       box-shadow: 0 0 0 2px #ef4444;
+    }
+
+    // ✅ FIX: Remove blue autofill on error state too
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px white inset !important;
+      -webkit-text-fill-color: #717680 !important;
+      box-shadow: 0 0 0 30px white inset !important;
     }
   }
 }
