@@ -191,7 +191,6 @@ const getStepOpacity = (item, index) => {
     return { opacity: 1 };
   }
 
-  // Progressive transparency with minimum of 0.4
   const opacityValue = Math.max(0.4, 1 - index * 0.2);
   return { opacity: opacityValue };
 };
@@ -204,10 +203,10 @@ const getStepOpacity = (item, index) => {
   padding-top: 5rem;
   padding-left: 1rem;
   padding-right: 1rem;
-  padding-bottom: 3rem; // ✅ FIXED: Add bottom padding to page
+  padding-bottom: 3rem;
   margin: 0 auto;
   max-width: 100%;
-  min-height: calc(100vh - 10rem); // ✅ FIXED: Ensure page has minimum height
+  min-height: calc(100vh - 10rem);
 
   &[data-step="1"] {
     max-width: 69rem;
@@ -229,18 +228,15 @@ const getStepOpacity = (item, index) => {
 
   &__sidebar {
     flex: 0 0 320px;
-    align-self: flex-start; // ✅ CRITICAL FIX: Don't stretch to fill height
+    align-self: flex-start; // ✅ Natural height
     position: sticky;
     top: 9rem;
-    max-height: calc(100vh - 11rem); // ✅ FIXED: Leave 1rem space at bottom
-    overflow-y: auto;
-    overflow-x: hidden;
+    // ✅ CRITICAL FIX: Remove max-height and overflow
+    // This makes sidebar scroll with page, not independently
 
     @media (max-width: 1024px) {
       position: static;
       flex: 1;
-      max-height: none;
-      align-self: auto;
     }
 
     @media (max-width: 768px) {
@@ -248,27 +244,8 @@ const getStepOpacity = (item, index) => {
       max-width: 100%;
     }
 
-    // ✅ PERFECT: Clean scrollbar with proper gaps
-    &::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-      margin: 8px 0;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: #d1d5db;
-      border-radius: 4px;
-      border: 2px solid transparent;
-      background-clip: padding-box;
-
-      &:hover {
-        background: #9ca3af;
-        background-clip: padding-box;
-      }
-    }
+    // ✅ REMOVE: No scrollbar needed on sidebar itself
+    // Page scrollbar handles everything
   }
 
   &__main {

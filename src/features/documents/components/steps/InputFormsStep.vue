@@ -554,18 +554,18 @@ useKeyboardShortcuts({
     margin-bottom: 0;
   }
 
-  &__label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #111827;
-  }
+  // &__label {
+  //   display: block;
+  //   margin-bottom: 0.5rem;
+  //   font-size: 0.875rem;
+  //   font-weight: 500;
+  //   color: #111827;
+  // }
 
-  &__required {
-    color: #d92d20;
-    margin-left: 0.125rem;
-  }
+  // &__required {
+  //   color: #d92d20;
+  //   margin-left: 0.125rem;
+  // }
 
   // ✅ FIXED: Perfect vertical alignment with align-items: center
   &__footer {
