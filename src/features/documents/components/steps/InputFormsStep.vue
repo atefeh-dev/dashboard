@@ -113,24 +113,10 @@
                     </div>
                   </template>
 
-                  <!-- Hint and Character Counter (only when no error) -->
+                  <!-- Hint (only when no error) -->
                   <template v-else>
                     <div class="form-field__hint">
                       {{ field.hint || "" }}
-                    </div>
-                    <div
-                      v-if="
-                        field.validation?.maxLength && formValues[field.name]
-                      "
-                      class="form-field__char-count"
-                      :class="{
-                        'form-field__char-count--warning':
-                          formValues[field.name].length >
-                          field.validation.maxLength * 0.9,
-                      }"
-                    >
-                      {{ formValues[field.name].length }} /
-                      {{ field.validation.maxLength }}
                     </div>
                   </template>
                 </div>

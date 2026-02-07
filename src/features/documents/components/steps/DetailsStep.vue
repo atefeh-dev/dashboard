@@ -185,17 +185,17 @@
                     'input-error': errors.length && meta.touched,
                   }"
                 />
-                <!-- ✅ FIXED: Consistent error message spacing -->
-                <div class="form-field__footer">
-                  <transition name="fade">
-                    <div
-                      v-if="errors.length && meta.touched"
-                      class="form-field__error"
-                    >
+                <!-- ✅ FIXED: Footer only renders when error exists -->
+                <transition name="fade">
+                  <div
+                    v-if="errors.length && meta.touched"
+                    class="form-field__footer"
+                  >
+                    <div class="form-field__error">
                       {{ errors[0] }}
                     </div>
-                  </transition>
-                </div>
+                  </div>
+                </transition>
               </div>
             </Field>
 
