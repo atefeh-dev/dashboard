@@ -104,32 +104,36 @@
                   "
                 />
 
-                <!-- Error or Hint (only one shows, no transition) -->
-                <div
-                  v-if="errors.length && meta.touched"
-                  class="form-field__message form-field__message--error"
-                >
-                  {{ errors[0] }}
-                </div>
-                <div
-                  v-else-if="field.hint"
-                  class="form-field__message form-field__message--hint"
-                >
-                  {{ field.hint }}
-                </div>
+                <!-- ✅ FIXED: Perfect vertical alignment with align-items: center -->
+                <div class="form-field__footer">
+                  <!-- Error Message (takes full width when present) -->
+                  <div
+                    v-if="errors.length && meta.touched"
+                    class="form-field__error"
+                  >
+                    {{ errors[0] }}
+                  </div>
 
-                <!-- Character Counter (for fields with maxLength) -->
-                <div
-                  v-if="field.validation?.maxLength && formValues[field.name]"
-                  class="form-field__char-counter"
-                  :class="{
-                    'form-field__char-counter--warning':
-                      formValues[field.name].length >
-                      field.validation.maxLength * 0.9,
-                  }"
-                >
-                  {{ formValues[field.name].length }} /
-                  {{ field.validation.maxLength }}
+                  <!-- Hint and Character Counter Row (only when no error) -->
+                  <template v-else>
+                    <div class="form-field__hint">
+                      {{ field.hint || "" }}
+                    </div>
+                    <div
+                      v-if="
+                        field.validation?.maxLength && formValues[field.name]
+                      "
+                      class="form-field__char-count"
+                      :class="{
+                        'form-field__char-count--warning':
+                          formValues[field.name].length >
+                          field.validation.maxLength * 0.9,
+                      }"
+                    >
+                      {{ formValues[field.name].length }} /
+                      {{ field.validation.maxLength }}
+                    </div>
+                  </template>
                 </div>
               </div>
             </Field>
@@ -542,9 +546,13 @@ useKeyboardShortcuts({
   margin-left: unset;
 }
 
-// PROPER FIX: Form field with consistent spacing
+// ✅ PERFECT: Form field with proper vertical alignment
 .form-field {
   margin-bottom: 1.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 
   &__label {
     display: block;
@@ -559,34 +567,43 @@ useKeyboardShortcuts({
     margin-left: 0.125rem;
   }
 
-  // Message container - ALWAYS takes space (no transition, no jumping)
-  &__message {
-    min-height: 1.25rem; // Fixed height
+  // ✅ FIXED: Perfect vertical alignment with align-items: center
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; // ✅ KEY FIX: Centers items vertically
+    gap: 1rem;
+    min-height: 1.25rem;
     margin-top: 0.375rem;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    display: block;
-
-    &--error {
-      color: #d92d20;
-    }
-
-    &--hint {
-      color: #6b7280;
-    }
   }
 
-  // Character counter
-  &__char-counter {
-    margin-top: 0.25rem;
-    font-size: 0.75rem;
+  // Error message (takes full width)
+  &__error {
+    flex: 1;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #d92d20;
+  }
+
+  // Hint text (left side)
+  &__hint {
+    flex: 1;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     color: #6b7280;
-    text-align: right;
-    line-height: 1;
+  }
+
+  // Character counter (right side)
+  &__char-count {
+    flex-shrink: 0;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #6b7280;
+    white-space: nowrap;
 
     &--warning {
       color: #f59e0b;
-      font-weight: 500;
+      font-weight: 600;
     }
   }
 }

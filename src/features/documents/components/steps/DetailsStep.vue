@@ -730,6 +730,10 @@ function handleRecover() {
 // DETAILS STEP SPECIFIC STYLES
 // ====================================
 
+.section__description {
+  margin-bottom: 1.5rem;
+}
+
 // Section Divider with Text
 .section-divider {
   position: relative;

@@ -192,7 +192,6 @@ const getStepOpacity = (item, index) => {
   }
 
   // Progressive transparency with minimum of 0.4
-  // Step 1: 1.0, Step 2: 0.8, Step 3: 0.6, Step 4: 0.4
   const opacityValue = Math.max(0.4, 1 - index * 0.2);
   return { opacity: opacityValue };
 };
@@ -205,8 +204,10 @@ const getStepOpacity = (item, index) => {
   padding-top: 5rem;
   padding-left: 1rem;
   padding-right: 1rem;
+  padding-bottom: 3rem; // ✅ FIXED: Add bottom padding to page
   margin: 0 auto;
   max-width: 100%;
+  min-height: calc(100vh - 10rem); // ✅ FIXED: Ensure page has minimum height
 
   &[data-step="1"] {
     max-width: 69rem;
@@ -216,26 +217,30 @@ const getStepOpacity = (item, index) => {
     flex-direction: column;
     gap: 1.5rem;
     padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 
   @media (max-width: 768px) {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
     padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
 
   &__sidebar {
     flex: 0 0 320px;
+    align-self: flex-start; // ✅ CRITICAL FIX: Don't stretch to fill height
     position: sticky;
     top: 9rem;
-    height: fit-content;
-    max-height: calc(100vh - 10rem);
+    max-height: calc(100vh - 11rem); // ✅ FIXED: Leave 1rem space at bottom
     overflow-y: auto;
+    overflow-x: hidden;
 
     @media (max-width: 1024px) {
       position: static;
       flex: 1;
       max-height: none;
+      align-self: auto;
     }
 
     @media (max-width: 768px) {
@@ -243,21 +248,25 @@ const getStepOpacity = (item, index) => {
       max-width: 100%;
     }
 
+    // ✅ PERFECT: Clean scrollbar with proper gaps
     &::-webkit-scrollbar {
-      width: 6px;
+      width: 8px;
     }
 
     &::-webkit-scrollbar-track {
-      background: #f3f4f6;
-      border-radius: 3px;
+      background: transparent;
+      margin: 8px 0;
     }
 
     &::-webkit-scrollbar-thumb {
       background: #d1d5db;
-      border-radius: 3px;
+      border-radius: 4px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
 
       &:hover {
         background: #9ca3af;
+        background-clip: padding-box;
       }
     }
   }
@@ -283,7 +292,7 @@ const getStepOpacity = (item, index) => {
   display: flex;
   flex-direction: column;
   gap: 0;
-  min-width: 20rem;
+  width: 100%;
   padding: 1rem 1.5rem;
   background-color: #ffffff;
   border: 1px solid #d5d7da;
@@ -291,7 +300,6 @@ const getStepOpacity = (item, index) => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
   @media (max-width: 768px) {
-    max-width: 100%;
     padding: 1rem;
     border-radius: 0.5rem;
   }
@@ -333,6 +341,7 @@ const getStepOpacity = (item, index) => {
     line-height: 1.5;
     color: #181d27;
     margin: 0;
+    word-wrap: break-word;
   }
 
   &__subtitle {
@@ -357,6 +366,7 @@ const getStepOpacity = (item, index) => {
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
+    min-width: 0;
 
     &--first {
       border-right: 1px solid #d5d7da;
@@ -438,6 +448,7 @@ const getStepOpacity = (item, index) => {
     display: flex;
     align-items: center;
     gap: 0.375rem;
+    min-width: 0;
   }
 
   &__avatar {
@@ -452,6 +463,9 @@ const getStepOpacity = (item, index) => {
     font-size: 1rem;
     font-weight: 600;
     color: #181d27;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__icon {
@@ -465,6 +479,7 @@ const getStepOpacity = (item, index) => {
     line-height: 1.5;
     color: #181d27;
     margin: 0;
+    word-wrap: break-word;
   }
 
   &__badge-group {
@@ -568,14 +583,13 @@ const getStepOpacity = (item, index) => {
     line-height: 1;
   }
 
-  // Vertical Dotted Line with 4px padding from circle
   &__checklist-line {
     position: absolute;
-    top: calc(1.5rem + 4px); // Circle height + 4px padding
+    top: calc(1.5rem + 4px);
     left: 50%;
     transform: translateX(-50%);
     width: 1px;
-    height: calc(100% + 1.25rem - 1rem); // Subtract 4px top + 4px bottom
+    height: calc(100% + 1.25rem - 1rem);
     background-image: repeating-linear-gradient(
       to bottom,
       #d1d5db,
@@ -589,6 +603,7 @@ const getStepOpacity = (item, index) => {
     flex: 1;
     padding-top: 0.125rem;
     transition: opacity 0.2s ease;
+    min-width: 0;
   }
 
   &__checklist-title {
