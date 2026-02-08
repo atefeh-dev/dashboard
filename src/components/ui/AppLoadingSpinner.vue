@@ -1,6 +1,6 @@
 <template>
   <img
-    src="../../assets/icons/common/button-loading.svg"
+    :src="spinner"
     alt="Loading"
     :class="['spinner-rotate-once', className]"
     :style="{ width: size, height: size }"
@@ -8,8 +8,15 @@
 </template>
 
 <script>
+import spinner from "@/assets/icons/common/button-loading.svg?url";
+
 export default {
   name: "LoadingSpinner",
+  data() {
+    return {
+      spinner,
+    };
+  },
   props: {
     size: {
       type: String,
