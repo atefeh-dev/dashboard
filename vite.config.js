@@ -6,15 +6,10 @@ import tailwindcss from "@tailwindcss/vite";
 import svgLoader from "vite-svg-loader";
 
 export default defineConfig({
-  plugins: [
-    vue(),
-    vueDevTools(),
-    tailwindcss(),
-    svgLoader(), // correct SVG loader for Vite + Vue 3
-  ],
-  assetsInclude: ["**/*.html"],
+  plugins: [vue(), vueDevTools(), tailwindcss(), svgLoader()],
 
-  base: "/",
+  base: "/", // ✅ required for Netlify
+
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
