@@ -24,6 +24,7 @@ defineEmits(["update:modelValue"]);
 
 <style scoped lang="scss">
 .app-textarea {
+  display: block;
   width: 100%;
   padding: 0.75rem 0.875rem;
   border: 1px solid #d5d7da;

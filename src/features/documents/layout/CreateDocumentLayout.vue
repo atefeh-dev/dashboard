@@ -230,7 +230,11 @@ function completeDocument() {
   margin: 0 auto;
   margin-top: 10rem;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1080px) {
+    margin-top: 9rem;
+  }
+
+  @media (max-width: 770px) {
     margin-top: 8rem;
   }
 
@@ -239,7 +243,7 @@ function completeDocument() {
   }
 
   &__content {
-    @media (max-width: 768px) {
+    @media (max-width: 770px) {
       padding: 1.5rem 1rem;
     }
   }
@@ -278,7 +282,8 @@ function completeDocument() {
       display: flex;
     }
 
-    @media (max-width: 1024px) {
+    // ✅ FIXED: Condensed for tablet (771-1080px)
+    @media (max-width: 1080px) {
       gap: 0.25rem;
       font-size: 0.8125rem;
     }
@@ -297,8 +302,20 @@ function completeDocument() {
       font-size: 0.875rem;
       max-width: 200px;
 
-      @media (max-width: 1024px) {
-        max-width: 150px;
+      @media (max-width: 1080px) {
+        max-width: 120px;
+        font-size: 0.8125rem;
+      }
+
+      @media (max-width: 900px) {
+        max-width: 100px;
+      }
+    }
+
+    // ✅ Hide first item on medium/small screens
+    @media (max-width: 1080px) {
+      &:first-child {
+        display: none;
       }
     }
   }
@@ -309,9 +326,16 @@ function completeDocument() {
     color: #d1d5db;
     flex-shrink: 0;
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1080px) {
       width: 0.875rem;
       height: 0.875rem;
+    }
+
+    // ✅ Hide separator for hidden breadcrumb
+    @media (max-width: 1080px) {
+      &:first-of-type {
+        display: none;
+      }
     }
   }
 
@@ -329,7 +353,7 @@ function completeDocument() {
     white-space: nowrap;
     flex-shrink: 0;
 
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       font-size: 0.8125rem;
       padding: 0.2rem 0.5rem;
     }
@@ -351,7 +375,7 @@ function completeDocument() {
     white-space: nowrap;
     flex-shrink: 0;
 
-    @media (max-width: 480px) {
+    @media (max-width: 900px) {
       padding: 0.25rem 0.5rem;
       font-size: 0.8125rem;
       gap: 0.25rem;
@@ -370,7 +394,7 @@ function completeDocument() {
     width: 1rem;
     height: 1rem;
 
-    @media (max-width: 480px) {
+    @media (max-width: 900px) {
       width: 0.875rem;
       height: 0.875rem;
     }
@@ -380,7 +404,7 @@ function completeDocument() {
     display: flex;
     gap: 0.125rem;
 
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       display: none;
     }
   }
@@ -415,7 +439,8 @@ function completeDocument() {
     border-radius: 0.5rem;
     color: #535862;
 
-    @media (min-width: 1024px) {
+    // ✅ Show only on larger screens
+    @media (min-width: 1280px) {
       display: flex;
       align-items: center;
     }
@@ -451,7 +476,7 @@ function completeDocument() {
   }
 }
 
-// FIXED: Steps
+// FIXED: Steps with proper tablet handling
 .steps-wrapper {
   position: fixed;
   top: 3.625rem;
@@ -477,7 +502,8 @@ function completeDocument() {
     border-radius: 2px;
   }
 
-  @media (max-width: 768px) {
+  // ✅ Scroll hint for tablets
+  @media (max-width: 1080px) {
     &::after {
       content: "";
       position: absolute;
@@ -512,7 +538,13 @@ function completeDocument() {
     transition: background-color 0.2s;
     text-align: left;
 
-    @media (max-width: 768px) {
+    // ✅ FIXED: Condensed for tablet (771-1080px)
+    @media (max-width: 1080px) {
+      padding: 0.875rem 1.125rem;
+      padding-bottom: 0.875rem;
+    }
+
+    @media (max-width: 770px) {
       padding: 0.875rem 1rem;
     }
 
@@ -572,7 +604,8 @@ function completeDocument() {
     transition: color 0.2s;
     white-space: nowrap;
 
-    @media (max-width: 768px) {
+    // ✅ Smaller for tablet
+    @media (max-width: 1080px) {
       font-size: 0.8125rem;
     }
   }
@@ -583,7 +616,8 @@ function completeDocument() {
     transition: color 0.2s;
     white-space: nowrap;
 
-    @media (max-width: 768px) {
+    // ✅ Slightly smaller on tablet
+    @media (max-width: 1080px) {
       font-size: 0.6875rem;
     }
   }

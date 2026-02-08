@@ -1,6 +1,6 @@
 <template>
   <div class="document-step-layout" :data-step="currentStep">
-    <!-- Left Sidebar -->
+    <!-- Left Sidebar - Visible from 771px up -->
     <aside v-if="showSidebar" class="document-step-layout__sidebar">
       <div class="sidebar-content">
         <!-- Document Info Section -->
@@ -212,14 +212,21 @@ const getStepOpacity = (item, index) => {
     max-width: 69rem;
   }
 
-  @media (max-width: 1024px) {
+  // ✅ FIXED: Proper tablet breakpoint (771px - 1080px)
+  @media (max-width: 1080px) {
+    gap: 1.25rem; // Tighter gap for medium screens
+    padding-top: 3rem;
+  }
+
+  // ✅ FIXED: Mobile stacked layout ONLY below 771px
+  @media (max-width: 770px) {
     flex-direction: column;
     gap: 1.5rem;
     padding-top: 2rem;
     padding-bottom: 2rem;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 480px) {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
     padding-top: 1.5rem;
@@ -227,25 +234,24 @@ const getStepOpacity = (item, index) => {
   }
 
   &__sidebar {
+    // ✅ FIXED: Narrower sidebar for medium screens (771-1080px)
     flex: 0 0 320px;
-    align-self: flex-start; // ✅ Natural height
+    align-self: flex-start;
     position: sticky;
     top: 9rem;
-    // ✅ CRITICAL FIX: Remove max-height and overflow
-    // This makes sidebar scroll with page, not independently
 
-    @media (max-width: 1024px) {
-      position: static;
-      flex: 1;
+    @media (max-width: 1080px) and (min-width: 771px) {
+      flex: 0 0 280px; // Narrower on tablets
+      top: 8rem;
     }
 
-    @media (max-width: 768px) {
+    // ✅ Mobile: Full width stacked
+    @media (max-width: 770px) {
+      position: static;
+      flex: 1;
       width: 100%;
       max-width: 100%;
     }
-
-    // ✅ REMOVE: No scrollbar needed on sidebar itself
-    // Page scrollbar handles everything
   }
 
   &__main {
@@ -253,7 +259,7 @@ const getStepOpacity = (item, index) => {
     min-width: 0;
     max-width: 100%;
 
-    @media (max-width: 768px) {
+    @media (max-width: 770px) {
       width: 100%;
       overflow-x: hidden;
     }
@@ -276,7 +282,12 @@ const getStepOpacity = (item, index) => {
   border-radius: 0.75rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
-  @media (max-width: 768px) {
+  // ✅ FIXED: Tighter padding for medium screens
+  @media (max-width: 1080px) and (min-width: 771px) {
+    padding: 1rem 1.25rem;
+  }
+
+  @media (max-width: 770px) {
     padding: 1rem;
     border-radius: 0.5rem;
   }
@@ -288,7 +299,13 @@ const getStepOpacity = (item, index) => {
     padding-bottom: 1rem;
     border-bottom: 2px dotted #d5d7da;
 
-    @media (max-width: 768px) {
+    // ✅ Tighter gaps for medium screens
+    @media (max-width: 1080px) and (min-width: 771px) {
+      gap: 0.875rem;
+      padding-bottom: 0.875rem;
+    }
+
+    @media (max-width: 770px) {
       gap: 0.75rem;
       padding-bottom: 0.875rem;
     }
@@ -301,7 +318,11 @@ const getStepOpacity = (item, index) => {
     &:not(:first-child) {
       padding-top: 1rem;
 
-      @media (max-width: 768px) {
+      @media (max-width: 1080px) and (min-width: 771px) {
+        padding-top: 0.875rem;
+      }
+
+      @media (max-width: 770px) {
         padding-top: 0.875rem;
       }
     }
@@ -319,6 +340,10 @@ const getStepOpacity = (item, index) => {
     color: #181d27;
     margin: 0;
     word-wrap: break-word;
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      font-size: 1rem;
+    }
   }
 
   &__subtitle {
@@ -326,12 +351,20 @@ const getStepOpacity = (item, index) => {
     line-height: 1.5;
     color: #6b7280;
     margin: 0;
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      font-size: 0.8125rem;
+    }
   }
 
   &__meta-row {
     display: flex;
     gap: 1rem;
     align-items: flex-start;
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      gap: 0.75rem;
+    }
 
     @media (max-width: 480px) {
       flex-direction: column;
@@ -348,6 +381,10 @@ const getStepOpacity = (item, index) => {
     &--first {
       border-right: 1px solid #d5d7da;
       padding-right: 1rem;
+
+      @media (max-width: 1080px) and (min-width: 771px) {
+        padding-right: 0.75rem;
+      }
 
       @media (max-width: 480px) {
         border-right: none;
@@ -369,6 +406,10 @@ const getStepOpacity = (item, index) => {
     line-height: 1.25rem;
     font-weight: 500;
     color: #6b7280;
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      font-size: 0.6875rem;
+    }
   }
 
   &__badge {
@@ -390,6 +431,11 @@ const getStepOpacity = (item, index) => {
       font-weight: 500;
       border-radius: 0.375rem;
       height: 1.5rem;
+
+      @media (max-width: 1080px) and (min-width: 771px) {
+        font-size: 0.8125rem;
+        height: 1.375rem;
+      }
     }
 
     &--verified {
@@ -402,6 +448,10 @@ const getStepOpacity = (item, index) => {
       gap: 0.25rem;
       align-items: center;
       border-right: 1px solid #d5d7da;
+
+      @media (max-width: 1080px) and (min-width: 771px) {
+        font-size: 0.8125rem;
+      }
     }
 
     &--author {
@@ -409,6 +459,10 @@ const getStepOpacity = (item, index) => {
       padding-left: 0.25rem;
       font-size: 0.875rem;
       font-weight: 400;
+
+      @media (max-width: 1080px) and (min-width: 771px) {
+        font-size: 0.8125rem;
+      }
 
       &--brand {
         color: #4539cc;
@@ -443,6 +497,10 @@ const getStepOpacity = (item, index) => {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      font-size: 0.9375rem;
+    }
   }
 
   &__icon {
@@ -457,6 +515,10 @@ const getStepOpacity = (item, index) => {
     color: #181d27;
     margin: 0;
     word-wrap: break-word;
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      font-size: 1rem;
+    }
   }
 
   &__badge-group {
@@ -482,6 +544,10 @@ const getStepOpacity = (item, index) => {
     font-weight: 500;
     line-height: 1.25rem;
     color: #717680;
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      font-size: 0.6875rem;
+    }
   }
 
   &__date-value {
@@ -490,6 +556,10 @@ const getStepOpacity = (item, index) => {
     line-height: 1.25rem;
     color: #181d27;
     margin: 0;
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      font-size: 0.9375rem;
+    }
   }
 
   &__tags {
@@ -506,6 +576,11 @@ const getStepOpacity = (item, index) => {
     color: #414651;
     border: 1px solid #d5d7da;
     border-radius: 0.375rem;
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      font-size: 0.6875rem;
+      padding: 0.0625rem 0.3125rem;
+    }
   }
 
   // Progress Checklist
@@ -520,6 +595,11 @@ const getStepOpacity = (item, index) => {
     gap: 0.75rem;
     align-items: flex-start;
     padding-bottom: 1.25rem;
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      padding-bottom: 1rem;
+      gap: 0.625rem;
+    }
 
     &:last-child {
       padding-bottom: 0;
@@ -574,6 +654,10 @@ const getStepOpacity = (item, index) => {
       transparent 2px,
       transparent 6px
     );
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      height: calc(100% + 1rem - 1rem);
+    }
   }
 
   &__checklist-content {
@@ -589,6 +673,11 @@ const getStepOpacity = (item, index) => {
     line-height: 1.25rem;
     color: #414651;
     margin: 0;
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      font-size: 0.8125rem;
+      line-height: 1.125rem;
+    }
   }
 
   &__checklist-subtitle {
@@ -597,6 +686,11 @@ const getStepOpacity = (item, index) => {
     line-height: 1rem;
     color: #535862;
     margin: 0;
+
+    @media (max-width: 1080px) and (min-width: 771px) {
+      font-size: 0.8125rem;
+      line-height: 0.9375rem;
+    }
   }
 }
 </style>
